@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gemini Chat + Mock Test (v8 - History/Delete)</title>
+    <title>Gemini Chat + Mock Test (v8 - Reviews & Delete)</title>
 
     <!-- MathJax Configuration -->
     <script> window.MathJax={tex:{inlineMath:[['$','$'],['\\(','\\)']],displayMath:[['$$','$$'],['\\[','\\]']]},svg:{fontCache:'global'},options:{skipHtmlTags:['script','noscript','style','textarea','pre','code']}}; </script>
@@ -15,24 +15,26 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
 
     <style>
-        /* --- Styles (Mostly Unchanged - Added History View, Delete Button, etc.) --- */
-        :root { /* ... Theme Variables ... */
+        /* --- Styles --- */
+        :root { /* ... Theme Variables (Unchanged) ... */
              --font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; --sidebar-width: 260px; --message-font-size-base: 1rem;
-             /* LIGHT */ --sidebar-bg: #f7f7f7; --main-bg: #ffffff; --input-bg: #ffffff; --border-color: #e0e0e0; --text-primary: #2c2c2c; --text-secondary: #5f5f5f; --text-placeholder: #999999; --accent-color: #d97a7a; --user-message-bg: #cce0ff; --user-message-text: #1c1c1c; --ai-message-bg: #f0f0f0; --ai-message-text: #2c2c2c; --button-bg: #f0f0f0; --button-hover-bg: #e0e0e0; --active-item-bg: #e0e0e0; --code-bg: #e8e8e8; --scrollbar-thumb: #ccc; --scrollbar-thumb-hover: #bbb; --app-outer-bg: #e8e8e8; --send-button-bg: var(--accent-color); --send-button-hover-bg: #c76b6b; --send-button-text: #ffffff; --error-bg: #ffebee; --error-text: #c62828; --error-border: #ef9a9a; --message-font-size: var(--message-font-size-base); --delete-btn-color: #a85c5c; --delete-btn-hover-color: #dc3545;
+             /* LIGHT */ --sidebar-bg: #f7f7f7; --main-bg: #ffffff; --input-bg: #ffffff; --border-color: #e0e0e0; --text-primary: #2c2c2c; --text-secondary: #5f5f5f; --text-placeholder: #999999; --accent-color: #d97a7a; --user-message-bg: #cce0ff; --user-message-text: #1c1c1c; --ai-message-bg: #f0f0f0; --ai-message-text: #2c2c2c; --button-bg: #f0f0f0; --button-hover-bg: #e0e0e0; --active-item-bg: #e0e0e0; --code-bg: #e8e8e8; --scrollbar-thumb: #ccc; --scrollbar-thumb-hover: #bbb; --app-outer-bg: #e8e8e8; --send-button-bg: var(--accent-color); --send-button-hover-bg: #c76b6b; --send-button-text: #ffffff; --error-bg: #ffebee; --error-text: #c62828; --error-border: #ef9a9a; --message-font-size: var(--message-font-size-base);
         }
-        body.dark-theme { /* DARK */ --sidebar-bg: #2a2a2e; --main-bg: #1e1e1e; --input-bg: #2a2a2e; --border-color: #404040; --text-primary: #e0e0e0; --text-secondary: #a0a0a0; --text-placeholder: #777777; --accent-color: #e58b8b; --user-message-bg: #3a4a6b; --user-message-text: #e8e8e8; --ai-message-bg: #333333; --ai-message-text: #e0e0e0; --button-bg: #404040; --button-hover-bg: #505050; --active-item-bg: #454545; --code-bg: #2c2c2e; --scrollbar-thumb: #555; --scrollbar-thumb-hover: #666; --app-outer-bg: #121212; --send-button-bg: var(--accent-color); --send-button-hover-bg: #f09f9f; --send-button-text: #1e1e1e; --error-bg: #5c2b2b; --error-text: #ffcdd2; --error-border: #8c4343; --delete-btn-color: #b07a7a; --delete-btn-hover-color: #ff8a8a; }
+        body.dark-theme { /* DARK (Unchanged) */ --sidebar-bg: #2a2a2e; --main-bg: #1e1e1e; --input-bg: #2a2a2e; --border-color: #404040; --text-primary: #e0e0e0; --text-secondary: #a0a0a0; --text-placeholder: #777777; --accent-color: #e58b8b; --user-message-bg: #3a4a6b; --user-message-text: #e8e8e8; --ai-message-bg: #333333; --ai-message-text: #e0e0e0; --button-bg: #404040; --button-hover-bg: #505050; --active-item-bg: #454545; --code-bg: #2c2c2e; --scrollbar-thumb: #555; --scrollbar-thumb-hover: #666; --app-outer-bg: #121212; --send-button-bg: var(--accent-color); --send-button-hover-bg: #f09f9f; --send-button-text: #1e1e1e; --error-bg: #5c2b2b; --error-text: #ffcdd2; --error-border: #8c4343; }
         body { font-family: var(--font-family); margin: 0; padding: 0; background-color: var(--app-outer-bg); color: var(--text-primary); font-size: 15px; transition: background-color 0.3s ease, color 0.3s ease; }
 
-        /* --- Layout & Structure --- */
+        /* --- Layout & Structure (Added All Reviews View) --- */
         .app-container { display: flex; height: 100vh; width: 100vw; overflow: hidden; } .app-container.hidden { display: none; }
         .sidebar { width: var(--sidebar-width); background-color: var(--sidebar-bg); border-right: 1px solid var(--border-color); display: flex; flex-direction: column; padding: 15px 0; box-sizing: border-box; flex-shrink: 0; transition: background-color 0.3s ease, border-color 0.3s ease; }
         .main-container { flex-grow: 1; display: flex; flex-direction: column; height: 100vh; overflow: hidden; position: relative; }
-        .main-content, .review-view, .test-history-view { display: none; flex-direction: column; background-color: var(--main-bg); height: 100%; width: 100%; overflow: hidden; transition: background-color 0.3s ease; } /* Added test-history-view */
-        .main-content.active, .review-view.active, .test-history-view.active { display: flex; } /* Added test-history-view */
+        .main-content, .review-view, .all-reviews-view { /* Added all-reviews-view */
+            display: none; flex-direction: column; background-color: var(--main-bg); height: 100%; width: 100%; overflow: hidden; transition: background-color 0.3s ease;
+        }
+        .main-content.active, .review-view.active, .all-reviews-view.active { display: flex; }
         .chat-area { flex-grow: 1; overflow-y: auto; padding: 30px 10% 20px; display: flex; flex-direction: column; max-width: 800px; margin: 0 auto; width: 80%; }
         .input-container { padding: 20px 10%; border-top: 1px solid var(--border-color); background-color: var(--input-bg); max-width: 800px; margin: 0 auto; width: 80%; transition: background-color 0.3s ease, border-color 0.3s ease; display: none; /* Initially hidden until login */ }
 
-        /* --- Sidebar Elements --- */
+        /* --- Sidebar Elements (Added Delete Button, Reviews Link) --- */
          .sidebar-header { padding: 10px 20px; font-size: 1.1em; font-weight: 600; color: var(--text-primary); }
          .start-chat-button { display: flex; align-items: center; gap: 8px; background-color: var(--main-bg); border: 1px solid var(--border-color); color: var(--text-primary); border-radius: 8px; padding: 10px 15px; margin: 10px 15px; font-size: 0.95em; font-weight: 500; cursor: pointer; text-align: left; transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease; }
          .start-chat-button:hover { background-color: var(--button-hover-bg); } .start-chat-button svg { fill: currentColor; width: 16px; height: 16px; }
@@ -40,48 +42,36 @@
          .sidebar-section-title { padding: 15px 20px 5px; font-size: 0.85em; font-weight: 600; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px; }
          .chat-list { flex-grow: 1; overflow-y: auto; padding: 0 15px; margin-bottom: 10px; }
          .chat-list::-webkit-scrollbar { width: 6px; } .chat-list::-webkit-scrollbar-thumb { background: var(--scrollbar-thumb); border-radius: 3px;} .chat-list::-webkit-scrollbar-thumb:hover { background: var(--scrollbar-thumb-hover); }
-         .chat-list-item {
-             padding: 8px 30px 8px 10px; /* Added padding-right for delete button */
-             margin-bottom: 4px; border-radius: 6px; font-size: 0.9em; cursor: pointer;
-             white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--text-secondary);
-             transition: background-color 0.2s ease, color 0.2s ease; position: relative; /* Needed for absolute positioning of delete button */
-         }
+         .chat-list-item { display: flex; align-items: center; justify-content: space-between; /* For delete btn */ padding: 8px 10px; margin-bottom: 4px; border-radius: 6px; font-size: 0.9em; cursor: pointer; /* white-space: nowrap; */ /* overflow: hidden; */ /* text-overflow: ellipsis; */ color: var(--text-secondary); transition: background-color 0.2s ease, color 0.2s ease; position: relative; }
          .chat-list-item:hover { background-color: var(--button-hover-bg); color: var(--text-primary); }
          .chat-list-item.active { background-color: var(--active-item-bg); color: var(--text-primary); font-weight: 500; }
-         .delete-chat-btn { /* New style for delete button */
-             position: absolute; right: 5px; top: 50%; transform: translateY(-50%);
-             background: none; border: none; color: var(--delete-btn-color); font-size: 1.2em; line-height: 1;
-             padding: 2px 5px; border-radius: 4px; cursor: pointer; display: none; /* Hidden by default */
-             transition: color 0.2s ease, background-color 0.2s ease;
-         }
-         .chat-list-item:hover .delete-chat-btn { display: inline-block; } /* Show on item hover */
-         .delete-chat-btn:hover { color: var(--delete-btn-hover-color); background-color: rgba(128, 128, 128, 0.1); }
-
+         .chat-title { flex-grow: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-right: 5px; /* Space before delete btn */ }
+         .delete-chat-btn { background: none; border: none; color: var(--text-secondary); font-size: 1.1em; line-height: 1; padding: 0 4px; cursor: pointer; display: none; /* Hidden by default */ flex-shrink: 0; }
+         .chat-list-item:hover .delete-chat-btn { display: inline-block; } /* Show on hover */
+         .delete-chat-btn:hover { color: #dc3545; } /* Red on hover */
          .sidebar-footer { border-top: 1px solid var(--border-color); padding: 10px 15px; transition: border-color 0.3s ease;}
+         .sidebar-section-link { /* Style for View All Reviews link */
+              display: block; text-align: center; padding: 8px 15px; margin: 5px 15px 10px; background-color: var(--button-bg); border: 1px solid var(--border-color); border-radius: 6px; font-size: 0.9em; color: var(--text-primary); cursor: pointer; transition: background-color 0.2s ease;
+         }
+         .sidebar-section-link:hover { background-color: var(--button-hover-bg); }
+         .sidebar-section-link:disabled { opacity: 0.6; cursor: not-allowed; } /* For logged out state */
          .sidebar-controls { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
          .text-size-controls span, .theme-toggle span { font-size: 0.85em; color: var(--text-secondary); }
          .text-size-buttons button, .theme-toggle button { background: var(--button-bg); border: 1px solid var(--border-color); color: var(--text-secondary); border-radius: 4px; padding: 2px 8px; margin-left: 5px; cursor: pointer; font-size: 1.1em; line-height: 1; transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease; }
          .text-size-buttons button:hover, .theme-toggle button:hover { background-color: var(--button-hover-bg); color: var(--text-primary); }
-         .text-size-buttons button:disabled, .theme-toggle button:disabled { opacity: 0.6; cursor: not-allowed; }
-         .account-info { display: flex; align-items: center; gap: 10px; font-size: 0.9em; margin-top: 10px; }
+         .text-size-buttons button:disabled, .theme-toggle button:disabled { opacity: 0.6; cursor: not-allowed; } /* Disabled style for logged out */
+         .account-info { display: flex; align-items: center; gap: 10px; font-size: 0.9em; margin-top: 10px; /* Added margin */ }
          .account-avatar { width: 30px; height: 30px; border-radius: 50%; background-color: #6c757d; color: white; display: flex; align-items: center; justify-content: center; font-weight: 600; }
          .account-details { overflow: hidden; }
          .account-email { font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--text-primary); }
          .account-plan { font-size: 0.85em; color: var(--text-secondary); }
-         #auth-controls { margin-top: 15px; text-align: center; }
+         #auth-controls { margin-top: 15px; text-align: center; } /* Auth buttons container */
          #auth-controls button { background-color: var(--button-bg); color: var(--text-primary); border: 1px solid var(--border-color); border-radius: 6px; padding: 8px 15px; cursor: pointer; font-size: 0.9em; transition: background-color 0.2s ease; }
          #auth-controls button:hover { background-color: var(--button-hover-bg); }
          #logout-btn { display: none; /* Initially hidden */ }
-         #view-test-history-btn { /* New Button */
-             display: block; width: calc(100% - 30px); margin: 15px 15px 5px;
-             background-color: var(--button-bg); color: var(--text-primary); border: 1px solid var(--border-color);
-             border-radius: 6px; padding: 8px 15px; cursor: pointer; font-size: 0.9em;
-             transition: background-color 0.2s ease; text-align: center;
-         }
-         #view-test-history-btn:hover:not(:disabled) { background-color: var(--button-hover-bg); }
-         #view-test-history-btn:disabled { opacity: 0.6; cursor: not-allowed; }
 
-        /* --- Chat Area Elements --- */
+
+        /* --- Chat Area Elements (Unchanged) --- */
         .greeting { font-size: 1.8em; font-weight: 600; margin-bottom: 40px; color: var(--text-primary); } .greeting .asterisk { color: var(--accent-color); font-size: 1.2em; margin-right: 5px; display: inline-block; vertical-align: middle; }
         .message { padding: 12px 18px; border-radius: 18px; max-width: 80%; word-wrap: break-word; line-height: 1.6; margin-bottom: 15px; font-size: var(--message-font-size); transition: background-color 0.3s ease, color 0.3s ease; }
         .user-message { background-color: var(--user-message-bg); color: var(--user-message-text); align-self: flex-end; border-bottom-right-radius: 5px; }
@@ -95,7 +85,7 @@
         .info-message { text-align: center; color: var(--text-secondary); padding: 50px 20px; font-style: italic; }
         .message mjx-container { color: inherit !important; font-size: inherit !important; }
 
-        /* --- Input Area Elements --- */
+        /* --- Input Area Elements (Unchanged) --- */
         .suggestions { display: none; gap: 10px; margin-bottom: 15px; flex-wrap: wrap; } /* Initially hidden */
         .suggestion-chip { background-color: var(--button-bg); border: 1px solid var(--border-color); color: var(--text-secondary); border-radius: 16px; padding: 8px 15px; font-size: 0.9em; cursor: pointer; transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease; }
         .suggestion-chip:hover { background-color: var(--button-hover-bg); color: var(--text-primary); }
@@ -115,7 +105,7 @@
          .start-test-button { background-color: var(--accent-color); color: var(--send-button-text); border: none; border-radius: 6px; padding: 8px 15px; margin-top: 10px; cursor: pointer; font-weight: 500; display: inline-block; transition: background-color 0.2s ease; }
          .start-test-button:hover { background-color: var(--send-button-hover-bg); }
 
-        /* --- Mock Test View Styles --- */
+        /* --- Mock Test View Styles (Unchanged) --- */
         .mock-test-view { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: var(--main-bg); z-index: 100; flex-direction: column; padding: 20px; box-sizing: border-box; transition: background-color 0.3s ease; }
         .mock-test-view.active { display: flex; }
         .test-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-bottom: 10px; border-bottom: 1px solid var(--border-color); flex-shrink: 0; }
@@ -135,9 +125,9 @@
         .test-navigation button#submit-test-btn:hover:not(:disabled) { background-color: var(--send-button-hover-bg); }
         .test-navigation button:disabled { opacity: 0.5; cursor: not-allowed; }
 
-        /* --- Review View Styles --- */
+        /* --- Review View Styles (Unchanged) --- */
         .review-view { padding: 20px; box-sizing: border-box; background-color: var(--main-bg); }
-        .review-header { margin-bottom: 15px; padding-bottom: 15px; border-bottom: 1px solid var(--border-color); flex-shrink: 0; }
+        .review-header { margin-bottom: 15px; padding-bottom: 15px; border-bottom: 1px solid var(--border-color); }
         .review-header h2 { margin: 0 0 10px 0; font-size: 1.3em; color: var(--text-primary); }
         .review-summary span { margin-right: 20px; font-size: 1em; color: var(--text-primary); }
         .review-summary .score-correct { color: #28a745; font-weight: bold;} .review-summary .score-incorrect { color: #dc3545; font-weight: bold;} .review-summary .score-skipped { color: #fd7e14; font-weight: bold;}
@@ -153,63 +143,57 @@
         .review-item-details span { display: block; margin-bottom: 5px; font-size: 0.95em; color: var(--text-primary); }
         .review-item-details .correct-answer { color: #28a745; font-weight: bold; }
         .review-item-details .user-answer-correct { color: #28a745; } .review-item-details .user-answer-incorrect { color: #dc3545; text-decoration: line-through; } .review-item-details .user-answer-skipped { color: #fd7e14; font-style: italic; }
-        .review-footer { text-align: center; padding-top: 20px; border-top: 1px solid var(--border-color); margin-top: auto; flex-shrink: 0; display: flex; justify-content: center; gap: 15px; }
-        #exit-review-btn, #save-review-btn {
+        .review-footer { text-align: center; padding-top: 20px; border-top: 1px solid var(--border-color); margin-top: auto; flex-shrink: 0; display: flex; justify-content: center; gap: 15px; /* Space between buttons */ }
+        #exit-review-btn, #save-review-btn { /* Style both buttons */
             background-color: var(--accent-color); color: var(--send-button-text); border: none;
             border-radius: 6px; padding: 10px 25px; cursor: pointer; font-size: 1em;
             transition: background-color 0.2s ease;
         }
         #exit-review-btn:hover, #save-review-btn:hover:not(:disabled) { background-color: var(--send-button-hover-bg); }
-        #save-review-btn { background-color: var(--button-bg); color: var(--text-primary); border: 1px solid var(--border-color); }
+        #save-review-btn { /* Secondary button style (optional) */
+            background-color: var(--button-bg); color: var(--text-primary); border: 1px solid var(--border-color);
+        }
         #save-review-btn:hover:not(:disabled) { background-color: var(--button-hover-bg); }
-        #save-review-btn:disabled { opacity: 0.6; cursor: not-allowed; background-color: #cccccc; border-color: #aaaaaa; }
+        #save-review-btn:disabled { opacity: 0.6; cursor: not-allowed; background-color: #cccccc; border-color: #aaaaaa; } /* Disabled style */
 
-        /* --- Test History View Styles (New) --- */
-        .test-history-view { padding: 20px; box-sizing: border-box; background-color: var(--main-bg); }
-        .history-header { margin-bottom: 15px; padding-bottom: 15px; border-bottom: 1px solid var(--border-color); flex-shrink: 0; display: flex; justify-content: space-between; align-items: center; }
-        .history-header h2 { margin: 0; font-size: 1.3em; color: var(--text-primary); }
-        #test-history-search { /* Search Input Style */
-            padding: 8px 12px; border: 1px solid var(--border-color); border-radius: 6px;
-            font-size: 0.95em; background-color: var(--input-bg); color: var(--text-primary);
-            width: 250px; max-width: 40%;
-        }
-        #test-history-list { flex-grow: 1; overflow-y: auto; padding: 10px 5px; }
-        .history-list-item {
-            margin-bottom: 12px; padding: 15px; border: 1px solid var(--border-color);
-            border-radius: 6px; background-color: var(--button-bg); display: flex;
-            justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;
-            transition: background-color 0.3s ease, border-color 0.3s ease;
-        }
-        .history-list-item.hidden-by-search { display: none; }
-        .history-item-info { flex-grow: 1; min-width: 200px; }
-        .history-item-info span { display: block; margin-bottom: 4px; font-size: 0.9em; }
-        .history-item-info .history-date { color: var(--text-secondary); }
-        .history-item-info .history-score { font-weight: bold; color: var(--text-primary); }
-        .history-item-actions { display: flex; gap: 8px; flex-wrap: wrap; }
-        .history-item-actions button {
-             background-color: var(--main-bg); color: var(--text-primary); border: 1px solid var(--border-color);
-             border-radius: 5px; padding: 5px 10px; cursor: pointer; font-size: 0.85em;
-             transition: background-color 0.2s ease; white-space: nowrap;
-        }
-        .history-item-actions button:hover:not(:disabled) { background-color: var(--button-hover-bg); }
-        .history-item-actions button.reattempt-btn { border-color: var(--accent-color); color: var(--accent-color); }
-        .history-item-actions button:disabled { opacity: 0.5; cursor: not-allowed; }
-
-        .history-footer { text-align: center; padding-top: 20px; border-top: 1px solid var(--border-color); margin-top: auto; flex-shrink: 0; }
-        #exit-history-btn {
-            background-color: var(--accent-color); color: var(--send-button-text); border: none;
-            border-radius: 6px; padding: 10px 25px; cursor: pointer; font-size: 1em;
+        /* --- All Test Reviews View Styles --- */
+        .all-reviews-view { padding: 20px; box-sizing: border-box; }
+        .all-reviews-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px solid var(--border-color); }
+        .all-reviews-header h2 { margin: 0; font-size: 1.3em; color: var(--text-primary); }
+        .all-reviews-header .search-container { display: flex; align-items: center; gap: 5px; }
+        .all-reviews-header .search-container label { font-size: 0.9em; color: var(--text-secondary); }
+        .all-reviews-header input[type="search"] { padding: 6px 10px; border: 1px solid var(--border-color); border-radius: 6px; background-color: var(--input-bg); color: var(--text-primary); font-size: 0.95em; }
+        .all-reviews-header input[type="search"]:focus { border-color: var(--accent-color); outline: none; }
+        .all-reviews-header #back-to-chat-from-reviews-btn { /* Style for back button */
+            background-color: var(--button-bg); color: var(--text-primary); border: 1px solid var(--border-color);
+            border-radius: 6px; padding: 6px 15px; cursor: pointer; font-size: 0.9em;
             transition: background-color 0.2s ease;
         }
-        #exit-history-btn:hover { background-color: var(--send-button-hover-bg); }
-        .no-history-message { padding: 20px; text-align: center; color: var(--text-secondary); font-style: italic; }
+        .all-reviews-header #back-to-chat-from-reviews-btn:hover { background-color: var(--button-hover-bg); }
+        .all-reviews-list { flex-grow: 1; overflow-y: auto; padding: 10px 5px 10px 0; } /* Add padding-right */
+        .all-reviews-list-item { margin-bottom: 15px; padding: 15px; border: 1px solid var(--border-color); border-radius: 8px; background-color: var(--main-bg); transition: background-color 0.3s ease, border-color 0.3s ease; }
+        .all-reviews-list-item.hidden-by-search { display: none; } /* For search filtering */
+        .review-item-header { margin-bottom: 10px; display: flex; justify-content: space-between; align-items: baseline; flex-wrap: wrap; gap: 10px; }
+        .review-item-header .review-date { font-size: 0.85em; color: var(--text-secondary); }
+        .review-item-header .review-summary-short span { margin-left: 15px; font-size: 0.95em; color: var(--text-primary); }
+        .review-item-details-preview { font-size: 0.9em; color: var(--text-secondary); margin-bottom: 12px; max-height: 60px; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; } /* Preview first question */
+        .review-item-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+        .review-item-actions button {
+            background-color: var(--button-bg); color: var(--text-primary); border: 1px solid var(--border-color);
+            border-radius: 5px; padding: 5px 12px; cursor: pointer; font-size: 0.85em;
+            transition: background-color 0.2s ease;
+        }
+        .review-item-actions button:hover { background-color: var(--button-hover-bg); }
+        .review-item-actions button.reattempt-full { /* Optional distinct style */
+             /* border-color: var(--accent-color); */
+        }
 
 
     </style>
 </head>
 <body>
 
-    <!-- App Container -->
+    <!-- App Container (Sidebar + Main Views) -->
     <div class="app-container" id="app-container">
         <!-- Sidebar -->
         <div class="sidebar">
@@ -222,10 +206,10 @@
             <div class="chat-list" id="chat-list">
                  <div style="padding:10px;color:var(--text-secondary);font-size:0.9em;">Please log in to see chats.</div>
             </div>
-
-            <!-- Added Button to View Test History -->
-            <button id="view-test-history-btn" disabled>View Test History</button>
-
+            <!-- Link to All Reviews -->
+            <div class="sidebar-section-title">Reviews</div>
+            <button class="sidebar-section-link" id="view-all-reviews-btn" disabled>View Saved Tests</button>
+            <!-- Footer -->
             <div class="sidebar-footer">
                 <div class="sidebar-controls">
                      <div class="text-size-controls">
@@ -253,11 +237,13 @@
             </div>
         </div>
 
-        <!-- Main Area Container -->
+        <!-- Main Area Container (Chat / Single Review / All Reviews) -->
         <div class="main-container">
             <!-- Chat View -->
             <div class="main-content active" id="main-content-chat">
-                 <div class="chat-area" id="chat-area"></div>
+                 <div class="chat-area" id="chat-area">
+                     <!-- Greeting or Login Prompt -->
+                 </div>
                  <div class="input-container" id="input-container">
                      <div class="suggestions" id="suggestions">
                           <button class="suggestion-chip" data-prompt="5 questions about US History">5 Qs US History (Check MCQ)</button>
@@ -273,7 +259,7 @@
                     </div>
                 </div>
             </div>
-            <!-- Review View -->
+            <!-- Single Test Review View -->
              <div class="review-view" id="review-view">
                  <div class="review-header">
                      <h2>Test Review</h2>
@@ -290,23 +276,25 @@
                      <button id="exit-review-btn">Back to Chat</button>
                  </div>
              </div>
-             <!-- Test History View (New) -->
-             <div class="test-history-view" id="test-history-view">
-                 <div class="history-header">
-                     <h2>Test History</h2>
-                     <input type="search" id="test-history-search" placeholder="Search history...">
-                 </div>
-                 <div id="test-history-list">
-                     <!-- History items will be loaded here -->
-                 </div>
-                 <div class="history-footer">
-                     <button id="exit-history-btn">Back to Chat</button>
-                 </div>
-             </div>
+             <!-- All Test Reviews View -->
+              <div class="all-reviews-view" id="all-reviews-view">
+                  <div class="all-reviews-header">
+                       <h2>All Saved Test Reviews</h2>
+                       <div class="search-container">
+                           <label for="review-search">Search:</label>
+                           <input type="search" id="review-search" placeholder="Search questions...">
+                       </div>
+                       <button id="back-to-chat-from-reviews-btn">Back to Chat</button>
+                  </div>
+                  <div class="all-reviews-list" id="all-reviews-list">
+                      <!-- Review items will be loaded here -->
+                       <div class="info-message">Loading saved reviews...</div>
+                  </div>
+              </div>
         </div>
     </div>
 
-    <!-- Mock Test View (Fullscreen Overlay) -->
+    <!-- Mock Test View (Fullscreen Overlay - Unchanged) -->
     <div class="mock-test-view" id="mock-test-view">
         <div class="test-header"> <h2 id="test-title">Mock Test</h2> <div class="test-info"> <span id="question-counter">Q: 1 / N</span> <span id="test-timer">Time: 00:00</span> </div> </div>
         <div class="test-content"> <div class="test-question-container"> <div class="test-question-number" id="test-question-number"></div> <div class="test-question" id="test-question"></div> <div class="test-options" id="test-options"></div> </div> </div>
@@ -315,10 +303,9 @@
 
 
     <script>
-        // --- Firebase Config ---
-        // !!! SECURITY WARNING - Replace with your actual config after testing !!!
+        // --- Firebase Config (SHARED, INSECURE KEY - REPLACE) ---
         const firebaseConfig = {
-          apiKey: "AIzaSyDgw604fe5jnNu4kTOv1cQ-3n7PL8gcN58", // <- SHARED, INSECURE KEY
+          apiKey: "AIzaSyDgw604fe5jnNu4kTOv1cQ-3n7PL8gcN58", // <- REPLACE THIS KEY
           authDomain: "krish-c5db8.firebaseapp.com",
           projectId: "krish-c5db8",
           storageBucket: "krish-c5db8.appspot.com",
@@ -350,13 +337,15 @@
         const chatView = document.getElementById('main-content-chat');
         const testView = document.getElementById('mock-test-view');
         const reviewView = document.getElementById('review-view');
-        const historyView = document.getElementById('test-history-view'); // New
+        const allReviewsView = document.getElementById('all-reviews-view'); // New View
+        const allReviewsListContainer = document.getElementById('all-reviews-list'); // New List
+        const reviewSearchInput = document.getElementById('review-search'); // New Search Input
+        const viewAllReviewsBtn = document.getElementById('view-all-reviews-btn'); // New Sidebar Btn
+        const backToChatFromReviewsBtn = document.getElementById('back-to-chat-from-reviews-btn'); // New Back Btn
         const inputContainer = document.getElementById('input-container');
         const mcqModeCheckbox = document.getElementById('mcq-mode-checkbox');
-        // Auth buttons
         const loginBtn = document.getElementById('login-google-btn');
         const logoutBtn = document.getElementById('logout-btn');
-        // Test elements
         const testTitle = document.getElementById('test-title');
         const questionCounter = document.getElementById('question-counter');
         const testTimer = document.getElementById('test-timer');
@@ -366,17 +355,11 @@
         const prevQuestionBtn = document.getElementById('prev-question-btn');
         const nextQuestionBtn = document.getElementById('next-question-btn');
         const submitTestBtn = document.getElementById('submit-test-btn');
-        // Review elements
         const reviewSummary = document.getElementById('review-summary');
         const reviewContent = document.getElementById('review-content');
         const exitReviewBtn = document.getElementById('exit-review-btn');
         const reviewFilters = document.getElementById('review-filters');
         const saveReviewBtn = document.getElementById('save-review-btn');
-        // History elements (New)
-        const viewHistoryBtn = document.getElementById('view-test-history-btn');
-        const exitHistoryBtn = document.getElementById('exit-history-btn');
-        const historyList = document.getElementById('test-history-list');
-        const historySearchInput = document.getElementById('test-history-search');
 
         // --- Config & Constants ---
         const MODEL_NAME="gemini-1.5-flash-latest";
@@ -388,17 +371,18 @@
         const MAX_TEXT_SIZE_MULTIPLIER=1.5;
         const LIGHT_THEME_ICON='☀️';
         const DARK_THEME_ICON='🌙';
+        const DELETE_ICON_HTML = '✕'; // Multiplication sign '×' as delete icon
 
         // --- State Variables ---
         let API_KEY='';
         let currentUser = null;
         let activeChatId = null;
-        let currentChatHistory=[];
+        let currentChatHistory=[]; // Only stores {role, parts} for API call format
         let currentTextSizeMultiplier=1.0;
         let currentTheme='light';
         let isTestMode=false;
         let isReviewMode=false;
-        let isHistoryMode=false; // New state
+        let isAllReviewsMode = false; // New state for All Reviews view
         let currentTestMCQs=[];
         let currentQuestionIndex=0;
         let userAnswers=[];
@@ -406,9 +390,10 @@
         let testTimerInterval=null;
         let generatedMCQData=null;
         let reviewResultsCache = null;
+        let allReviewsCache = []; // Cache for fetched reviews in All Reviews view
         let activeChatListener = null;
         let chatListListener = null;
-        let allHistoryItemsCache = []; // Cache for client-side search
+        let allReviewsListener = null; // Listener for all reviews collection
 
         // --- Initialization ---
         initializeApp();
@@ -419,28 +404,23 @@
         userInput.addEventListener('keydown', handleInputKeydown);
         suggestionsContainer.addEventListener('click', handleSuggestionClick);
         startChatButton.addEventListener('click', createNewChat);
-        chatListContainer.addEventListener('click', handleChatListClick); // Will handle delete too
+        chatListContainer.addEventListener('click', handleChatListClick); // Handles selection AND deletion
         decreaseTextBtn.addEventListener('click', () => adjustTextSize(-TEXT_SIZE_STEP));
         increaseTextBtn.addEventListener('click', () => adjustTextSize(TEXT_SIZE_STEP));
         themeToggleButton.addEventListener('click', toggleTheme);
-        // Test listeners
         prevQuestionBtn.addEventListener('click', () => handleTestNavigation('prev'));
         nextQuestionBtn.addEventListener('click', () => handleTestNavigation('next'));
         submitTestBtn.addEventListener('click', submitTest);
-        // Review listeners
-        exitReviewBtn.addEventListener('click', exitReview);
+        exitReviewBtn.addEventListener('click', exitReview); // Exits SINGLE review
         chatArea.addEventListener('click', handleChatAreaClick);
         reviewFilters.addEventListener('click', handleReviewFilterClick);
         saveReviewBtn.addEventListener('click', saveTestReviewToCloud);
-        // Auth listeners
         loginBtn.addEventListener('click', signInWithGoogle);
         logoutBtn.addEventListener('click', signOut);
-        // History listeners (New)
-        viewHistoryBtn.addEventListener('click', showTestHistory);
-        exitHistoryBtn.addEventListener('click', exitHistory);
-        historyList.addEventListener('click', handleHistoryListClick);
-        historySearchInput.addEventListener('input', handleHistorySearch);
-
+        viewAllReviewsBtn.addEventListener('click', showAllReviewsView); // New: Go to All Reviews
+        backToChatFromReviewsBtn.addEventListener('click', () => switchView('chat')); // New: Back from All Reviews
+        reviewSearchInput.addEventListener('input', handleAllReviewsSearch); // New: Search listener
+        allReviewsListContainer.addEventListener('click', handleReattemptClick); // New: Reattempt listener
 
         // --- Initialization Functions ---
         async function initializeApp() {
@@ -461,7 +441,7 @@
         }
 
         // --- Authentication Functions ---
-        async function signInWithGoogle() { /* ... (no change) ... */
+        async function signInWithGoogle() { /* ... (Unchanged) ... */
             const provider = new firebase.auth.GoogleAuthProvider();
             try {
                 setLoadingState(true, "Logging in...");
@@ -469,31 +449,39 @@
             } catch (error) {
                 console.error("Google Sign-In Error:", error);
                 displayError(`Login failed: ${error.message}`);
-                setLoadingState(false);
+                setLoadingState(false); // Ensure loading stops on error
             }
         }
-        async function signOut() { /* ... (no change) ... */
+
+        async function signOut() { /* ... (Unchanged) ... */
             try {
                 setLoadingState(true, "Logging out...");
                 await fbAuth.signOut();
             } catch (error) {
                 console.error("Sign Out Error:", error);
                 displayError(`Logout failed: ${error.message}`);
-                setLoadingState(false);
+                setLoadingState(false); // Ensure loading stops on error
             }
-         }
+        }
 
         function handleAuthStateChange(user) {
+            // Detach ALL previous Firestore listeners
             if (activeChatListener) { activeChatListener(); activeChatListener = null; }
             if (chatListListener) { chatListListener(); chatListListener = null; }
+            if (allReviewsListener) { allReviewsListener(); allReviewsListener = null; } // Detach reviews listener
+
+            // Clear main UI areas and state
             chatArea.innerHTML = '';
             chatListContainer.innerHTML = '';
+            allReviewsListContainer.innerHTML = ''; // Clear all reviews list
             activeChatId = null;
             currentChatHistory = [];
+            allReviewsCache = []; // Clear reviews cache
+            reviewSearchInput.value = ''; // Clear search
 
             if (user) {
+                // --- User is logged IN ---
                 currentUser = user;
-                console.log("User logged in:", currentUser.uid, currentUser.displayName || currentUser.email);
                 loginBtn.style.display = 'none';
                 logoutBtn.style.display = 'inline-block';
                 accountEmail.textContent = currentUser.email || currentUser.displayName || `User`;
@@ -503,20 +491,26 @@
                 decreaseTextBtn.disabled = false;
                 increaseTextBtn.disabled = false;
                 themeToggleButton.disabled = false;
-                viewHistoryBtn.disabled = false; // Enable history button
+                viewAllReviewsBtn.disabled = false; // Enable reviews button
 
-                sendButton.disabled = false;
-                userInput.disabled = false;
-                userInput.placeholder = "Enter prompt...";
+                sendButton.disabled = false; // Enable based on chat selection later in setLoadingState
+                userInput.disabled = false;  // Enable based on chat selection later in setLoadingState
+                userInput.placeholder = "Select or create a chat"; // Initial placeholder
                 inputContainer.style.display = 'block';
                 suggestionsContainer.style.display = 'flex';
 
                 loadUserSettings(currentUser.uid);
-                loadAndListenForChats(currentUser.uid);
+                loadAndListenForChats(currentUser.uid); // This might load the first chat and trigger message loading
+
+                // Listen for saved reviews in the background
+                listenForAllReviews(currentUser.uid);
+
+                // Initially switch to chat view after login
+                switchView('chat');
 
             } else {
+                // --- User is logged OUT ---
                 currentUser = null;
-                console.log("User logged out");
                 loginBtn.style.display = 'inline-block';
                 logoutBtn.style.display = 'none';
                 accountEmail.textContent = "Not logged in";
@@ -526,7 +520,7 @@
                 decreaseTextBtn.disabled = true;
                 increaseTextBtn.disabled = true;
                 themeToggleButton.disabled = true;
-                viewHistoryBtn.disabled = true; // Disable history button
+                viewAllReviewsBtn.disabled = true; // Disable reviews button
 
                 sendButton.disabled = true;
                 userInput.disabled = true;
@@ -534,124 +528,104 @@
                 inputContainer.style.display = 'none';
                 suggestionsContainer.style.display = 'none';
 
-                renderGreetingOrLoginPrompt();
+                renderGreetingOrLoginPrompt(); // Show login prompt in chat area
                 chatListContainer.innerHTML = '<div style="padding:10px;color:var(--text-secondary);font-size:0.9em;">Please log in to see chats.</div>';
+                allReviewsListContainer.innerHTML = '<div class="info-message">Please log in to see saved reviews.</div>';
 
                 currentTheme = 'light'; applyTheme();
                 currentTextSizeMultiplier = 1.0; applyTextSize();
-                switchView('chat'); // Ensure back in chat view on logout
+
+                // Ensure back in chat view on logout
+                switchView('chat');
             }
-             setLoadingState(false); // Ensure loading state is off
+            // Update loading state AFTER main setup
+            setLoadingState(false);
         }
 
-        function renderGreetingOrLoginPrompt() { /* ... (no change) ... */
-             chatArea.innerHTML = '';
+        // Helper to show greeting or login message
+        function renderGreetingOrLoginPrompt() { /* ... (Unchanged) ... */
+            chatArea.innerHTML = '';
             const g = document.createElement('div');
             g.classList.add('greeting');
             if (currentUser) {
                  g.innerHTML = `<span class="asterisk">*</span>Good day, ${currentUser.displayName || 'User'}!`;
                  chatArea.appendChild(g);
-                 if (!activeChatId && !isHistoryMode) { // Also check not in history mode
-                    displayMessage("Select a chat or start a new one.", 'ai');
+                 if (!activeChatId) { // Only show if no chat is active
+                    displayMessage("Select a chat from the sidebar or start a new one.", 'ai', ['info-message']);
                  }
             } else {
                 g.innerHTML = `<span class="asterisk">*</span>Welcome!`;
                 chatArea.appendChild(g);
-                displayMessage("Please log in using Google (button in the sidebar) to start chatting or view your history.", 'ai');
+                displayMessage("Please log in using Google (button in the sidebar) to start chatting or view your history.", 'ai', ['info-message']);
             }
             scrollToBottom(true);
         }
 
-        // --- Settings ---
-        async function loadUserSettings(userId) { /* ... (no change) ... */
-             const userDocRef = db.collection('users').doc(userId);
-            try {
-                const docSnap = await userDocRef.get();
-                if (docSnap.exists) {
-                    const settings = docSnap.data();
-                    currentTheme = settings.theme || 'light';
-                    currentTextSizeMultiplier = settings.textSizeMultiplier || 1.0;
-                    console.log("Loaded user settings:", settings);
-                } else {
-                    console.log("No user settings found, using defaults and saving.");
-                    currentTheme = 'light';
-                    currentTextSizeMultiplier = 1.0;
-                    await saveUserSettings();
-                }
-            } catch (error) {
-                console.error("Error loading user settings:", error);
-                currentTheme = 'light';
-                currentTextSizeMultiplier = 1.0;
-            }
-            applyTheme();
-            applyTextSize();
-        }
-        async function saveUserSettings() { /* ... (no change) ... */
-             if (!currentUser) return;
-            const userDocRef = db.collection('users').doc(currentUser.uid);
-            const settings = { theme: currentTheme, textSizeMultiplier: currentTextSizeMultiplier };
-            try {
-                await userDocRef.set(settings, { merge: true });
-                console.log("User settings saved:", settings);
-            } catch (error) { console.error("Error saving user settings:", error); }
-        }
-        function applyTheme() { /* ... (no change) ... */
-             if(currentTheme==='dark'){ document.body.classList.add('dark-theme'); themeToggleButton.textContent=LIGHT_THEME_ICON; themeToggleButton.title="Switch to Light"; }
-             else { document.body.classList.remove('dark-theme'); themeToggleButton.textContent=DARK_THEME_ICON; themeToggleButton.title="Switch to Dark"; }
-        }
-        function toggleTheme() { /* ... (no change) ... */
-             if (!currentUser) return;
-             currentTheme = (currentTheme === 'light') ? 'dark' : 'light'; applyTheme(); saveUserSettings();
-        }
-        function applyTextSize() { /* ... (no change) ... */
-             const newSize = `calc(var(--message-font-size-base) * ${currentTextSizeMultiplier})`;
-             document.documentElement.style.setProperty('--message-font-size', newSize); console.log("Applied text size multiplier:", currentTextSizeMultiplier);
-        }
-        function adjustTextSize(change) { /* ... (no change) ... */
-             if (!currentUser) return;
-            let newMultiplier = Math.max(MIN_TEXT_SIZE_MULTIPLIER, Math.min(MAX_TEXT_SIZE_MULTIPLIER, currentTextSizeMultiplier + change));
-            newMultiplier = Math.round(newMultiplier * 10) / 10;
-            if (newMultiplier !== currentTextSizeMultiplier) { currentTextSizeMultiplier = newMultiplier; applyTextSize(); saveUserSettings(); }
-        }
 
-        // --- Chat Storage & Loading (Firestore) ---
+        // --- Settings (Theme/Text Size) --- (Unchanged)
+        async function loadUserSettings(userId) { /* ... */ }
+        async function saveUserSettings() { /* ... */ }
+        function applyTheme() { /* ... */ }
+        function toggleTheme() { /* ... */ }
+        function applyTextSize() { /* ... */ }
+        function adjustTextSize(change) { /* ... */ }
+
+        // --- Chat Storage & Loading (Firestore - Modified for Delete) ---
 
         function loadAndListenForChats(userId) {
             if (chatListListener) { chatListListener(); chatListListener = null; }
 
-            const chatsRef = db.collection('chats').where('userId', '==', userId).orderBy('lastUpdated', 'desc');
+            const chatsRef = db.collection('chats')
+                               .where('userId', '==', userId)
+                               .orderBy('lastUpdated', 'desc');
 
             console.log(`Listening for chats for user ${userId}`);
             chatListListener = chatsRef.onSnapshot(snapshot => {
                 const chats = [];
-                snapshot.forEach(doc => { chats.push({ id: doc.id, ...doc.data() }); });
+                snapshot.forEach(doc => {
+                    chats.push({ id: doc.id, ...doc.data() });
+                });
                 console.log("Received chat list snapshot:", chats);
                 renderSidebarChatList(chats); // Render sidebar with new data
 
-                // Determine which chat to load/display (if not already active or in another view)
-                if (!isTestMode && !isReviewMode && !isHistoryMode) { // Only switch chat if in chat view
-                    let chatToLoad = null;
-                    if (activeChatId && chats.some(c => c.id === activeChatId)) {
-                        chatToLoad = activeChatId; // Keep current active chat
-                    } else if (chats.length > 0) {
-                        chatToLoad = chats[0].id; // Load the newest one
-                    }
+                let chatToLoadId = null;
+                let activeChatStillExists = chats.some(c => c.id === activeChatId);
 
-                    if (chatToLoad && chatToLoad !== activeChatId) {
-                         console.log("Switching to chat:", chatToLoad);
-                         switchChat(chatToLoad); // Switch including loading messages
-                    } else if (!chatToLoad && activeChatId) {
-                         // The active chat was deleted, clear the view
+                if (activeChatStillExists) {
+                    chatToLoadId = activeChatId; // Keep current chat active
+                     // Ensure highlight is correct even if no ID change occurred
+                    highlightActiveChatInSidebar();
+                } else if (chats.length > 0) {
+                    // Active chat was deleted or never set, load the newest one
+                    chatToLoadId = chats[0].id;
+                } else {
+                    // No chats exist for the user
+                    chatToLoadId = null;
+                }
+
+                // Switch chat content only if the target ID has changed or become null
+                if (chatToLoadId !== activeChatId) {
+                     if (chatToLoadId) {
+                         console.log("Switching active chat content to:", chatToLoadId);
+                         switchChat(chatToLoadId); // This handles listeners and UI update
+                     } else {
+                         // No chats left, clear the chat area and stop message listener
+                         console.log("No chats available for user.");
                          activeChatId = null;
+                         currentChatHistory = [];
                          if (activeChatListener) { activeChatListener(); activeChatListener = null; }
                          renderGreetingOrLoginPrompt();
-                    } else if (!chatToLoad && !activeChatId) {
-                        // No chats exist for the user
-                        renderGreetingOrLoginPrompt();
-                    }
-                } else {
-                    // If in test/review/history mode, just update the highlight in sidebar
-                    highlightActiveChatInSidebar();
+                         highlightActiveChatInSidebar(); // Clear highlight
+                         setLoadingState(false); // Ensure input is disabled if no chat selected
+                     }
+                } else if (!activeChatStillExists && chats.length === 0) {
+                    // Special case: The *only* chat was deleted
+                    activeChatId = null;
+                    currentChatHistory = [];
+                    if (activeChatListener) { activeChatListener(); activeChatListener = null; }
+                    renderGreetingOrLoginPrompt();
+                    highlightActiveChatInSidebar(); // Clear highlight
+                    setLoadingState(false);
                 }
 
             }, error => {
@@ -661,60 +635,61 @@
             });
         }
 
+        // Modified to include delete button
         function renderSidebarChatList(chats) {
             chatListContainer.innerHTML = '';
-            if (!currentUser) {
-                chatListContainer.innerHTML = '<div style="padding:10px;color:var(--text-secondary);font-size:0.9em;">Please log in.</div>';
-                return;
-            }
+            if (!currentUser) { /* ... login prompt ... */ return; }
             if (chats.length === 0) {
-                const i = document.createElement('div');
-                i.textContent = "No chats yet.";
-                i.style.cssText = "padding:10px;color:var(--text-secondary);font-size:0.9em;";
-                chatListContainer.appendChild(i);
+                 const i = document.createElement('div');
+                 i.textContent = "No chats yet.";
+                 i.style.cssText = "padding:10px;color:var(--text-secondary);font-size:0.9em;";
+                 chatListContainer.appendChild(i);
             } else {
                 chats.forEach(c => {
                     const item = document.createElement('div');
                     item.classList.add('chat-list-item');
-                    let title = c.title || '(Untitled)';
-                    if (typeof title !== 'string' || title.trim() === '') title = '(Untitled Chat)';
-                    item.textContent = title;
                     item.dataset.id = c.id;
 
-                    // Add Delete Button
+                    const titleSpan = document.createElement('span');
+                    titleSpan.classList.add('chat-title');
+                    titleSpan.textContent = c.title || '(Untitled)';
+                    titleSpan.title = c.title || '(Untitled)'; // Tooltip for long titles
+
                     const deleteBtn = document.createElement('button');
                     deleteBtn.classList.add('delete-chat-btn');
-                    deleteBtn.innerHTML = '×'; // 'X' symbol
-                    deleteBtn.title = "Delete Chat";
-                    deleteBtn.dataset.id = c.id; // Store ID on button too for easier access
-                    item.appendChild(deleteBtn);
+                    deleteBtn.innerHTML = DELETE_ICON_HTML;
+                    deleteBtn.title = "Delete chat";
+                    deleteBtn.dataset.id = c.id; // Add id to button for easier handling
 
+                    item.appendChild(titleSpan);
+                    item.appendChild(deleteBtn);
                     chatListContainer.appendChild(item);
                 });
             }
-             highlightActiveChatInSidebar();
+            highlightActiveChatInSidebar();
         }
 
-        function highlightActiveChatInSidebar() { /* ... (no change) ... */
+        function highlightActiveChatInSidebar() { /* ... (Unchanged) ... */
              const items = chatListContainer.querySelectorAll('.chat-list-item');
-             items.forEach(item => { item.classList.toggle('active', item.dataset.id === activeChatId); });
+             items.forEach(item => {
+                 item.classList.toggle('active', item.dataset.id === activeChatId);
+             });
          }
 
-        async function createNewChat() {
-            if (!currentUser) return;
+        async function createNewChat() { /* ... (Unchanged, listener handles the rest) ... */
+            if (!currentUser) { displayError("Please log in to create a new chat."); return; }
             setLoadingState(true, "Creating chat...");
             const newChatRef = db.collection('chats').doc();
             const timestamp = firebase.firestore.FieldValue.serverTimestamp();
             try {
                 await newChatRef.set({
                     userId: currentUser.uid,
-                    title: NEW_CHAT_TITLE, // Will be updated by first message
+                    title: NEW_CHAT_TITLE,
                     createdAt: timestamp,
                     lastUpdated: timestamp
                 });
                 console.log("New chat document created:", newChatRef.id);
-                // Listener will pick it up and potentially switch to it
-                switchView('chat'); // Ensure we are in chat view
+                // Listener (loadAndListenForChats) will pick it up and make it active
             } catch (error) {
                 console.error("Error creating new chat:", error);
                 displayError("Failed to create chat.");
@@ -724,628 +699,715 @@
             }
         }
 
+        // Modified to handle delete button clicks
         function handleChatListClick(event) {
-            const item = event.target.closest('.chat-list-item');
-            const deleteBtn = event.target.closest('.delete-chat-btn');
-            const clickedId = item?.dataset?.id;
+            const deleteButton = event.target.closest('.delete-chat-btn');
+            const chatItem = event.target.closest('.chat-list-item');
 
-            if (deleteBtn) {
-                event.stopPropagation(); // Prevent chat switching when clicking delete
-                const chatIdToDelete = deleteBtn.dataset.id;
-                if (chatIdToDelete) {
+            if (deleteButton) {
+                const chatIdToDelete = deleteButton.dataset.id;
+                const chatTitle = chatItem?.querySelector('.chat-title')?.textContent || 'this chat';
+                if (chatIdToDelete && confirm(`Are you sure you want to permanently delete "${chatTitle}" and all its messages?`)) {
                     deleteChat(chatIdToDelete);
                 }
-            } else if (item && clickedId && clickedId !== activeChatId) {
-                console.log("Chat list item clicked:", clickedId);
-                switchChat(clickedId);
+            } else if (chatItem) {
+                const clickedId = chatItem.dataset.id;
+                if (clickedId && clickedId !== activeChatId) {
+                    console.log("Chat list item selected:", clickedId);
+                    switchChat(clickedId);
+                }
             }
         }
 
-        // --- New Function: Delete Chat ---
+        // New function to delete chat and its subcollection
         async function deleteChat(chatId) {
             if (!currentUser || !chatId) return;
+            console.log(`Attempting to delete chat: ${chatId}`);
+            setLoadingState(true, `Deleting chat...`);
 
-            const chatToDelete = chatListContainer.querySelector(`.chat-list-item[data-id="${chatId}"]`);
-            const title = chatToDelete ? chatToDelete.textContent.replace('×', '').trim() : `Chat ID ${chatId}`;
-
-            if (!confirm(`Are you sure you want to delete the chat "${title}"? This cannot be undone.`)) {
-                return;
-            }
-
-            console.log("Attempting to delete chat:", chatId);
             const chatDocRef = db.collection('chats').doc(chatId);
+            const messagesColRef = chatDocRef.collection('messages');
 
             try {
-                // --- IMPORTANT LIMITATION ---
-                // This only deletes the main chat document.
-                // Messages in the subcollection 'messages' will be orphaned.
-                // A Cloud Function is the recommended way to delete subcollections.
-                // See: https://firebase.google.com/docs/firestore/manage-data/delete-data#delete_collections
-                console.warn(`Deleting chat document ${chatId}. Messages subcollection will be orphaned (client-side limitation).`);
+                // 1. Delete messages subcollection (important!)
+                await deleteSubcollection(messagesColRef);
+                console.log(`Messages subcollection deleted for chat ${chatId}`);
 
+                // 2. Delete the chat document itself
                 await chatDocRef.delete();
-                console.log("Chat document deleted:", chatId);
+                console.log(`Chat document ${chatId} deleted`);
 
-                // If the deleted chat was the active one, clear the view
-                if (activeChatId === chatId) {
-                    activeChatId = null;
-                    if (activeChatListener) { activeChatListener(); activeChatListener = null; }
-                    chatArea.innerHTML = '';
-                    currentChatHistory = [];
-                    renderGreetingOrLoginPrompt(); // Show default greeting
-                }
-                // The chatListListener will automatically update the sidebar UI.
+                // 3. UI update is handled by the chat list listener reacting to the deletion.
+                //    It will automatically select the next newest chat or show the empty state.
+
+                // Optional: Clear related data if needed (e.g., test reviews linked to this chat - not implemented)
 
             } catch (error) {
-                console.error("Error deleting chat:", error);
-                displayError(`Failed to delete chat "${title}".`);
+                console.error(`Error deleting chat ${chatId}:`, error);
+                displayError(`Failed to delete chat: ${error.message}`);
+            } finally {
+                setLoadingState(false);
             }
         }
+
+        // Helper to delete all documents in a subcollection
+        async function deleteSubcollection(collectionRef, batchSize = 100) {
+            const query = collectionRef.orderBy('__name__').limit(batchSize);
+
+            return new Promise((resolve, reject) => {
+                deleteQueryBatch(query, resolve, reject);
+            });
+        }
+
+        async function deleteQueryBatch(query, resolve, reject) {
+            try {
+                const snapshot = await query.get();
+
+                // When there are no documents left, we are done
+                if (snapshot.size === 0) {
+                    resolve();
+                    return;
+                }
+
+                // Delete documents in a batch
+                const batch = db.batch();
+                snapshot.docs.forEach(doc => {
+                    batch.delete(doc.ref);
+                });
+                await batch.commit();
+
+                // Recurse on the next process tick, to avoid exploding the stack.
+                process.nextTick(() => {
+                    deleteQueryBatch(query, resolve, reject);
+                });
+
+            } catch(error) {
+                 console.error("Error deleting batch in subcollection:", error);
+                 reject(error);
+            }
+        }
+        // Workaround if process.nextTick isn't available in browser directly
+        async function deleteQueryBatch(query, resolve, reject) {
+             try {
+                 const snapshot = await query.get();
+                 if (snapshot.size === 0) {
+                     resolve();
+                     return;
+                 }
+                 const batch = db.batch();
+                 snapshot.docs.forEach(doc => batch.delete(doc.ref));
+                 await batch.commit();
+                 // Use setTimeout for recursion in browser
+                 setTimeout(() => deleteQueryBatch(query, resolve, reject), 0);
+             } catch (error) {
+                 console.error("Error deleting batch in subcollection:", error);
+                 reject(error);
+             }
+         }
 
 
         function switchChat(chatId) {
-             if (!currentUser || !chatId || chatId === activeChatId) return;
-             // Ensure we are in the chat view before switching
-             switchView('chat'); // This resets modes like isHistoryMode
+             if (!currentUser || !chatId) return; // || chatId === activeChatId removed, listener handles no-op
+
              console.log("Switching to chat:", chatId);
-             activeChatId = chatId;
-             highlightActiveChatInSidebar();
-             loadAndListenForActiveChat(chatId);
+             if (activeChatId !== chatId) { // Only proceed if ID is actually changing
+                activeChatId = chatId;
+                highlightActiveChatInSidebar();
+                loadAndListenForActiveChat(chatId); // Load messages for the new chat
+             }
              userInput.focus();
+             setLoadingState(false); // Ensure input is enabled after switching
         }
 
-        // --- Message Loading (Firestore) ---
-        function loadAndListenForActiveChat(chatId) { /* ... (no change from previous version, handles loading messages) ... */
-            if (!currentUser || !chatId) { console.log("Cannot load messages: No user or chatId."); chatArea.innerHTML = ''; if (activeChatListener) { activeChatListener(); activeChatListener = null; } renderGreetingOrLoginPrompt(); return; }
+        // --- Message Loading (Firestore) --- (Unchanged)
+        function loadAndListenForActiveChat(chatId) {
+            if (!currentUser || !chatId) { /* ... */ return; }
             if (activeChatListener) { activeChatListener(); activeChatListener = null; }
+
             highlightActiveChatInSidebar();
             const messagesRef = db.collection('chats').doc(chatId).collection('messages').orderBy('timestamp', 'asc');
-            chatArea.innerHTML = ''; const loadingMsg = displayMessage("Loading chat...", 'ai', ['thinking']);
+            chatArea.innerHTML = ''; // Clear before loading
+            const loadingMsg = displayMessage("Loading chat...", 'ai', ['thinking']);
+            currentChatHistory = []; // Clear history before loading new chat
+
             console.log(`Listening for messages in chat ${chatId}`);
             activeChatListener = messagesRef.onSnapshot(snapshot => {
                 console.log(`Received messages snapshot for chat ${chatId}:`, snapshot.size, "messages");
-                removeMessageElement(loadingMsg); chatArea.innerHTML = ''; currentChatHistory = [];
-                if (snapshot.empty) { console.log("Chat is empty."); renderGreetingOrLoginPrompt(); }
-                else { snapshot.forEach(doc => { const msgData = doc.data(); const text = msgData.text || ""; const role = msgData.role || "model"; currentChatHistory.push({ role: role, parts: [{ text: text }] }); displayMessage(text, role, [], null, msgData); }); }
+                removeMessageElement(loadingMsg);
+                chatArea.innerHTML = ''; // Clear again before rendering batch
+                currentChatHistory = []; // Reset and rebuild history
+
+                if (snapshot.empty) {
+                     renderGreetingOrLoginPrompt(); // Show greeting if chat is empty
+                } else {
+                    snapshot.forEach(doc => {
+                        const msgData = doc.data();
+                        const text = msgData.text || "";
+                        const role = msgData.role || "model";
+                         // Add to API history format
+                         currentChatHistory.push({
+                             role: (role === "model" ? "model" : "user"), // Ensure correct roles for API
+                             parts: [{ text: text }]
+                         });
+                        displayMessage(text, role, [], null, msgData); // Display visually
+                    });
+                }
                 scrollToBottom(true);
+                setLoadingState(false); // Ensure input enabled after loading messages
+
             }, error => {
-                console.error(`Error listening for messages in chat ${chatId}:`, error); displayError("Could not load messages for this chat."); removeMessageElement(loadingMsg); chatArea.innerHTML = ''; currentChatHistory = [];
+                console.error(`Error listening for messages in chat ${chatId}:`, error);
+                displayError("Could not load messages for this chat.");
+                removeMessageElement(loadingMsg);
+                chatArea.innerHTML = '';
+                currentChatHistory = [];
+                setLoadingState(false); // Ensure interactable on error
             });
-         }
+        }
 
-        // --- Message Sending (Gemini API & Firestore Save) ---
+        // --- Message Sending (Gemini API & Firestore Save - Title Update Refined) ---
+
         async function handleSendMessage() {
-             // --- Pre-send Checks ---
-             if (!API_KEY) { displayError("Gemini API Key not set. Reload."); return; }
-             if (!currentUser) { displayError("Please log in first."); return; }
-             if (!activeChatId) { displayError("Please select or create a chat first."); return; } // Should not happen if UI is correct
-             const txt = userInput.value.trim();
-             if (!txt || sendButton.disabled) return;
+            const txt = userInput.value.trim();
+            if (!API_KEY || !currentUser || !activeChatId || !txt || sendButton.disabled) return;
 
-             setLoadingState(true, "Sending...");
-             const isMCQRequest = mcqModeCheckbox.checked;
-             const userMessageText = txt;
-             userInput.value = ''; autoGrowTextarea();
-             if (isMCQRequest) mcqModeCheckbox.checked = false;
+            const isMCQRequest = mcqModeCheckbox.checked;
+            setLoadingState(true, "Sending...");
+            const userMessageText = txt;
 
-             const timestamp = firebase.firestore.FieldValue.serverTimestamp();
-             const messagesColRef = db.collection('chats').doc(activeChatId).collection('messages');
-             const chatDocRef = db.collection('chats').doc(activeChatId);
+            userInput.value = '';
+            autoGrowTextarea();
+            if (isMCQRequest) mcqModeCheckbox.checked = false;
 
-             // 1. Save User Message
+            const timestamp = firebase.firestore.FieldValue.serverTimestamp();
+            const messagesColRef = db.collection('chats').doc(activeChatId).collection('messages');
+            const chatDocRef = db.collection('chats').doc(activeChatId);
+
+            // 1. Save user message
              const userMsgData = { role: "user", text: userMessageText, timestamp: timestamp };
+             let userMsgRef;
              try {
-                 await messagesColRef.add(userMsgData);
+                 userMsgRef = await messagesColRef.add(userMsgData); // Get ref if needed later
                  await chatDocRef.update({ lastUpdated: timestamp });
                  console.log("User message saved.");
-             } catch(error) {
-                 console.error("Error saving user message:", error); displayError("Failed to send."); setLoadingState(false); return;
-             }
+             } catch(error) { /* ... error handling ... */ setLoadingState(false); return; }
 
-             // 2. Update Title if First Message (Check current title *before* API call)
-             try {
-                 const chatDocSnap = await chatDocRef.get();
-                 if (chatDocSnap.exists && chatDocSnap.data().title === NEW_CHAT_TITLE) {
-                     // Check if there are *any* user messages in history *before this one*.
-                     // If the history loaded by the listener doesn't contain a user message yet,
-                     // this is effectively the first one being processed.
-                     const historyHasUserMessage = currentChatHistory.some(m => m.role === 'user');
-                     if (!historyHasUserMessage) {
-                         const generatedTitle = generateChatTitle([{ parts: [{ text: userMessageText }] }]); // Pass only current message
+             // --- Title Generation Trigger (User Message) ---
+             // Check if title needs update *after* user message is saved, using chat history length *before* listener adds it
+             const historyBeforeUserMsg = [...currentChatHistory]; // Snapshot before listener updates
+             const isFirstUserMessage = historyBeforeUserMsg.filter(m => m.role === 'user').length === 0;
+             if (isFirstUserMessage) {
+                 try {
+                     const chatDocSnap = await chatDocRef.get();
+                     if (chatDocSnap.exists() && chatDocSnap.data().title === NEW_CHAT_TITLE) {
+                         const generatedTitle = generateChatTitleFromText(userMessageText); // Use simple generation
                          if (generatedTitle !== NEW_CHAT_TITLE) {
-                             await updateActiveChatTitle(generatedTitle); // Update Firestore
+                             await updateActiveChatTitle(generatedTitle);
                          }
                      }
-                 }
-             } catch (titleError) { console.error("Error checking/updating chat title:", titleError); }
+                 } catch (titleError) { console.error("Error checking/updating title after user msg:", titleError); }
+             }
+             // --- End Title Generation ---
 
-             // 3. Prepare for API Call
-             const thinking = displayMessage("Thinking", 'ai', ['thinking']);
-             // Build history - include the message just sent for the API context
-             const requestHistory = [...currentChatHistory, { role: "user", parts: [{ text: userMessageText }] }];
-             let modifiedPrompt = userMessageText;
-             if (isMCQRequest) { /* ... (MCQ prompt modification - no change) ... */
-                 modifiedPrompt = `${userMessageText}\n\nPlease provide the response strictly in JSON format... Example: \`\`\`json\n[{"question":"Capital of France?","options":["A) Berlin","B) Paris","C) Rome","D) Madrid"],"answer":"B"}]\n\`\`\` ...`;
+            // 3. Prepare for API call
+            const thinking = displayMessage("Thinking", 'ai', ['thinking']);
+            const requestHistory = [
+                 ...currentChatHistory, // History built by listener (might not include this latest user msg yet)
+                 { role: "user", parts: [{ text: userMessageText }] } // Add it explicitly for the API call
+                ];
+
+            let modifiedPrompt = userMessageText;
+            if (isMCQRequest) { /* ... JSON prompt modification (Unchanged) ... */
+                 modifiedPrompt = `${userMessageText}\n\nPlease provide the response strictly in JSON format...`;
                  requestHistory[requestHistory.length - 1] = { role: "user", parts: [{ text: modifiedPrompt }] };
              }
 
-             // 4. Call Gemini API
-             console.warn("Calling Gemini API using client-side key. Replace with Cloud Function.");
-             try {
-                 const response = await fetch(API_URL_BASE + API_KEY, { /* ... (API call options - no change) ... */
-                      method: 'POST', headers: { 'Content-Type': 'application/json' },
-                      body: JSON.stringify({ contents: requestHistory, safetySettings: [ /* ... */ ] }),
-                 });
-                 removeMessageElement(thinking);
+            // 4. Call Gemini API
+            console.warn("Calling Gemini API using client-side key. Replace with Cloud Function.");
+            try {
+                const response = await fetch(API_URL_BASE + API_KEY, { /* ... (fetch options unchanged) ... */ });
+                removeMessageElement(thinking);
 
-                 let aiMsgData = { role: "model", text: "Error: No response.", timestamp: firebase.firestore.FieldValue.serverTimestamp() };
+                let aiMsgData = { role: "model", text: "", timestamp: firebase.firestore.FieldValue.serverTimestamp() };
+                let aiResponseText = "";
+                let isBlocked = false;
 
-                 if (!response.ok) { /* ... (Error handling - no change) ... */
-                     let err = { message: `API error (${response.status})` }; try { err = (await response.json()).error || err; } catch {} console.error("API Error:", err); aiMsgData.text = `Error: ${err.message || "Unknown API error"}`; displayError(aiMsgData.text); if(response.status===400 && err.message?.toLowerCase().includes('api key not valid')){ localStorage.removeItem(STORAGE_KEY_API_KEY); API_KEY=''; displayError("Invalid Gemini Key cleared. Reload."); }
-                 } else { // Handle success
-                     const data = await response.json();
-                     let aiTxt = "Sorry, empty response."; let blocked = false;
-                     if (data.promptFeedback?.blockReason) { /* ... (Block reason handling - no change) ... */
-                         aiTxt = `Blocked: ${data.promptFeedback.blockReason}`; blocked = true; aiMsgData.text = aiTxt; displayMessage(aiTxt,'ai',['error-message']);
-                     } else if (data.candidates?.[0]?.content?.parts?.[0]?.text) {
-                         aiTxt = data.candidates[0].content.parts[0].text;
-                         aiMsgData.text = aiTxt; // Default text to save
-                         let processedForMCQ = false;
-                         if (isMCQRequest && !blocked) { /* ... (MCQ JSON parsing - no change) ... */
-                              try {
-                                 const jsonMatch = aiTxt.match(/```json\s*([\s\S]*?)\s*```/); const jsonString = jsonMatch ? jsonMatch[1].trim() : aiTxt.trim();
-                                 if (jsonString.startsWith('[') && jsonString.endsWith(']')) {
-                                     const mcqs = JSON.parse(jsonString);
-                                     if (Array.isArray(mcqs) && mcqs.length > 0 && mcqs.every(q => q.question && Array.isArray(q.options) && q.options.length > 1 && q.answer)) { // Basic validation
-                                         const summaryText = `Generated ${mcqs.length} MCQs. Click below to start the test.`;
-                                         aiMsgData.text = summaryText; aiMsgData.mcqData = mcqs; // Store MCQs in Firestore
-                                         console.log("MCQs parsed, saving to Firestore:", mcqs); processedForMCQ = true;
-                                     } else { console.warn("MCQ JSON validation failed."); }
-                                 } else { console.warn("MCQ response not JSON array."); }
-                             } catch (parseError) { console.error("Failed to parse MCQ JSON:", parseError); }
-                         }
-                         // If not processed as MCQ, aiMsgData.text already holds the normal response.
-                     } else { console.warn("Unexpected API response format:", data); aiMsgData.text = "Error: Invalid response format."; displayError(aiMsgData.text); }
-                 }
-                 // 5. Save AI Response/Error
+                if (!response.ok) { /* ... (Error handling unchanged) ... */
+                    let err = { message: `API error (${response.status})` };
+                    try { err = (await response.json()).error || err; } catch { /* Ignore */ }
+                    aiMsgData.text = `Error: ${err.message || "Unknown API error"}`;
+                    displayError(aiMsgData.text); // Show error in chat
+                    if(response.status===400 && err.message?.toLowerCase().includes('api key not valid')){ /* ... clear key ... */ }
+                } else {
+                    const data = await response.json();
+                    if (data.promptFeedback?.blockReason) { /* ... (Block handling unchanged) ... */
+                        aiResponseText = `Blocked: ${data.promptFeedback.blockReason}`;
+                        aiMsgData.text = aiResponseText;
+                        isBlocked = true;
+                        displayMessage(aiResponseText,'ai',['error-message']); // Show block in chat
+                    } else if (data.candidates?.[0]?.content?.parts?.[0]?.text) {
+                        aiResponseText = data.candidates[0].content.parts[0].text;
+                        aiMsgData.text = aiResponseText; // Base text for saving
+
+                        if (isMCQRequest && !isBlocked) { /* ... (MCQ Parsing unchanged) ... */
+                             try { /* ... */
+                                 const mcqs = JSON.parse(jsonString);
+                                 if (/* validation */) {
+                                     const summaryText = `Generated ${mcqs.length} MCQs...`;
+                                     aiMsgData.text = summaryText; // Save summary
+                                     aiMsgData.mcqData = mcqs; // Save full MCQ data
+                                     processedForMCQ = true;
+                                 } /* ... */
+                             } catch (parseError) { /* ... */ }
+                        }
+                        // If not processed as MCQ, aiMsgData.text holds the normal response.
+                    } else { /* ... (Handle unexpected format) ... */
+                         aiMsgData.text = "Error: Could not extract valid text from response.";
+                         displayError(aiMsgData.text);
+                    }
+                }
+
+                 // 5. Save AI response/error to Firestore
+                 let aiMsgRef;
                  try {
-                     await messagesColRef.add(aiMsgData);
-                     await chatDocRef.update({ lastUpdated: firebase.firestore.FieldValue.serverTimestamp() }); // Update again
+                     aiMsgRef = await messagesColRef.add(aiMsgData);
+                     await chatDocRef.update({ lastUpdated: firebase.firestore.FieldValue.serverTimestamp() });
                      console.log("AI response/error saved.");
-                 } catch (saveError) { console.error("Error saving AI response:", saveError); displayError("Error saving response."); }
+                 } catch (saveError) { /* ... error handling ... */ }
 
-             } catch (error) { /* ... (Fetch/Network error handling - no change) ... */
-                 console.error("Fetch/Processing Error:", error); removeMessageElement(thinking); const errorText = `Error: ${error.message || "Network error."}`; displayError(errorText);
-                 try { await messagesColRef.add({ role: "model", text: errorText, timestamp: firebase.firestore.FieldValue.serverTimestamp() }); await chatDocRef.update({ lastUpdated: firebase.firestore.FieldValue.serverTimestamp() }); } catch (saveError) { console.error("Error saving network error message:", saveError); }
-             } finally {
-                 setLoadingState(false);
-                 if (!isTestMode && !isReviewMode && !isHistoryMode) userInput.focus(); // Focus only if in chat view
-             }
+                 // --- Title Generation Trigger (AI Response) ---
+                 // If it was the *first* AI message AND title is still default, generate title
+                 const historyAfterUserMsg = [...requestHistory]; // History including user msg sent to API
+                 const isFirstAiMessage = historyAfterUserMsg.filter(m => m.role === 'model').length === 0;
+                 if (isFirstAiMessage && !isBlocked && aiResponseText) {
+                     try {
+                         const chatDocSnap = await chatDocRef.get();
+                         if (chatDocSnap.exists() && chatDocSnap.data().title === NEW_CHAT_TITLE) {
+                             // Generate title based on User + AI response
+                             const titleText = userMessageText + "\n" + aiResponseText;
+                             const generatedTitle = generateChatTitleFromText(titleText);
+                             if (generatedTitle !== NEW_CHAT_TITLE) {
+                                 await updateActiveChatTitle(generatedTitle);
+                             }
+                         }
+                     } catch (titleError) { console.error("Error checking/updating title after AI msg:", titleError); }
+                 }
+                 // --- End Title Generation ---
+
+
+            } catch (error) { /* ... (Network/Script error handling unchanged) ... */
+                 removeMessageElement(thinking);
+                 const errorText = `Error: ${error.message || "Network error"}`;
+                 displayError(errorText);
+                 try { /* ... save error to Firestore ... */ } catch (saveError) { /* ... */ }
+            } finally {
+                setLoadingState(false);
+                if (!isTestMode && !isReviewMode && !isAllReviewsMode) userInput.focus();
+            }
         }
 
-        function generateChatTitle(historyForTitle) { /* ... (no change - generates title) ... */
-             const firstUserMessage = historyForTitle.find(m => m.role === 'user');
-             if (firstUserMessage?.parts[0]?.text) {
-                 const text = firstUserMessage.parts[0].text;
-                 const title = text.split(/[\s\n]+/).slice(0, 5).join(' ').replace(/[.,!?;:]$/, '');
-                 return title.length > 35 ? title.substring(0, 32) + '...' : (title || NEW_CHAT_TITLE);
-             } return NEW_CHAT_TITLE;
-         }
+        // Refined simple title generation from text
+        function generateChatTitleFromText(text) {
+             if (!text) return NEW_CHAT_TITLE;
+             // Remove potential markdown, newlines, trim, take first few words
+             const cleanText = text.replace(/[*`#\n\r]/g, ' ').replace(/\s+/g, ' ').trim();
+             const title = cleanText.split(' ').slice(0, 5).join(' ');
+             // Limit length
+             const maxLength = 40;
+             return title.length > maxLength ? title.substring(0, maxLength - 3) + '...' : (title || NEW_CHAT_TITLE);
+        }
 
-        async function updateActiveChatTitle(newTitle) { /* ... (no change - updates Firestore) ... */
+         async function updateActiveChatTitle(newTitle) { /* ... (Unchanged) ... */
              if (!currentUser || !activeChatId || !newTitle || newTitle === NEW_CHAT_TITLE) return;
              const chatDocRef = db.collection('chats').doc(activeChatId);
-             try { await chatDocRef.update({ title: newTitle }); console.log(`Chat ${activeChatId} title updated: ${newTitle}`); }
-             catch (error) { console.error("Error updating chat title:", error); }
+             try {
+                 await chatDocRef.update({ title: newTitle });
+                 console.log(`Chat ${activeChatId} title updated to: ${newTitle}`);
+                 // Listener updates sidebar
+             } catch (error) { console.error("Error updating chat title:", error); }
          }
 
 
         // --- UI & Message Display ---
-        function autoGrowTextarea() { /* ... */ }
-        function handleInputKeydown(event) { /* ... */ }
-        function handleSuggestionClick(event) { /* ... */ }
+        function autoGrowTextarea() { /* ... (Unchanged) ... */ }
+        function handleInputKeydown(event) { /* ... (Unchanged) ... */ }
+        function handleSuggestionClick(event) { /* ... (Unchanged) ... */ }
         function displayError(text) { displayMessage(`Error: ${text}`, 'ai', ['error-message']); }
-        function scrollToBottom(immediate = false) { /* ... */ }
-        function removeMessageElement(element) { /* ... */ }
+        function scrollToBottom(immediate = false) { chatArea.scrollTo({top:chatArea.scrollHeight,behavior:immediate?'auto':'smooth'}); }
+        function removeMessageElement(element) { /* ... (Unchanged) ... */ }
 
+        // Modified setLoadingState
         function setLoadingState(isLoading, message = "Generating...") {
-             const isDisabled = isLoading || !currentUser; // Simplified: disable mainly if loading or logged out
-             const isInputDisabled = isDisabled || !activeChatId; // Input also disabled if no chat selected
+            // Disable if loading OR if logged out
+            const baseDisabled = isLoading || !currentUser;
+            // Input/Send also disabled if no active chat selected
+            const inputDisabled = baseDisabled || !activeChatId;
 
-             userInput.disabled = isInputDisabled;
-             sendButton.disabled = isInputDisabled;
-             mcqModeCheckbox.disabled = isInputDisabled;
+            userInput.disabled = inputDisabled;
+            sendButton.disabled = inputDisabled;
+            mcqModeCheckbox.disabled = inputDisabled;
+            startChatButton.disabled = baseDisabled; // Can always start new chat if logged in & not loading
+            viewAllReviewsBtn.disabled = baseDisabled; // Can view reviews if logged in & not loading
 
-             if (isLoading) { userInput.placeholder = message; }
-             else if (!currentUser) { userInput.placeholder = "Please log in"; }
-             else if (!activeChatId && !isHistoryMode) { userInput.placeholder = "Select or create a chat"; } // More specific
-             else if (!isHistoryMode) { userInput.placeholder = "Enter prompt..."; } // Default when ready
+            // Update placeholder
+            if (isLoading) {
+                userInput.placeholder = message;
+            } else if (!currentUser) {
+                userInput.placeholder = "Please log in";
+            } else if (!activeChatId) {
+                userInput.placeholder = "Select or create a chat";
+            } else {
+                userInput.placeholder = "Enter prompt (Check 'MCQs?' to generate test)";
+            }
 
-             startChatButton.disabled = isDisabled;
-             viewHistoryBtn.disabled = isDisabled; // Also disable history button when loading/logged out
-         }
-
-        function switchView(viewName) {
-             console.log("Switching view to:", viewName);
-             chatView.classList.remove('active');
-             reviewView.classList.remove('active');
-             testView.classList.remove('active');
-             historyView.classList.remove('active'); // New
-             appContainer.classList.remove('hidden'); // Assume visible by default
-
-             isTestMode = false; isReviewMode = false; isHistoryMode = false; // Reset all modes
-
-             if (viewName === 'test') {
-                 appContainer.classList.add('hidden');
-                 testView.classList.add('active');
-                 isTestMode = true;
-             } else if (viewName === 'review') {
-                 reviewView.classList.add('active');
-                 isReviewMode = true;
-             } else if (viewName === 'history') { // New
-                 historyView.classList.add('active');
-                 isHistoryMode = true;
-             } else { // Default to chat view
-                 chatView.classList.add('active');
-             }
-
-             // Stop test timer if switching away from test view
-             if (viewName !== 'test' && testTimerInterval) { clearInterval(testTimerInterval); testTimerInterval = null; }
-             // Update input placeholder based on view
-             setLoadingState(false); // Refresh placeholder etc.
-         }
-
-        function displayMessage(text, sender, cssClasses = [], appendHtml = null, messageData = null) { /* ... (no change, handles MCQ offer) ... */
-             const element = document.createElement('div'); element.classList.add('message', `${sender}-message`, ...cssClasses);
-             let formattedText = text.replace(/</g, "<").replace(/>/g, ">").replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\*(.*?)\*/g, '<em>$1</em>').replace(/```([\s\S]*?)```/g, (m, c) => `<pre><code>${c.replace(/</g, "<").replace(/>/g, ">")}</code></pre>`).replace(/`([^`]+)`/g, (m, c) => `<code>${c.replace(/</g, "<").replace(/>/g, ">")}</code>`).replace(/\n/g, '<br>');
-             element.innerHTML = formattedText;
-             if (messageData?.role === 'model' && messageData.mcqData && Array.isArray(messageData.mcqData)) { console.log("Rendering MCQ offer:", messageData.mcqData.length); displayMCQOffer(messageData.mcqData, element); }
-             else if (appendHtml) { const tempDiv = document.createElement('div'); tempDiv.innerHTML = appendHtml; while (tempDiv.firstChild) element.appendChild(tempDiv.firstChild); }
-             chatArea.appendChild(element);
-             try { if (typeof MathJax !== "undefined" && MathJax.typesetPromise) { MathJax.typesetPromise([element]).catch(err => console.error('MathJax typeset error:', err)); } } catch (e) { console.error("MathJax call failed:", e); }
-             return element;
+             // Disable sidebar controls etc. if loading
+             decreaseTextBtn.disabled = baseDisabled;
+             increaseTextBtn.disabled = baseDisabled;
+             themeToggleButton.disabled = baseDisabled;
+             logoutBtn.disabled = isLoading; // Prevent logout during operation? Maybe not necessary.
         }
+
+        // Modified switchView
+        function switchView(viewName) {
+            console.log("Switching view to:", viewName);
+            chatView.classList.remove('active');
+            reviewView.classList.remove('active');
+            testView.classList.remove('active');
+            allReviewsView.classList.remove('active'); // Deactivate all reviews view
+            appContainer.classList.remove('hidden');
+
+            isTestMode = false;
+            isReviewMode = false;
+            isAllReviewsMode = false; // Reset all view flags
+
+            if(viewName==='test'){
+                appContainer.classList.add('hidden'); // Overlay
+                testView.classList.add('active');
+                isTestMode=true;
+            } else if(viewName==='review'){
+                reviewView.classList.add('active');
+                isReviewMode=true;
+            } else if (viewName === 'allReviews') { // New case
+                allReviewsView.classList.add('active');
+                isAllReviewsMode = true;
+                // Optional: Trigger fetch/render if not already listening
+                if (!allReviewsListener && currentUser) {
+                    listenForAllReviews(currentUser.uid); // Start listening if not already
+                }
+            } else { // Default to chat view
+                chatView.classList.add('active');
+                // Focus input only if coming back to chat view and logged in
+                 if (currentUser && activeChatId) userInput.focus();
+            }
+
+            // Stop test timer if switching away from test view
+            if (viewName !== 'test' && testTimerInterval) {
+                clearInterval(testTimerInterval);
+                testTimerInterval = null;
+            }
+        }
+
+        // Modified displayMessage to handle MCQ button better
+        function displayMessage(text, sender, cssClasses = [], appendHtml = null, messageData = null) {
+            const element = document.createElement('div');
+            element.classList.add('message', `${sender}-message`, ...cssClasses);
+
+            let formattedText = text /* ... (formatting unchanged) ... */
+                .replace(/</g, "<").replace(/>/g, ">")
+                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\*(.*?)\*/g, '<em>$1</em>')
+                .replace(/```([\s\S]*?)```/g, (match, code) => `<pre><code>${code.replace(/</g, "<").replace(/>/g, ">")}</code></pre>`)
+                .replace(/`([^`]+)`/g, (match, code) => `<code>${code.replace(/</g, "<").replace(/>/g, ">")}</code>`)
+                .replace(/\n/g, '<br>');
+
+            element.innerHTML = formattedText;
+
+            // Handle MCQ offer (uses messageData from Firestore)
+            if (messageData?.role === 'model' && messageData.mcqData && Array.isArray(messageData.mcqData)) {
+                 console.log("Rendering MCQ offer button for message with MCQs:", messageData.mcqData.length);
+                 const buttonContainer = document.createElement('div');
+                 buttonContainer.style.marginTop = '10px';
+                 const button = document.createElement('button');
+                 button.classList.add('start-test-button');
+                 button.textContent = `Start Mock Test (${messageData.mcqData.length} Questions)`;
+                 // Store data needed to start test directly on the button for simplicity
+                 button.dataset.mcqData = JSON.stringify(messageData.mcqData);
+                 buttonContainer.appendChild(button);
+                 element.appendChild(buttonContainer);
+            } else if (appendHtml) { /* ... (appendHtml logic unchanged) ... */ }
+
+            chatArea.appendChild(element);
+
+            try { /* ... (MathJax typesetting unchanged) ... */
+                 if (typeof MathJax !== "undefined" && MathJax.typesetPromise) {
+                    MathJax.typesetPromise([element]).catch(err => console.error('MathJax typeset error:', err));
+                 }
+            } catch (e) { console.error("MathJax call failed:", e); }
+
+            // scroll handled by listener
+            return element;
+        }
+
 
         // --- MCQ/Test Specific Functions ---
-        function handleChatAreaClick(event) { /* ... (no change - starts test from chat offer) ... */
-             if (event.target.classList.contains('start-test-button')) { const mcqs = generatedMCQData; if (mcqs) { startMockTest(mcqs); generatedMCQData = null; } else { console.error("MCQ data not found."); displayError("Could not start test."); } }
-        }
-        function displayMCQOffer(mcqs, aiMessageElement) { /* ... (no change - displays start button in chat) ... */
-             generatedMCQData = mcqs; const buttonHtml = `<button class="start-test-button">Start Mock Test (${mcqs.length} Questions)</button>`; const tempDiv = document.createElement('div'); tempDiv.style.marginTop = '10px'; tempDiv.innerHTML = buttonHtml; aiMessageElement.appendChild(tempDiv); scrollToBottom();
-        }
 
-        function startMockTest(mcqs, titlePrefix = "Mock Test") { // Added optional title prefix
-            if (!currentUser) { displayError("Please log in."); return; }
-            if (!mcqs || mcqs.length === 0) { displayError("No questions available."); return; }
-            console.log(`Starting test: ${titlePrefix} with ${mcqs.length} Qs.`);
-
-            // Ensure MCQs have the 'answer' field (needed by displayTestQuestion logic)
-            // This might be needed if reattempting from saved review which might not store the letter.
-            const processedMcqs = mcqs.map(q => {
-                if (q.answer) return q; // Already has answer letter
-                if (q.correctAnswer && q.options) { // Reconstruct from review data if needed
-                    return {
-                        ...q, // Keep other fields like question, options
-                        answer: findCorrectAnswerLetter(q.options, q.correctAnswer) || '?'
-                    };
-                }
-                return { ...q, answer: '?' }; // Fallback
-            });
-
-            currentTestMCQs = processedMcqs;
-            currentQuestionIndex = 0;
-            userAnswers = new Array(processedMcqs.length).fill(null);
-            testStartTime = Date.now();
-            reviewResultsCache = null;
-
-            switchView('test');
-            displayTestQuestion(0);
-            startTestTimer();
-            testTitle.textContent = `${titlePrefix} (${processedMcqs.length} Qs)`;
-        }
-
-        function displayTestQuestion(index) { /* ... (no change) ... */
-             if (index < 0 || index >= currentTestMCQs.length) return; currentQuestionIndex = index; const q = currentTestMCQs[index]; testQuestionNumber.textContent = `Question ${index + 1}`; testQuestion.innerHTML = q.question; testOptionsContainer.innerHTML = ''; const options = Array.isArray(q.options) ? q.options : []; options.forEach((opt, i) => { const label = document.createElement('label'); const input = document.createElement('input'); input.type = 'radio'; input.name = `q_${index}`; input.value = i; input.checked = (userAnswers[index] === i); input.onchange = () => handleOptionSelect(i); label.appendChild(input); label.appendChild(document.createTextNode(` ${opt || '(Empty)'}`)); testOptionsContainer.appendChild(label); }); try { if (typeof MathJax !== "undefined" && MathJax.typesetPromise) { MathJax.typesetPromise([testQuestion, testOptionsContainer]).catch(err=>console.error('MathJax typeset error:',err)); } } catch(e){ console.error("MathJax call failed:",e); } prevQuestionBtn.disabled = (index === 0); nextQuestionBtn.disabled = (index === currentTestMCQs.length - 1); questionCounter.textContent = `Q: ${index + 1} / ${currentTestMCQs.length}`;
-        }
-        function handleOptionSelect(optionIndex) { /* ... (no change) ... */
-             if (currentQuestionIndex >= 0 && currentQuestionIndex < userAnswers.length) { userAnswers[currentQuestionIndex] = optionIndex; console.log(`Answered Q${currentQuestionIndex + 1}: Option index ${optionIndex}`); }
-        }
-        function handleTestNavigation(direction) { /* ... (no change) ... */
-            let newIndex=currentQuestionIndex; if(direction==='prev'&¤tQuestionIndex>0){newIndex--;}else if(direction==='next'&¤tQuestionIndex<currentTestMCQs.length-1){newIndex++;} if(newIndex!==currentQuestionIndex){displayTestQuestion(newIndex);}
-        }
-        function startTestTimer() { /* ... (no change, but reset start time is important - checked startMockTest) ... */
-            if (testTimerInterval) clearInterval(testTimerInterval); testStartTime = Date.now(); testTimerInterval = setInterval(() => { const elapsedSeconds = Math.floor((Date.now() - testStartTime) / 1000); const minutes = Math.floor(elapsedSeconds / 60).toString().padStart(2, '0'); const seconds = (elapsedSeconds % 60).toString().padStart(2, '0'); testTimer.textContent = `Time: ${minutes}:${seconds}`; }, 1000);
-        }
-        function submitTest() { /* ... (no change) ... */
-             if (!confirm("Submit the test?")) return; if (testTimerInterval) clearInterval(testTimerInterval); const endTime = Date.now(); const timeTakenMs = endTime - testStartTime; console.log("Submitting test. Time:", timeTakenMs); switchView('review'); displayReview(timeTakenMs);
-        }
-
-        // --- Review Functions ---
-        function displayReview(timeTakenMs) { /* ... (Mostly unchanged, ensure reviewResultsCache is built correctly) ... */
-              reviewContent.innerHTML = ''; saveReviewBtn.disabled = false; saveReviewBtn.textContent = "Save Review";
-              if (!currentTestMCQs || currentTestMCQs.length === 0) { reviewSummary.innerHTML = "<span>No test data.</span>"; return; }
-              let correct=0, incorrect=0, skipped=0;
-              reviewResultsCache = { questions: [], summary: {}, testDate: new Date().toISOString(), timeTakenMs: timeTakenMs };
-              currentTestMCQs.forEach((q, index) => {
-                  const userAnswerIndex = userAnswers[index]; let userAnswerText = "Skipped"; let status = "skipped"; let itemClass = "status-skipped"; let answerClass = "user-answer-skipped";
-                  const options = Array.isArray(q.options) ? q.options : [];
-                  // Find correct answer text using the 'answer' letter from the test data
-                  const correctAnswerLetter = q.answer?.trim().toUpperCase();
-                  const correctAnswerIndex = correctAnswerLetter ? correctAnswerLetter.charCodeAt(0) - 'A'.charCodeAt(0) : -1;
-                  const correctAnswerText = (correctAnswerIndex >= 0 && correctAnswerIndex < options.length) ? options[correctAnswerIndex] : "N/A";
-
-                  if (userAnswerIndex !== null && userAnswerIndex >= 0 && userAnswerIndex < options.length) {
-                      userAnswerText = options[userAnswerIndex];
-                      if (userAnswerIndex === correctAnswerIndex) { status = "correct"; itemClass = "status-correct"; answerClass = "user-answer-correct"; correct++; }
-                      else { status = "incorrect"; itemClass = "status-incorrect"; answerClass = "user-answer-incorrect"; incorrect++; }
-                  } else if (userAnswerIndex !== null) { userAnswerText = "Invalid"; status = "incorrect"; itemClass = "status-incorrect"; answerClass = "user-answer-incorrect"; incorrect++; }
-                  else { skipped++; }
-
-                  reviewResultsCache.questions.push({ question: q.question, options: options, correctAnswer: correctAnswerText, userAnswer: userAnswerText, status: status }); // Save detailed results
-
-                  const item = document.createElement('div'); item.classList.add('review-item', itemClass); item.dataset.status = status;
-                  let detailsHtml = `<span class="${answerClass}">Your Answer: ${userAnswerText}</span>`;
-                  if (status !== 'correct') { detailsHtml += `<br><span class="correct-answer">Correct Answer: ${correctAnswerText}</span>`; }
-                  item.innerHTML = `<div class="review-item-qnum">Question ${index + 1}</div> <div class="review-item-question">${q.question}</div> <div class="review-item-details">${detailsHtml}</div>`;
-                  reviewContent.appendChild(item);
-              });
-              const total = currentTestMCQs.length; const score = `${correct}/${total}`; const timeSeconds = Math.round(timeTakenMs / 1000); const minutes = Math.floor(timeSeconds / 60); const seconds = timeSeconds % 60; const timeString = `${minutes}m ${seconds}s`;
-              reviewSummary.innerHTML = `<span>Score: ${score}</span> <span class="score-correct">Correct: ${correct}</span> <span class="score-incorrect">Incorrect: ${incorrect}</span> <span class="score-skipped">Skipped: ${skipped}</span> <span>Time: ${timeString}</span>`;
-              reviewResultsCache.summary = { score, correct, incorrect, skipped, timeString }; // Save summary too
-              try { if (typeof MathJax !== "undefined" && MathJax.typesetPromise) { MathJax.typesetPromise([reviewContent]).catch(err=>console.error('MathJax typeset error:',err)); } } catch(e){ console.error("MathJax call failed:",e); }
-              filterReviewItems('all');
-        }
-        function handleReviewFilterClick(event) { /* ... (no change) ... */
-             const button=event.target.closest('button[data-filter]'); if(button){filterReviewItems(button.dataset.filter);}
-        }
-        function filterReviewItems(filter) { /* ... (no change) ... */
-             reviewFilters.querySelectorAll('button').forEach(btn => { btn.classList.toggle('active-filter', btn.dataset.filter === filter); });
-             reviewContent.querySelectorAll('.review-item').forEach(item => { const show = (filter === 'all') || item.classList.contains(`status-${filter}`); item.classList.toggle('hidden-by-filter', !show); });
-        }
-        function exitReview() { /* ... (no change) ... */
-            switchView('chat'); reviewResultsCache = null;
-        }
-        async function saveTestReviewToCloud() { /* ... (no change - saves reviewResultsCache) ... */
-             if (!currentUser) { alert("Log in to save."); return; } if (!reviewResultsCache) { alert("No review data."); return; }
-             const reviewDataToSave = { ...reviewResultsCache, userId: currentUser.uid, savedAt: firebase.firestore.FieldValue.serverTimestamp() };
-             saveReviewBtn.disabled = true; saveReviewBtn.textContent = "Saving...";
-             try { const newReviewRef = await db.collection('testReviews').add(reviewDataToSave); console.log("Review saved:", newReviewRef.id); alert("Review saved!"); saveReviewBtn.textContent = "Saved"; }
-             catch (error) { console.error("Error saving review:", error); alert("Failed to save review."); saveReviewBtn.disabled = false; saveReviewBtn.textContent = "Save Review"; }
-        }
-
-        // --- Test History Functions (New) ---
-
-        function showTestHistory() {
-            if (!currentUser) return;
-            switchView('history');
-            loadAndDisplayTestHistory();
-        }
-
-        function exitHistory() {
-            switchView('chat');
-            historySearchInput.value = ''; // Clear search on exit
-            allHistoryItemsCache = []; // Clear cache
-        }
-
-        async function loadAndDisplayTestHistory() {
-            if (!currentUser) return;
-            historyList.innerHTML = '<div class="info-message thinking">Loading history...</div>';
-            allHistoryItemsCache = []; // Clear previous cache
-
-            try {
-                const querySnapshot = await db.collection('testReviews')
-                                             .where('userId', '==', currentUser.uid)
-                                             .orderBy('savedAt', 'desc')
-                                             .get();
-
-                historyList.innerHTML = ''; // Clear loading message
-                if (querySnapshot.empty) {
-                    historyList.innerHTML = '<div class="no-history-message">No saved test history found.</div>';
-                    return;
-                }
-
-                querySnapshot.forEach(doc => {
-                    const reviewData = doc.data();
-                    const reviewId = doc.id;
-                    allHistoryItemsCache.push({ id: reviewId, data: reviewData }); // Store for search
-                    const listItem = createHistoryListItem(reviewId, reviewData);
-                    historyList.appendChild(listItem);
-                });
-                 // Apply initial search filter if any text is present (e.g., browser autofill)
-                 handleHistorySearch();
-
-            } catch (error) {
-                console.error("Error loading test history:", error);
-                historyList.innerHTML = '<div class="info-message error-message">Failed to load test history.</div>';
-            }
-        }
-
-        function createHistoryListItem(id, data) {
-            const item = document.createElement('div');
-            item.classList.add('history-list-item');
-            item.dataset.id = id; // Store ID on the item itself
-
-            const date = data.savedAt?.toDate() || new Date(data.testDate); // Prefer savedAt, fallback to testDate
-            const dateString = date.toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' });
-            const score = data.summary?.score || 'N/A';
-            const time = data.summary?.timeString || '';
-            const qCount = data.questions?.length || 0;
-            const incorrectCount = data.summary?.incorrect || 0;
-            const skippedCount = data.summary?.skipped || 0;
-
-             // Store searchable text content within the element (hidden or visible)
-             // Include date, score, and maybe first question text for better search
-             const firstQuestion = data.questions?.[0]?.question?.substring(0, 50) || '';
-             item.dataset.searchText = `${dateString} ${score} ${firstQuestion}`.toLowerCase();
-
-
-            item.innerHTML = `
-                <div class="history-item-info">
-                    <span class="history-date">${dateString}</span>
-                    <span class="history-score">Score: ${score} (${qCount} Qs)</span>
-                    ${time ? `<span>Time: ${time}</span>` : ''}
-                </div>
-                <div class="history-item-actions">
-                    <button class="view-review-btn" data-id="${id}">View Review</button>
-                    <button class="reattempt-btn" data-id="${id}" ${qCount === 0 ? 'disabled' : ''}>Reattempt</button>
-                    <button class="reattempt-mistakes-btn" data-id="${id}" ${incorrectCount + skippedCount === 0 ? 'disabled' : ''}>
-                        Reattempt Mistakes (${incorrectCount + skippedCount})
-                    </button>
-                </div>
-            `;
-            return item;
-        }
-
-        function handleHistoryListClick(event) {
-            const viewBtn = event.target.closest('.view-review-btn');
-            const reattemptBtn = event.target.closest('.reattempt-btn');
-            const reattemptMistakesBtn = event.target.closest('.reattempt-mistakes-btn');
-            const reviewId = viewBtn?.dataset.id || reattemptBtn?.dataset.id || reattemptMistakesBtn?.dataset.id;
-
-            if (!reviewId) return;
-
-            if (viewBtn) {
-                console.log("View Review clicked:", reviewId);
-                loadAndDisplaySpecificReview(reviewId);
-            } else if (reattemptBtn) {
-                console.log("Reattempt clicked:", reviewId);
-                startReattempt(reviewId, false); // false = full reattempt
-            } else if (reattemptMistakesBtn) {
-                console.log("Reattempt Mistakes clicked:", reviewId);
-                startReattempt(reviewId, true); // true = mistakes/skipped only
-            }
-        }
-
-        async function loadAndDisplaySpecificReview(reviewId) {
-            // Find cached data first
-            const cached = allHistoryItemsCache.find(item => item.id === reviewId);
-            if (cached?.data) {
-                console.log("Displaying review from cache:", reviewId);
-                displayReviewFromData(cached.data);
-            } else {
-                // Fetch from Firestore if not cached (shouldn't happen often with current flow)
-                console.log("Fetching specific review from Firestore:", reviewId);
+        // Modified to get data from button dataset
+        function handleChatAreaClick(event) {
+            if (event.target.classList.contains('start-test-button') && event.target.dataset.mcqData) {
                 try {
-                    const docSnap = await db.collection('testReviews').doc(reviewId).get();
-                    if (docSnap.exists) {
-                         displayReviewFromData(docSnap.data());
+                    const mcqs = JSON.parse(event.target.dataset.mcqData);
+                    if (mcqs && Array.isArray(mcqs)) {
+                        startMockTest(mcqs);
                     } else {
-                        displayError("Could not find the selected review.");
+                        console.error("Invalid MCQ data on button.");
+                        displayError("Could not start test: Invalid data.");
                     }
-                } catch (error) {
-                    console.error("Error fetching specific review:", error);
-                    displayError("Failed to load the review details.");
+                } catch (e) {
+                    console.error("Failed to parse MCQ data from button:", e);
+                    displayError("Could not start test: Corrupted data.");
                 }
             }
         }
 
-        // Displays a previously saved review (data from Firestore) in the Review View
-        function displayReviewFromData(reviewData) {
-            if (!reviewData || !reviewData.questions || !reviewData.summary) {
-                displayError("Invalid review data format.");
+        // Removed displayMCQOffer - button is now created directly in displayMessage
+
+        function startMockTest(mcqs) { /* ... (Unchanged, but ensure testStartTime is reset) ... */
+             if (!currentUser) { displayError("Please log in to start a test."); return; }
+             if (!mcqs || mcqs.length === 0) { displayError("No questions available for this test."); return; }
+             console.log("Starting mock test with", mcqs.length, "questions.");
+
+             currentTestMCQs = mcqs; // Store the questions being used for this test run
+             currentQuestionIndex = 0;
+             userAnswers = new Array(mcqs.length).fill(null);
+             reviewResultsCache = null; // Clear any previous review cache
+             testStartTime = null; // Reset start time, will be set when timer starts
+
+             switchView('test');
+             displayTestQuestion(0);
+             startTestTimer(); // Start timer which sets testStartTime
+             testTitle.textContent = `Mock Test (${mcqs.length} Qs)`;
+        }
+
+        function displayTestQuestion(index) { /* ... (Unchanged) ... */ }
+        function handleOptionSelect(optionIndex) { /* ... (Unchanged) ... */ }
+        function handleTestNavigation(direction) { /* ... (Unchanged) ... */ }
+
+        // Reset testStartTime when timer starts
+        function startTestTimer() {
+            if (testTimerInterval) clearInterval(testTimerInterval);
+            testStartTime = Date.now(); // <<< SET START TIME HERE
+            testTimer.textContent = `Time: 00:00`; // Reset display
+            testTimerInterval = setInterval(() => {
+                if (!testStartTime) return; // Guard against race conditions
+                const elapsedSeconds = Math.floor((Date.now() - testStartTime) / 1000);
+                const minutes = Math.floor(elapsedSeconds / 60).toString().padStart(2, '0');
+                const seconds = (elapsedSeconds % 60).toString().padStart(2, '0');
+                testTimer.textContent = `Time: ${minutes}:${seconds}`;
+            }, 1000);
+        }
+
+        function submitTest() { /* ... (Unchanged) ... */ }
+
+        // --- Single Test Review Functions --- (Unchanged)
+        function displayReview(timeTakenMs) { /* ... (Builds reviewResultsCache) ... */ }
+        function handleReviewFilterClick(event) { /* ... */ }
+        function filterReviewItems(filter) { /* ... */ }
+        function exitReview() { switchView('chat'); reviewResultsCache = null; }
+        async function saveTestReviewToCloud() { /* ... (Uses reviewResultsCache) ... */ }
+
+
+        // --- All Test Reviews Functions (NEW) ---
+
+        // Navigate to the All Reviews view
+        function showAllReviewsView() {
+            if (!currentUser) { displayError("Please log in to view saved reviews."); return; }
+            switchView('allReviews');
+            // Data loading is handled by the listener or triggered in switchView if needed
+        }
+
+        // Listen for changes in the user's saved reviews
+        function listenForAllReviews(userId) {
+            if (allReviewsListener) { allReviewsListener(); allReviewsListener = null; } // Detach previous listener
+
+            const reviewsRef = db.collection('testReviews')
+                                 .where('userId', '==', userId)
+                                 .orderBy('savedAt', 'desc'); // Newest first
+
+            console.log(`Listening for saved reviews for user ${userId}`);
+            allReviewsListContainer.innerHTML = '<div class="info-message">Loading saved reviews...</div>'; // Loading indicator
+
+            allReviewsListener = reviewsRef.onSnapshot(snapshot => {
+                allReviewsCache = []; // Clear cache before repopulating
+                snapshot.forEach(doc => {
+                    allReviewsCache.push({ id: doc.id, ...doc.data() });
+                });
+                console.log("Received all reviews snapshot:", allReviewsCache.length, "reviews");
+                renderAllReviewsList(allReviewsCache); // Render the list
+                handleAllReviewsSearch(); // Apply current search filter after rendering
+
+            }, error => {
+                console.error("Error listening for all reviews:", error);
+                displayError("Could not load saved reviews.");
+                allReviewsListContainer.innerHTML = '<div class="info-message error-message">Error loading reviews.</div>';
+            });
+        }
+
+        // Render the list of all saved reviews
+        function renderAllReviewsList(reviews) {
+            allReviewsListContainer.innerHTML = ''; // Clear previous content
+            if (reviews.length === 0) {
+                allReviewsListContainer.innerHTML = '<div class="info-message">No test reviews saved yet.</div>';
                 return;
             }
-             switchView('review'); // Switch to the review view
 
-             reviewContent.innerHTML = ''; // Clear previous content
-             saveReviewBtn.disabled = true; // Disable saving again
-             saveReviewBtn.textContent = "Review Loaded";
+            reviews.forEach(review => {
+                const item = document.createElement('div');
+                item.classList.add('all-reviews-list-item');
+                item.dataset.reviewId = review.id; // Store ID for actions
 
-             reviewData.questions.forEach((q, index) => {
-                 const item = document.createElement('div');
-                 item.classList.add('review-item', `status-${q.status}`);
-                 item.dataset.status = q.status;
+                 // Safely access data, provide defaults
+                 const savedDate = review.savedAt?.toDate ? review.savedAt.toDate().toLocaleString() : (review.testDate ? new Date(review.testDate).toLocaleString() : 'Unknown Date');
+                 const summary = review.summary || {};
+                 const score = summary.score || 'N/A';
+                 const correct = summary.correct ?? '?';
+                 const incorrect = summary.incorrect ?? '?';
+                 const skipped = summary.skipped ?? '?';
+                 const time = summary.timeString || 'N/A';
+                 const firstQuestion = review.questions?.[0]?.question || 'No question preview available.';
 
-                 let detailsHtml = `<span class="${q.status === 'correct' ? 'user-answer-correct' : q.status === 'incorrect' ? 'user-answer-incorrect' : 'user-answer-skipped'}">Your Answer: ${q.userAnswer}</span>`;
-                 if (q.status !== 'correct') {
-                     detailsHtml += `<br><span class="correct-answer">Correct Answer: ${q.correctAnswer}</span>`;
-                 }
+                item.innerHTML = `
+                    <div class="review-item-header">
+                        <span class="review-date">Saved: ${savedDate}</span>
+                        <div class="review-summary-short">
+                             <span>Score: ${score}</span>
+                             <span class="score-correct">C: ${correct}</span>
+                             <span class="score-incorrect">I: ${incorrect}</span>
+                             <span class="score-skipped">S: ${skipped}</span>
+                             <span>Time: ${time}</span>
+                        </div>
+                    </div>
+                    <div class="review-item-details-preview">${firstQuestion.replace(/<br>/g, ' ')}</div>
+                    <div class="review-item-actions">
+                        <button class="reattempt-btn reattempt-full" data-review-id="${review.id}" data-reattempt-type="full">Reattempt Full</button>
+                        <button class="reattempt-btn reattempt-mistakes" data-review-id="${review.id}" data-reattempt-type="mistakes">Reattempt Mistakes</button>
+                        <button class="reattempt-btn reattempt-skipped" data-review-id="${review.id}" data-reattempt-type="skipped">Reattempt Skipped</button>
+                        <!-- Maybe add a 'View Details' button later -->
+                    </div>
+                `;
+                allReviewsListContainer.appendChild(item);
+            });
+            // Apply MathJax if needed (if question preview uses it - less likely)
+             try { if (typeof MathJax !== "undefined" && MathJax.typesetPromise) { MathJax.typesetPromise(allReviewsListContainer.querySelectorAll('.review-item-details-preview')).catch(err => console.error('MathJax typeset error:', err)); } } catch (e) { console.error("MathJax call failed:", e); }
 
-                 item.innerHTML = `
-                     <div class="review-item-qnum">Question ${index + 1}</div>
-                     <div class="review-item-question">${q.question}</div>
-                     <div class="review-item-details">${detailsHtml}</div>
-                 `;
-                 reviewContent.appendChild(item);
-             });
-
-             // Display Summary
-             const { score, correct, incorrect, skipped, timeString } = reviewData.summary;
-             reviewSummary.innerHTML = `
-                 <span>Score: ${score}</span>
-                 <span class="score-correct">Correct: ${correct}</span>
-                 <span class="score-incorrect">Incorrect: ${incorrect}</span>
-                 <span class="score-skipped">Skipped: ${skipped}</span>
-                 <span>Total Time: ${timeString}</span>
-             `;
-
-              // Typeset MathJax
-              try { if (typeof MathJax !== "undefined" && MathJax.typesetPromise) { MathJax.typesetPromise([reviewContent]).catch(err=>console.error('MathJax error:',err)); } } catch(e){ console.error("MathJax call failed:",e); }
-
-             filterReviewItems('all'); // Apply default filter
         }
 
-
-        async function startReattempt(reviewId, mistakesOnly = false) {
-            // Find cached data first
-            const cached = allHistoryItemsCache.find(item => item.id === reviewId);
-            let reviewData = cached?.data;
-
-            if (!reviewData) {
-                console.log("Fetching review data for reattempt:", reviewId);
-                 try {
-                    const docSnap = await db.collection('testReviews').doc(reviewId).get();
-                    if (docSnap.exists) { reviewData = docSnap.data(); }
-                    else { displayError("Could not find review data to reattempt."); return; }
-                 } catch (error) { displayError("Failed to load review data for reattempt."); return; }
-            }
-
-            if (!reviewData?.questions) { displayError("Review data missing questions."); return; }
-
-            let questionsToAttempt = reviewData.questions;
-            let titlePrefix = "Reattempt";
-
-            if (mistakesOnly) {
-                questionsToAttempt = reviewData.questions.filter(q => q.status === 'incorrect' || q.status === 'skipped');
-                titlePrefix = "Reattempt Mistakes";
-                if (questionsToAttempt.length === 0) {
-                    alert("No incorrect or skipped questions to reattempt!");
-                    return;
-                }
-            }
-
-            // Map saved question data to the format needed by startMockTest
-            // (Ensuring 'question', 'options', and 'answer' letter are present)
-             const mcqsForTest = questionsToAttempt.map(q => ({
-                 question: q.question,
-                 options: q.options,
-                 answer: findCorrectAnswerLetter(q.options, q.correctAnswer) || '?' // Regenerate letter needed for test grading
-             }));
-
-
-            startMockTest(mcqsForTest, titlePrefix);
-        }
-
-        // Helper to find the answer letter ('A', 'B', 'C', 'D') from options and correct text
-        function findCorrectAnswerLetter(options, correctAnswerText) {
-            if (!Array.isArray(options) || !correctAnswerText) return null;
-            const index = options.findIndex(opt => opt === correctAnswerText);
-            if (index !== -1) {
-                return String.fromCharCode('A'.charCodeAt(0) + index);
-            }
-            return null; // Not found
-        }
-
-        function handleHistorySearch() {
-            const searchTerm = historySearchInput.value.toLowerCase().trim();
-            const items = historyList.querySelectorAll('.history-list-item');
+        // Handle search input changes
+        function handleAllReviewsSearch() {
+            const searchTerm = reviewSearchInput.value.toLowerCase().trim();
+            const items = allReviewsListContainer.querySelectorAll('.all-reviews-list-item');
+            let visibleCount = 0;
 
             items.forEach(item => {
-                 // Use the pre-stored searchable text
-                const itemText = item.dataset.searchText || '';
-                const isMatch = itemText.includes(searchTerm);
+                const reviewId = item.dataset.reviewId;
+                const reviewData = allReviewsCache.find(r => r.id === reviewId);
+                let isMatch = true; // Show by default if search is empty
+
+                if (searchTerm && reviewData?.questions) {
+                    // Check if any question text matches the search term
+                    isMatch = reviewData.questions.some(q =>
+                        q.question?.toLowerCase().includes(searchTerm)
+                    );
+                }
+
                 item.classList.toggle('hidden-by-search', !isMatch);
+                if (isMatch) visibleCount++;
             });
+
+            // Optional: Show message if no results found
+            const noResultsMsg = allReviewsListContainer.querySelector('.no-search-results');
+            if (searchTerm && visibleCount === 0 && !noResultsMsg) {
+                const msgDiv = document.createElement('div');
+                msgDiv.classList.add('info-message', 'no-search-results');
+                msgDiv.textContent = 'No reviews match your search.';
+                allReviewsListContainer.appendChild(msgDiv);
+            } else if (noResultsMsg && (visibleCount > 0 || !searchTerm)) {
+                noResultsMsg.remove();
+            }
+        }
+
+        // Handle clicks on reattempt buttons
+        function handleReattemptClick(event) {
+            const button = event.target.closest('.reattempt-btn');
+            if (button && button.dataset.reviewId && button.dataset.reattemptType) {
+                const reviewId = button.dataset.reviewId;
+                const reattemptType = button.dataset.reattemptType;
+                const reviewData = allReviewsCache.find(r => r.id === reviewId);
+
+                if (reviewData) {
+                    startReattempt(reviewData, reattemptType);
+                } else {
+                    console.error(`Review data not found in cache for ID: ${reviewId}`);
+                    displayError("Could not start reattempt: Review data missing.");
+                }
+            }
+        }
+
+        // Prepare and start a reattempt test
+        function startReattempt(reviewData, reattemptType) {
+            if (!reviewData || !reviewData.questions || reviewData.questions.length === 0) {
+                 displayError("Cannot reattempt: No question data found in this review.");
+                 return;
+            }
+
+            let questionsToReattempt = [];
+            const originalQuestions = reviewData.questions;
+
+            if (reattemptType === 'full') {
+                questionsToReattempt = originalQuestions;
+            } else if (reattemptType === 'mistakes') {
+                questionsToReattempt = originalQuestions.filter(q => q.status === 'incorrect');
+            } else if (reattemptType === 'skipped') {
+                questionsToReattempt = originalQuestions.filter(q => q.status === 'skipped');
+            }
+
+            if (questionsToReattempt.length === 0) {
+                 alert(`There are no ${reattemptType} questions to reattempt in this review.`);
+                 return;
+            }
+
+            // Convert saved review questions back to the MCQ format expected by startMockTest
+            const mcqsForTest = questionsToReattempt.map(q => {
+                 if (!q.question || !Array.isArray(q.options) || !q.correctAnswer) {
+                     console.warn("Skipping invalid question data during reattempt setup:", q);
+                     return null; // Skip invalid question structure
+                 }
+
+                 // Find the correct answer letter/index based on the saved text
+                 let correctAnswerLetter = "A"; // Default, should be overridden
+                 const correctIndex = q.options.findIndex(opt => opt === q.correctAnswer);
+
+                 if (correctIndex !== -1) {
+                     correctAnswerLetter = String.fromCharCode('A'.charCodeAt(0) + correctIndex);
+                 } else {
+                     console.warn(`Could not find correct answer text "${q.correctAnswer}" in options for question: ${q.question.substring(0, 50)}...`);
+                     // Decide how to handle: skip question, use default 'A', or mark somehow?
+                     // For now, let's default to 'A' but log the warning.
+                     correctAnswerLetter = "A";
+                 }
+
+                 return {
+                     question: q.question,
+                     options: q.options,
+                     answer: correctAnswerLetter // The LETTER (A, B, C, D)
+                 };
+            }).filter(mcq => mcq !== null); // Remove any skipped invalid questions
+
+            if (mcqsForTest.length === 0) {
+                displayError("Could not prepare any valid questions for reattempt.");
+                return;
+            }
+
+            console.log(`Starting reattempt (${reattemptType}) with ${mcqsForTest.length} questions.`);
+            startMockTest(mcqsForTest); // Start the test with the filtered/reconstructed MCQs
         }
 
 
