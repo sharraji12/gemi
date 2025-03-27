@@ -424,6 +424,7 @@
             }
         }
 
+        // --- UPDATED function ---
         function handleAuthStateChange(user) {
             // Detach previous Firestore listeners to prevent memory leaks and duplicate data fetches
             if (activeChatListener) { activeChatListener(); activeChatListener = null; }
@@ -448,14 +449,19 @@
                 decreaseTextBtn.disabled = false;
                 increaseTextBtn.disabled = false;
                 themeToggleButton.disabled = false;
+
+                // **** UPDATED LINES ****
                 sendButton.disabled = false; // Enable send button
+                userInput.disabled = false; // <<<====== EXPLICITLY ENABLE TEXTAREA
+                userInput.placeholder = "Enter prompt (Check 'MCQs?' to generate test)"; // <<<====== SET PLACEHOLDER
+                inputContainer.style.display = 'block'; // Show input area
+                suggestionsContainer.style.display = 'flex'; // Show suggestions
+                // ****************************
 
                 // Load user-specific settings and chats from Firestore
                 loadUserSettings(currentUser.uid); // Loads theme and text size
                 loadAndListenForChats(currentUser.uid); // Loads chat list and potentially first chat
 
-                inputContainer.style.display = 'block'; // Show input area
-                suggestionsContainer.style.display = 'flex'; // Show suggestions
 
             } else {
                 // --- User is logged OUT ---
@@ -470,21 +476,31 @@
                 decreaseTextBtn.disabled = true;
                 increaseTextBtn.disabled = true;
                 themeToggleButton.disabled = true;
+
+                // **** UPDATED LINES ****
                 sendButton.disabled = true; // Disable send button
+                userInput.disabled = true; // <<<====== EXPLICITLY DISABLE TEXTAREA
+                userInput.placeholder = "Please log in"; // <<<====== SET PLACEHOLDER
+                inputContainer.style.display = 'none'; // Hide input area
+                suggestionsContainer.style.display = 'none'; // Hide suggestions
+                // ****************************
+
 
                 // Clear UI, show login prompt
                 renderGreetingOrLoginPrompt();
                 chatListContainer.innerHTML = '<div style="padding:10px;color:var(--text-secondary);font-size:0.9em;">Please log in to see chats.</div>';
-                inputContainer.style.display = 'none'; // Hide input area
-                suggestionsContainer.style.display = 'none'; // Hide suggestions
+
 
                 // Apply default theme/size (could load from localStorage as fallback if desired)
                 currentTheme = 'light'; applyTheme();
                 currentTextSizeMultiplier = 1.0; applyTextSize();
             }
             // Ensure loading indicator is off after auth state change is processed
-             setLoadingState(false);
+             // Make sure this is called AFTER explicitly setting disabled states above
+             setLoadingState(false); // <<<====== CALL AT THE END
         }
+        // --- END OF UPDATED handleAuthStateChange ---
+
 
         // Helper to show greeting or login message
         function renderGreetingOrLoginPrompt() {
@@ -1024,17 +1040,34 @@
         function scrollToBottom(immediate = false) { chatArea.scrollTo({top:chatArea.scrollHeight,behavior:immediate?'auto':'smooth'}); }
         function removeMessageElement(element) { if(element?.parentNode===chatArea)chatArea.removeChild(element); }
 
+
+        // --- UPDATED function ---
         function setLoadingState(isLoading, message = "Generating...") {
-            const isDisabled = isLoading || !currentUser || !activeChatId; // Also disable if logged out or no chat selected
+            // Always disable if loading. Also disable if logged out OR no active chat (safer).
+            // Note: activeChatId check is added for robustness
+            const isDisabled = isLoading || !currentUser || !activeChatId;
             userInput.disabled = isDisabled;
             sendButton.disabled = isDisabled;
-            mcqModeCheckbox.disabled = isDisabled;
-            userInput.placeholder = isLoading ? message : (currentUser ? "Enter prompt..." : "Please log in");
-             // Consider disabling login/logout buttons during critical operations?
-             // loginBtn.disabled = isLoading;
-             // logoutBtn.disabled = isLoading;
-             startChatButton.disabled = isLoading || !currentUser; // Disable if loading or logged out
+            mcqModeCheckbox.disabled = isDisabled; // Assuming this should also follow the same logic
+
+            // Update placeholder based on the reason for being disabled/enabled
+            // This logic is refined to give better context
+            if (isLoading) {
+                userInput.placeholder = message;
+            } else if (!currentUser) {
+                userInput.placeholder = "Please log in"; // <<<====== UPDATED PLACEHOLDER
+            } else if (!activeChatId) {
+                // User is logged in but no chat selected (e.g., after login, before first chat loads/is created)
+                userInput.placeholder = "Select or create a chat"; // <<<====== ADDED PLACEHOLDER CASE
+            } else {
+                // User logged in, chat selected, not loading
+                userInput.placeholder = "Enter prompt (Check 'MCQs?' to generate test)"; // <<<====== STANDARD PLACEHOLDER
+            }
+
+            // Disable 'Start new chat' button if loading or logged out
+            startChatButton.disabled = isLoading || !currentUser;
         }
+        // --- END OF UPDATED setLoadingState ---
 
         function switchView(viewName) {
             console.log("Switching view to:", viewName);
@@ -1071,12 +1104,12 @@
 
             // Basic escaping and markdown-like formatting
              let formattedText = text
-                .replace(/</g, "&lt;")
-                .replace(/>/g, "&gt;")
+                .replace(/</g, "<")
+                .replace(/>/g, ">")
                 .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>') // Bold
                 .replace(/\*(.*?)\*/g, '<em>$1</em>')       // Italic
-                .replace(/```([\s\S]*?)```/g, (match, code) => `<pre><code>${code.replace(/</g, "&lt;").replace(/>/g, "&gt;")}</code></pre>`) // Code blocks
-                .replace(/`([^`]+)`/g, (match, code) => `<code>${code.replace(/</g, "&lt;").replace(/>/g, "&gt;")}</code>`)       // Inline code
+                .replace(/```([\s\S]*?)```/g, (match, code) => `<pre><code>${code.replace(/</g, "<").replace(/>/g, ">")}</code></pre>`) // Code blocks
+                .replace(/`([^`]+)`/g, (match, code) => `<code>${code.replace(/</g, "<").replace(/>/g, ">")}</code>`)       // Inline code
                 .replace(/\n/g, '<br>');                   // Newlines
 
             element.innerHTML = formattedText;
@@ -1220,6 +1253,7 @@
 
         function startTestTimer() {
             if (testTimerInterval) clearInterval(testTimerInterval); // Clear existing timer
+            testStartTime = Date.now(); // <<<=== Reset start time when timer starts
             testTimerInterval = setInterval(() => {
                 const elapsedSeconds = Math.floor((Date.now() - testStartTime) / 1000);
                 const minutes = Math.floor(elapsedSeconds / 60).toString().padStart(2, '0');
