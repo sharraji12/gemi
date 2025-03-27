@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gemini Chat (v9.0 - Tests Separated)</title> <script> window.MathJax={tex:{inlineMath:[['$','$'],['\\(','\\)']],displayMath:[['$$','$$'],['\\[','\\]']]},svg:{fontCache:'global'},options:{skipHtmlTags:['script','noscript','style','textarea','pre','code']}}; </script>
+    <title>Gemini Chat + Mock Test (v8.1 - Fixed)</title> <script> window.MathJax={tex:{inlineMath:[['$','$'],['\\(','\\)']],displayMath:[['$$','$$'],['\\[','\\]']]},svg:{fontCache:'global'},options:{skipHtmlTags:['script','noscript','style','textarea','pre','code']}}; </script>
     <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
 
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
@@ -11,55 +11,83 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
 
     <style>
-        /* --- Styles (Mostly unchanged, removed test/review view styles) --- */
+        /* --- Styles (Minor adjustments for delete button) --- */
         :root { /* ... Theme Variables ... */
-            --font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; --sidebar-width: 260px; --message-font-size-base: 1rem;
-            /* LIGHT */ --sidebar-bg: #f7f7f7; --main-bg: #ffffff; --input-bg: #ffffff; --border-color: #e0e0e0; --text-primary: #2c2c2c; --text-secondary: #5f5f5f; --text-placeholder: #999999; --accent-color: #d97a7a; --user-message-bg: #cce0ff; --user-message-text: #1c1c1c; --ai-message-bg: #f0f0f0; --ai-message-text: #2c2c2c; --button-bg: #f0f0f0; --button-hover-bg: #e0e0e0; --active-item-bg: #e0e0e0; --code-bg: #e8e8e8; --scrollbar-thumb: #ccc; --scrollbar-thumb-hover: #bbb; --app-outer-bg: #e8e8e8; --send-button-bg: var(--accent-color); --send-button-hover-bg: #c76b6b; --send-button-text: #ffffff; --error-bg: #ffebee; --error-text: #c62828; --error-border: #ef9a9a; --message-font-size: var(--message-font-size-base); --delete-button-color: #aaa; --delete-button-hover-color: #dc3545; --link-color: #007bff; --link-hover-color: #0056b3; --info-message-bg: #e7f3fe; --info-message-text: #0c5460; --info-message-border: #b8daff;
+             --font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; --sidebar-width: 260px; --message-font-size-base: 1rem;
+            /* LIGHT */ --sidebar-bg: #f7f7f7; --main-bg: #ffffff; --input-bg: #ffffff; --border-color: #e0e0e0; --text-primary: #2c2c2c; --text-secondary: #5f5f5f; --text-placeholder: #999999; --accent-color: #d97a7a; --user-message-bg: #cce0ff; --user-message-text: #1c1c1c; --ai-message-bg: #f0f0f0; --ai-message-text: #2c2c2c; --button-bg: #f0f0f0; --button-hover-bg: #e0e0e0; --active-item-bg: #e0e0e0; --code-bg: #e8e8e8; --scrollbar-thumb: #ccc; --scrollbar-thumb-hover: #bbb; --app-outer-bg: #e8e8e8; --send-button-bg: var(--accent-color); --send-button-hover-bg: #c76b6b; --send-button-text: #ffffff; --error-bg: #ffebee; --error-text: #c62828; --error-border: #ef9a9a; --message-font-size: var(--message-font-size-base); --delete-button-color: #aaa; --delete-button-hover-color: #dc3545;
         }
-        body.dark-theme { /* DARK */ --sidebar-bg: #2a2a2e; --main-bg: #1e1e1e; --input-bg: #2a2a2e; --border-color: #404040; --text-primary: #e0e0e0; --text-secondary: #a0a0a0; --text-placeholder: #777777; --accent-color: #e58b8b; --user-message-bg: #3a4a6b; --user-message-text: #e8e8e8; --ai-message-bg: #333333; --ai-message-text: #e0e0e0; --button-bg: #404040; --button-hover-bg: #505050; --active-item-bg: #454545; --code-bg: #2c2c2e; --scrollbar-thumb: #555; --scrollbar-thumb-hover: #666; --app-outer-bg: #121212; --send-button-bg: var(--accent-color); --send-button-hover-bg: #f09f9f; --send-button-text: #1e1e1e; --error-bg: #5c2b2b; --error-text: #ffcdd2; --error-border: #8c4343; --delete-button-color: #666; --delete-button-hover-color: #f09f9f; --link-color: #6cadff; --link-hover-color: #a3ceff; --info-message-bg: #1c3a4f; --info-message-text: #bee5eb; --info-message-border: #49779c;}
+        body.dark-theme { /* DARK */ --sidebar-bg: #2a2a2e; --main-bg: #1e1e1e; --input-bg: #2a2a2e; --border-color: #404040; --text-primary: #e0e0e0; --text-secondary: #a0a0a0; --text-placeholder: #777777; --accent-color: #e58b8b; --user-message-bg: #3a4a6b; --user-message-text: #e8e8e8; --ai-message-bg: #333333; --ai-message-text: #e0e0e0; --button-bg: #404040; --button-hover-bg: #505050; --active-item-bg: #454545; --code-bg: #2c2c2e; --scrollbar-thumb: #555; --scrollbar-thumb-hover: #666; --app-outer-bg: #121212; --send-button-bg: var(--accent-color); --send-button-hover-bg: #f09f9f; --send-button-text: #1e1e1e; --error-bg: #5c2b2b; --error-text: #ffcdd2; --error-border: #8c4343; --delete-button-color: #666; --delete-button-hover-color: #f09f9f; }
         body { font-family: var(--font-family); margin: 0; padding: 0; background-color: var(--app-outer-bg); color: var(--text-primary); font-size: 15px; transition: background-color 0.3s ease, color 0.3s ease; }
 
-        /* --- Layout & Structure --- */
-        .app-container { display: flex; height: 100vh; width: 100vw; overflow: hidden; }
+        /* --- Layout & Structure (Unchanged) --- */
+        .app-container { display: flex; height: 100vh; width: 100vw; overflow: hidden; } .app-container.hidden { display: none; }
         .sidebar { width: var(--sidebar-width); background-color: var(--sidebar-bg); border-right: 1px solid var(--border-color); display: flex; flex-direction: column; padding: 15px 0; box-sizing: border-box; flex-shrink: 0; transition: background-color 0.3s ease, border-color 0.3s ease; }
         .main-container { flex-grow: 1; display: flex; flex-direction: column; height: 100vh; overflow: hidden; position: relative; }
-        .main-content { display: flex; flex-direction: column; background-color: var(--main-bg); height: 100%; width: 100%; overflow: hidden; transition: background-color 0.3s ease; }
+        .main-content, .review-view { display: none; flex-direction: column; background-color: var(--main-bg); height: 100%; width: 100%; overflow: hidden; transition: background-color 0.3s ease; }
+        .main-content.active, .review-view.active { display: flex; }
         .chat-area { flex-grow: 1; overflow-y: auto; padding: 30px 10% 20px; display: flex; flex-direction: column; max-width: 800px; margin: 0 auto; width: 80%; }
-        .input-container { padding: 20px 10%; border-top: 1px solid var(--border-color); background-color: var(--input-bg); max-width: 800px; margin: 0 auto; width: 80%; transition: background-color 0.3s ease, border-color 0.3s ease; display: none; /* Initially hidden */ }
+        .input-container { padding: 20px 10%; border-top: 1px solid var(--border-color); background-color: var(--input-bg); max-width: 800px; margin: 0 auto; width: 80%; transition: background-color 0.3s ease, border-color 0.3s ease; display: none; /* Initially hidden until login */ }
 
         /* --- Sidebar Elements --- */
-        .sidebar-header { padding: 10px 20px; font-size: 1.1em; font-weight: 600; color: var(--text-primary); }
-        .sidebar-button { /* General purpose button */ display: flex; align-items: center; gap: 8px; background-color: var(--main-bg); border: 1px solid var(--border-color); color: var(--text-primary); border-radius: 8px; padding: 10px 15px; margin: 5px 15px; font-size: 0.95em; font-weight: 500; cursor: pointer; text-align: left; transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease; }
-        .sidebar-button:hover { background-color: var(--button-hover-bg); }
-        .sidebar-button svg { fill: currentColor; width: 16px; height: 16px; }
-        .sidebar-button:disabled { opacity: 0.6; cursor: not-allowed; }
-        .sidebar-section-title { padding: 15px 20px 5px; font-size: 0.85em; font-weight: 600; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px; }
-        .chat-list { flex-grow: 1; overflow-y: auto; padding: 0 15px; margin-bottom: 10px; }
-        .chat-list::-webkit-scrollbar { width: 6px; } .chat-list::-webkit-scrollbar-thumb { background: var(--scrollbar-thumb); border-radius: 3px;} .chat-list::-webkit-scrollbar-thumb:hover { background: var(--scrollbar-thumb-hover); }
-        .chat-list-item { padding: 8px 30px 8px 10px; margin-bottom: 4px; border-radius: 6px; font-size: 0.9em; cursor: pointer; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--text-secondary); transition: background-color 0.2s ease, color 0.2s ease; position: relative; }
-        .chat-list-item:hover { background-color: var(--button-hover-bg); color: var(--text-primary); }
-        .chat-list-item.active { background-color: var(--active-item-bg); color: var(--text-primary); font-weight: 500; }
-        .delete-chat-button { position: absolute; right: 6px; top: 50%; transform: translateY(-50%); width: 18px; height: 18px; background: none; border: none; color: var(--delete-button-color); cursor: pointer; font-size: 1.3em; line-height: 1; padding: 0; display: none; opacity: 0.7; transition: color 0.2s ease, opacity 0.2s ease; }
-        .chat-list-item:hover .delete-chat-button { display: block; }
-        .delete-chat-button:hover { color: var(--delete-button-hover-color); opacity: 1; }
-        .sidebar-footer { border-top: 1px solid var(--border-color); padding: 10px 15px; transition: border-color 0.3s ease;}
-        .sidebar-controls { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; flex-wrap: wrap; gap: 10px; }
-        .text-size-controls span, .theme-toggle span, .language-toggle span { font-size: 0.85em; color: var(--text-secondary); }
-        .text-size-buttons button, .theme-toggle button, .language-toggle button { background: var(--button-bg); border: 1px solid var(--border-color); color: var(--text-secondary); border-radius: 4px; padding: 2px 8px; margin-left: 5px; cursor: pointer; font-size: 1.1em; line-height: 1; transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease; }
-        .text-size-buttons button:hover, .theme-toggle button:hover, .language-toggle button:hover { background-color: var(--button-hover-bg); color: var(--text-primary); }
-        .text-size-buttons button:disabled, .theme-toggle button:disabled, .language-toggle button:disabled { opacity: 0.6; cursor: not-allowed; }
-        .account-info { display: flex; align-items: center; gap: 10px; font-size: 0.9em; margin-top: 10px; }
-        .account-avatar { width: 30px; height: 30px; border-radius: 50%; background-color: #6c757d; color: white; display: flex; align-items: center; justify-content: center; font-weight: 600; }
-        .account-details { overflow: hidden; }
-        .account-email { font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--text-primary); }
-        .account-plan { font-size: 0.85em; color: var(--text-secondary); }
-        #auth-controls { margin-top: 15px; text-align: center; }
-        #auth-controls button { background-color: var(--button-bg); color: var(--text-primary); border: 1px solid var(--border-color); border-radius: 6px; padding: 8px 15px; cursor: pointer; font-size: 0.9em; transition: background-color 0.2s ease; }
-        #auth-controls button:hover { background-color: var(--button-hover-bg); }
-        #logout-btn { display: none; }
+         .sidebar-header { padding: 10px 20px; font-size: 1.1em; font-weight: 600; color: var(--text-primary); }
+         .start-chat-button { display: flex; align-items: center; gap: 8px; background-color: var(--main-bg); border: 1px solid var(--border-color); color: var(--text-primary); border-radius: 8px; padding: 10px 15px; margin: 10px 15px; font-size: 0.95em; font-weight: 500; cursor: pointer; text-align: left; transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease; }
+         .start-chat-button:hover { background-color: var(--button-hover-bg); } .start-chat-button svg { fill: currentColor; width: 16px; height: 16px; }
+         .start-chat-button:disabled { opacity: 0.6; cursor: not-allowed; } /* Disabled style for logged out */
+         .sidebar-section-title { padding: 15px 20px 5px; font-size: 0.85em; font-weight: 600; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px; }
+         .chat-list { flex-grow: 1; overflow-y: auto; padding: 0 15px; margin-bottom: 10px; }
+         .chat-list::-webkit-scrollbar { width: 6px; } .chat-list::-webkit-scrollbar-thumb { background: var(--scrollbar-thumb); border-radius: 3px;} .chat-list::-webkit-scrollbar-thumb:hover { background: var(--scrollbar-thumb-hover); }
+         .chat-list-item {
+             padding: 8px 30px 8px 10px; /* Increased right padding for delete btn */
+             margin-bottom: 4px; border-radius: 6px; font-size: 0.9em;
+             cursor: pointer; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+             color: var(--text-secondary); transition: background-color 0.2s ease, color 0.2s ease;
+             position: relative; /* Needed for absolute positioning of delete button */
+         }
+         .chat-list-item:hover { background-color: var(--button-hover-bg); color: var(--text-primary); }
+         .chat-list-item.active { background-color: var(--active-item-bg); color: var(--text-primary); font-weight: 500; }
+         .delete-chat-button { /* NEW */
+             position: absolute;
+             right: 6px;
+             top: 50%;
+             transform: translateY(-50%);
+             width: 18px;
+             height: 18px;
+             background: none;
+             border: none;
+             color: var(--delete-button-color);
+             cursor: pointer;
+             font-size: 1.3em; /* Adjust size */
+             line-height: 1;
+             padding: 0;
+             display: none; /* Hidden by default */
+             opacity: 0.7;
+             transition: color 0.2s ease, opacity 0.2s ease;
+         }
+         .chat-list-item:hover .delete-chat-button {
+             display: block; /* Show on hover */
+         }
+         .delete-chat-button:hover {
+             color: var(--delete-button-hover-color);
+             opacity: 1;
+         }
+         .sidebar-footer { border-top: 1px solid var(--border-color); padding: 10px 15px; transition: border-color 0.3s ease;}
+         .sidebar-controls { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+         .text-size-controls span, .theme-toggle span { font-size: 0.85em; color: var(--text-secondary); }
+         .text-size-buttons button, .theme-toggle button { background: var(--button-bg); border: 1px solid var(--border-color); color: var(--text-secondary); border-radius: 4px; padding: 2px 8px; margin-left: 5px; cursor: pointer; font-size: 1.1em; line-height: 1; transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease; }
+         .text-size-buttons button:hover, .theme-toggle button:hover { background-color: var(--button-hover-bg); color: var(--text-primary); }
+         .text-size-buttons button:disabled, .theme-toggle button:disabled { opacity: 0.6; cursor: not-allowed; } /* Disabled style for logged out */
+         .account-info { display: flex; align-items: center; gap: 10px; font-size: 0.9em; margin-top: 10px; /* Added margin */ }
+         .account-avatar { width: 30px; height: 30px; border-radius: 50%; background-color: #6c757d; color: white; display: flex; align-items: center; justify-content: center; font-weight: 600; }
+         .account-details { overflow: hidden; }
+         .account-email { font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--text-primary); }
+         .account-plan { font-size: 0.85em; color: var(--text-secondary); }
+         #auth-controls { margin-top: 15px; text-align: center; } /* Auth buttons container */
+         #auth-controls button { background-color: var(--button-bg); color: var(--text-primary); border: 1px solid var(--border-color); border-radius: 6px; padding: 8px 15px; cursor: pointer; font-size: 0.9em; transition: background-color 0.2s ease; }
+         #auth-controls button:hover { background-color: var(--button-hover-bg); }
+         #logout-btn { display: none; /* Initially hidden */ }
 
 
-        /* --- Chat Area Elements --- */
+        /* --- Chat Area Elements (Unchanged) --- */
         .greeting { font-size: 1.8em; font-weight: 600; margin-bottom: 40px; color: var(--text-primary); } .greeting .asterisk { color: var(--accent-color); font-size: 1.2em; margin-right: 5px; display: inline-block; vertical-align: middle; }
         .message { padding: 12px 18px; border-radius: 18px; max-width: 80%; word-wrap: break-word; line-height: 1.6; margin-bottom: 15px; font-size: var(--message-font-size); transition: background-color 0.3s ease, color 0.3s ease; }
         .user-message { background-color: var(--user-message-bg); color: var(--user-message-text); align-self: flex-end; border-bottom-right-radius: 5px; }
@@ -70,12 +98,11 @@
         .ai-message pre code { background-color: transparent; padding: 0; }
         .ai-message.thinking { background-color: transparent; color: var(--text-secondary); font-style: italic; }
         .error-message { background-color: var(--error-bg); color: var(--error-text); border: 1px solid var(--error-border); align-self: flex-start; transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;}
-        .info-message { background-color: var(--info-message-bg); color: var(--info-message-text); border: 1px solid var(--info-message-border); padding: 10px 15px; border-radius: 8px; margin-top: 10px; font-size: 0.95em; }
-        .info-message a { color: var(--link-color); text-decoration: none; font-weight: 500; } .info-message a:hover { color: var(--link-hover-color); text-decoration: underline; }
+        .info-message { text-align: center; color: var(--text-secondary); padding: 50px 20px; font-style: italic; }
         .message mjx-container { color: inherit !important; font-size: inherit !important; }
 
-        /* --- Input Area Elements --- */
-        .suggestions { display: none; gap: 10px; margin-bottom: 15px; flex-wrap: wrap; }
+        /* --- Input Area Elements (Unchanged except suggestions hidden initially) --- */
+        .suggestions { display: none; gap: 10px; margin-bottom: 15px; flex-wrap: wrap; } /* Initially hidden */
         .suggestion-chip { background-color: var(--button-bg); border: 1px solid var(--border-color); color: var(--text-secondary); border-radius: 16px; padding: 8px 15px; font-size: 0.9em; cursor: pointer; transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease; }
         .suggestion-chip:hover { background-color: var(--button-hover-bg); color: var(--text-primary); }
         .input-box { display: flex; align-items: flex-end; background-color: var(--main-bg); border: 1px solid var(--border-color); border-radius: 12px; padding: 5px 5px 5px 15px; position: relative; transition: background-color 0.3s ease, border-color 0.3s ease; }
@@ -91,6 +118,59 @@
         #send-button svg { width: 20px; height: 20px; fill: currentColor; }
         .thinking::after { content: ' .'; animation: dots 1s steps(3, end) infinite; display: inline-block; }
         @keyframes dots { 0%, 20% { content: ' .'; } 40% { content: ' ..'; } 60%, 100% { content: ' ...'; } }
+         .start-test-button { background-color: var(--accent-color); color: var(--send-button-text); border: none; border-radius: 6px; padding: 8px 15px; margin-top: 10px; cursor: pointer; font-weight: 500; display: inline-block; transition: background-color 0.2s ease; }
+         .start-test-button:hover { background-color: var(--send-button-hover-bg); }
+
+        /* --- Mock Test View Styles (Unchanged) --- */
+        .mock-test-view { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: var(--main-bg); z-index: 100; flex-direction: column; padding: 20px; box-sizing: border-box; transition: background-color 0.3s ease; }
+        .mock-test-view.active { display: flex; }
+        .test-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-bottom: 10px; border-bottom: 1px solid var(--border-color); flex-shrink: 0; }
+        .test-header h2 { margin: 0; font-size: 1.3em; color: var(--text-primary); }
+        .test-info span { margin-left: 15px; font-size: 0.95em; color: var(--text-secondary); }
+        .test-content { flex-grow: 1; overflow-y: auto; padding: 10px 20px; }
+        .test-question-container { margin-bottom: 25px; }
+        .test-question-number { font-weight: bold; margin-bottom: 8px; color: var(--text-secondary); }
+        .test-question { font-size: 1.1em; line-height: 1.5; margin-bottom: 15px; color: var(--text-primary); }
+        .test-options label { display: block; margin-bottom: 12px; background-color: var(--button-bg); padding: 12px 15px; border-radius: 6px; border: 1px solid var(--border-color); cursor: pointer; transition: background-color 0.2s ease, border-color 0.2s ease; color: var(--text-primary); }
+        .test-options label:hover { background-color: var(--button-hover-bg); }
+        .test-options input[type="radio"] { margin-right: 10px; accent-color: var(--accent-color); cursor: pointer;}
+        .test-navigation { display: flex; justify-content: space-between; padding-top: 15px; border-top: 1px solid var(--border-color); margin-top: auto; flex-shrink: 0; }
+        .test-navigation button { background-color: var(--button-bg); color: var(--text-primary); border: 1px solid var(--border-color); border-radius: 6px; padding: 10px 20px; cursor: pointer; font-size: 0.95em; transition: background-color 0.2s ease; }
+        .test-navigation button:hover:not(:disabled) { background-color: var(--button-hover-bg); }
+        .test-navigation button#submit-test-btn { background-color: var(--accent-color); color: var(--send-button-text); border-color: var(--accent-color); }
+        .test-navigation button#submit-test-btn:hover:not(:disabled) { background-color: var(--send-button-hover-bg); }
+        .test-navigation button:disabled { opacity: 0.5; cursor: not-allowed; }
+
+        /* --- Review View Styles (Unchanged) --- */
+        .review-view { padding: 20px; box-sizing: border-box; background-color: var(--main-bg); }
+        .review-header { margin-bottom: 15px; padding-bottom: 15px; border-bottom: 1px solid var(--border-color); }
+        .review-header h2 { margin: 0 0 10px 0; font-size: 1.3em; color: var(--text-primary); }
+        .review-summary span { margin-right: 20px; font-size: 1em; color: var(--text-primary); }
+        .review-summary .score-correct { color: #28a745; font-weight: bold;} .review-summary .score-incorrect { color: #dc3545; font-weight: bold;} .review-summary .score-skipped { color: #fd7e14; font-weight: bold;}
+        .review-filters { margin-bottom: 15px; }
+        .review-filters button { background-color: var(--button-bg); color: var(--text-primary); border: 1px solid var(--border-color); border-radius: 6px; padding: 5px 12px; margin-right: 8px; cursor: pointer; font-size: 0.9em; transition: background-color 0.2s ease, border-color 0.2s ease; }
+        .review-filters button:hover { background-color: var(--button-hover-bg); }
+        .review-filters button.active-filter { background-color: var(--accent-color); color: var(--send-button-text); border-color: var(--accent-color);}
+        .review-content { flex-grow: 1; overflow-y: auto; padding-right: 10px; }
+        .review-item { margin-bottom: 15px; padding: 15px; border: 1px solid var(--border-color); border-radius: 6px; background-color: var(--button-bg); transition: background-color 0.3s ease, border-color 0.3s ease; }
+        .review-item.hidden-by-filter { display: none; }
+        .review-item-qnum { font-weight: bold; margin-bottom: 8px; color: var(--text-secondary); }
+        .review-item-question { margin-bottom: 10px; line-height: 1.5; color: var(--text-primary); }
+        .review-item-details span { display: block; margin-bottom: 5px; font-size: 0.95em; color: var(--text-primary); }
+        .review-item-details .correct-answer { color: #28a745; font-weight: bold; }
+        .review-item-details .user-answer-correct { color: #28a745; } .review-item-details .user-answer-incorrect { color: #dc3545; text-decoration: line-through; } .review-item-details .user-answer-skipped { color: #fd7e14; font-style: italic; }
+        .review-footer { text-align: center; padding-top: 20px; border-top: 1px solid var(--border-color); margin-top: auto; flex-shrink: 0; display: flex; justify-content: center; gap: 15px; /* Space between buttons */ }
+        #exit-review-btn, #save-review-btn { /* Style both buttons */
+             background-color: var(--accent-color); color: var(--send-button-text); border: none;
+             border-radius: 6px; padding: 10px 25px; cursor: pointer; font-size: 1em;
+             transition: background-color 0.2s ease;
+        }
+        #exit-review-btn:hover, #save-review-btn:hover:not(:disabled) { background-color: var(--send-button-hover-bg); }
+        #save-review-btn { /* Secondary button style (optional) */
+             background-color: var(--button-bg); color: var(--text-primary); border: 1px solid var(--border-color);
+        }
+        #save-review-btn:hover:not(:disabled) { background-color: var(--button-hover-bg); }
+        #save-review-btn:disabled { opacity: 0.6; cursor: not-allowed; background-color: #cccccc; border-color: #aaaaaa; } /* Disabled style */
 
     </style>
 </head>
@@ -98,91 +178,104 @@
 
     <div class="app-container" id="app-container">
         <div class="sidebar">
-            <div class="sidebar-header" data-translate-key="appTitle">Gemini Chat</div>
-
-            <button class="sidebar-button" id="start-chat" disabled>
-                <svg viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"></path></svg>
-                <span data-translate-key="newChat">புதிய உரையாடல்</span>
+            <div class="sidebar-header">Gemini Chat</div>
+            <button class="start-chat-button" id="start-chat" disabled> <svg viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"></path></svg>
+                 Start new chat
             </button>
-
-            <button class="sidebar-button" id="goto-tests-page" disabled>
-                <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor"><path d="M200-120q-33 0-56.5-23.5T120-200v-560q0-33 23.5-56.5T200-840h560q33 0 56.5 23.5T840-760v560q0 33-23.5 56.5T760-120H200Zm0-80h560v-560H200v560Zm80-80h400v-80H280v80Zm0-120h400v-80H280v80Zm0-120h400v-80H280v80Zm0-120h160v-80H280v80Zm240 0h160v-80H520v80Z"/></svg>
-                <span data-translate-key="manageTests">சோதனைகளை நிர்வகி</span>
-            </button>
-
-            <div class="sidebar-section-title" data-translate-key="chats">உரையாடல்கள்</div>
+            <div class="sidebar-section-title">Chats</div>
             <div class="chat-list" id="chat-list">
-                <div style="padding:10px;color:var(--text-secondary);font-size:0.9em;" data-translate-key="loginToSeeChats">உரையாடல்களைப் பார்க்க உள்நுழையவும்.</div>
+                 <div style="padding:10px;color:var(--text-secondary);font-size:0.9em;">Please log in to see chats.</div>
             </div>
             <div class="sidebar-footer">
-                <div class="sidebar-controls">
-                    <div class="text-size-controls">
-                        <span data-translate-key="textSize">எழுத்து அளவு</span>
-                        <div class="text-size-buttons">
-                            <button id="decrease-text-size" title="Decrease text size" disabled>-</button>
-                            <button id="increase-text-size" title="Increase text size" disabled>+</button>
-                        </div>
-                    </div>
-                    <div class="theme-toggle">
-                        <button id="theme-toggle-button" title="Toggle Theme" disabled>☀️</button>
-                    </div>
-                     <div class="language-toggle">
-                        <button id="language-toggle-button" title="Switch Language" disabled>தமிழ்</button>
-                    </div>
-                </div>
-                <div id="auth-controls">
-                    <button id="login-google-btn" data-translate-key="loginGoogle">Google மூலம் உள்நுழைக</button>
-                    <button id="logout-btn" style="display: none;" data-translate-key="logout">வெளியேறு</button>
-                </div>
-                <div class="account-info">
-                    <div class="account-avatar" id="account-avatar">?</div>
-                    <div class="account-details">
-                        <div class="account-email" id="account-email" data-translate-key="notLoggedIn">உள்நுழையவில்லை</div>
-                        <div class="account-plan" id="account-plan"></div>
-                    </div>
-                </div>
+                 <div class="sidebar-controls">
+                     <div class="text-size-controls">
+                         <span>Text Size</span>
+                         <div class="text-size-buttons">
+                             <button id="decrease-text-size" title="Decrease text size" disabled>-</button> <button id="increase-text-size" title="Increase text size" disabled>+</button> </div>
+                     </div>
+                     <div class="theme-toggle">
+                         <button id="theme-toggle-button" title="Toggle Theme" disabled>☀️</button> </div>
+                 </div>
+                  <div id="auth-controls">
+                      <button id="login-google-btn">Login with Google</button>
+                      <button id="logout-btn" style="display: none;">Logout</button>
+                  </div>
+                  <div class="account-info">
+                      <div class="account-avatar" id="account-avatar">?</div>
+                      <div class="account-details">
+                          <div class="account-email" id="account-email">Not logged in</div>
+                          <div class="account-plan" id="account-plan"></div>
+                      </div>
+                  </div>
             </div>
         </div>
 
         <div class="main-container">
             <div class="main-content active" id="main-content-chat">
-                <div class="chat-area" id="chat-area">
-                    </div>
-                <div class="input-container" id="input-container">
-                    <div class="suggestions" id="suggestions">
-                        </div>
-                   <div class="input-box">
-                        <textarea id="user-input" placeholder="..." rows="1"></textarea>
-                        <div class="mcq-mode-control">
-                            <input type="checkbox" id="mcq-mode-checkbox" title="...">
-                            <label for="mcq-mode-checkbox" id="mcq-label">MCQs?</label>
-                        </div>
-                        <button id="send-button" title="..." disabled>
-                            <svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"></path></svg>
+                 <div class="chat-area" id="chat-area">
+                     </div>
+                 <div class="input-container" id="input-container"> <div class="suggestions" id="suggestions">
+                          <button class="suggestion-chip" data-prompt="5 questions about US History">5 Qs US History (Check MCQ)</button>
+                          <button class="suggestion-chip" data-prompt="What is recursion?">Recursion?</button>
+                          <button class="suggestion-chip" data-prompt="Explain $\lim_{x\to 0} \frac{\sin x}{x} = 1$">Limit sin(x)/x ?</button>
+                     </div>
+                    <div class="input-box">
+                        <textarea id="user-input" placeholder="Enter prompt (Check 'MCQs?' to generate test)" rows="1"></textarea>
+                        <div class="mcq-mode-control"> <input type="checkbox" id="mcq-mode-checkbox" title="Check to generate MCQs based on your prompt"> <label for="mcq-mode-checkbox">MCQs?</label> </div>
+                        <button id="send-button" title="Send message" disabled> <svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"></path></svg>
                         </button>
                     </div>
-                </div>
+                 </div>
             </div>
-             </div>
+            <div class="review-view" id="review-view">
+                 <div class="review-header">
+                     <h2>Test Review</h2>
+                     <div class="review-summary" id="review-summary"></div>
+                     <div class="review-filters" id="review-filters">
+                         <button data-filter="all" class="active-filter">All</button>
+                         <button data-filter="incorrect">Incorrect</button>
+                         <button data-filter="skipped">Skipped</button>
+                     </div>
+                 </div>
+                 <div class="review-content" id="review-content"></div>
+                 <div class="review-footer">
+                     <button id="save-review-btn">Save Review</button>
+                     <button id="exit-review-btn">Back to Chat</button>
+                 </div>
+              </div>
+        </div>
     </div>
+
+    <div class="mock-test-view" id="mock-test-view">
+         <div class="test-header"> <h2 id="test-title">Mock Test</h2> <div class="test-info"> <span id="question-counter">Q: 1 / N</span> <span id="test-timer">Time: 00:00</span> </div> </div>
+         <div class="test-content"> <div class="test-question-container"> <div class="test-question-number" id="test-question-number"></div> <div class="test-question" id="test-question"></div> <div class="test-options" id="test-options"></div> </div> </div>
+         <div class="test-navigation"> <button id="prev-question-btn" disabled>Previous</button> <button id="next-question-btn">Next</button> <button id="submit-test-btn">Submit Test</button> </div>
+    </div>
+
 
     <script>
         // --- Firebase Config ---
-        // !!! SECURITY WARNING !!! Replace with your actual config. RESTRICT YOUR API KEY!
+        // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+        // !!! பாதுகாப்பு எச்சரிக்கை / SECURITY WARNING !!!
+        // This firebaseConfig (especially apiKey) is insecure because it was shared.
+        // After testing, delete/restrict this API key in Firebase Console and use a new one here.
+        // DO NOT DEPLOY WITH THIS SHARED KEY. USE A SERVER-SIDE SOLUTION (e.g., Cloud Functions)
+        // TO HIDE YOUR API KEY AND MAKE API CALLS SECURELY.
+        // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         const firebaseConfig = {
-         apiKey: "AIzaSyDgw604fe5jnNu4kTOv1cQ-3n7PL8gcN58", // <- SHARED, INSECURE KEY - REPLACE AND SECURE!
-         authDomain: "krish-c5db8.firebaseapp.com",
-         projectId: "krish-c5db8",
-         storageBucket: "krish-c5db8.appspot.com",
-         messagingSenderId: "217175257890",
-         appId: "1:217175257890:web:209f0f290eabab6b1fab7b",
-         measurementId: "G-97SHYGL2J4"
+          apiKey: "AIzaSyDgw604fe5jnNu4kTOv1cQ-3n7PL8gcN58", // <- பகிரப்பட்ட, பாதுகாப்பற்ற Key / SHARED, INSECURE KEY - REPLACE ME
+          authDomain: "krish-c5db8.firebaseapp.com",
+          projectId: "krish-c5db8",
+          storageBucket: "krish-c5db8.appspot.com",
+          messagingSenderId: "217175257890",
+          appId: "1:217175257890:web:209f0f290eabab6b1fab7b",
+          measurementId: "G-97SHYGL2J4"
         };
 
         // --- Initialize Firebase ---
         firebase.initializeApp(firebaseConfig);
-        const fbAuth = firebase.auth();
-        const db = firebase.firestore();
+        const fbAuth = firebase.auth(); // Firebase Authentication service
+        const db = firebase.firestore(); // Firebase Firestore service
 
         // --- DOM Elements ---
         const appContainer = document.getElementById('app-container');
@@ -191,7 +284,6 @@
         const sendButton = document.getElementById('send-button');
         const suggestionsContainer = document.getElementById('suggestions');
         const startChatButton = document.getElementById('start-chat');
-        const gotoTestsButton = document.getElementById('goto-tests-page');
         const chatListContainer = document.getElementById('chat-list');
         const accountEmail = document.getElementById('account-email');
         const accountAvatar = document.getElementById('account-avatar');
@@ -199,233 +291,64 @@
         const decreaseTextBtn = document.getElementById('decrease-text-size');
         const increaseTextBtn = document.getElementById('increase-text-size');
         const themeToggleButton = document.getElementById('theme-toggle-button');
-        const languageToggleButton = document.getElementById('language-toggle-button');
+        const mainContainer = document.querySelector('.main-container');
+        const chatView = document.getElementById('main-content-chat');
+        const testView = document.getElementById('mock-test-view');
+        const reviewView = document.getElementById('review-view');
         const inputContainer = document.getElementById('input-container');
         const mcqModeCheckbox = document.getElementById('mcq-mode-checkbox');
-        const mcqLabel = document.getElementById('mcq-label');
+        // Auth buttons
         const loginBtn = document.getElementById('login-google-btn');
         const logoutBtn = document.getElementById('logout-btn');
+        // Test elements
+        const testTitle = document.getElementById('test-title');
+        const questionCounter = document.getElementById('question-counter');
+        const testTimer = document.getElementById('test-timer');
+        const testQuestionNumber = document.getElementById('test-question-number');
+        const testQuestion = document.getElementById('test-question');
+        const testOptionsContainer = document.getElementById('test-options');
+        const prevQuestionBtn = document.getElementById('prev-question-btn');
+        const nextQuestionBtn = document.getElementById('next-question-btn');
+        const submitTestBtn = document.getElementById('submit-test-btn');
+        // Review elements
+        const reviewSummary = document.getElementById('review-summary');
+        const reviewContent = document.getElementById('review-content');
+        const exitReviewBtn = document.getElementById('exit-review-btn');
+        const reviewFilters = document.getElementById('review-filters');
+        const saveReviewBtn = document.getElementById('save-review-btn');
 
         // --- Config & Constants ---
-        const MODEL_NAME = "gemini-1.5-flash-latest";
-        const API_URL_BASE = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL_NAME}:generateContent?key=`;
-        const STORAGE_KEY_API_KEY = 'geminiApiKey';
-        const STORAGE_KEY_SETTINGS = 'geminiChatSettings_v2'; // Changed key to reset old settings if needed
-        const NEW_CHAT_KEY = "newChatUntitled"; // Key for translation
-        const TEXT_SIZE_STEP = 0.1;
-        const MIN_TEXT_SIZE_MULTIPLIER = 0.7;
-        const MAX_TEXT_SIZE_MULTIPLIER = 1.5;
-        const LIGHT_THEME_ICON = '☀️';
-        const DARK_THEME_ICON = '🌙';
-        const DELETE_ICON = '×';
-        const TESTS_PAGE_URL = 'tests.html'; // URL for the new tests page
-
-        // --- Translations ---
-        const translations = {
-            en: {
-                appTitle: "Gemini Chat",
-                newChat: "New Chat",
-                manageTests: "Manage Tests",
-                chats: "Chats",
-                loginToSeeChats: "Login to see chats.",
-                noChatsYet: "No conversations yet.",
-                errorLoadingChats: "Error loading chats.",
-                deleteChat: "Delete Chat",
-                confirmDelete: 'Permanently delete "{chatTitle}" and all its messages?',
-                deletingChat: "Deleting chat...",
-                errorDeletingChat: "Could not delete chat. Check permissions or connection.",
-                textSize: "Text Size",
-                decreaseTextSize: "Decrease text size",
-                increaseTextSize: "Increase text size",
-                toggleThemeLight: "Light Mode",
-                toggleThemeDark: "Dark Mode",
-                switchLanguage: "Switch Language",
-                languageName: "English",
-                loginGoogle: "Login with Google",
-                logout: "Logout",
-                notLoggedIn: "Not logged in",
-                firebaseUser: "Firebase User",
-                greeting: "Hello, {userName}!",
-                welcome: "Welcome!",
-                selectOrCreateChat: "Select a conversation or start a new one.",
-                loginToStart: "Please log in using the Google button in the sidebar to start chatting or view your history.",
-                enterQuestion: "Enter a question...",
-                enterQuestionMCQ: "Enter prompt for MCQs...",
-                mcqCheckboxLabel: "Generate MCQs?",
-                mcqCheckboxTitle: "Check this to generate Multiple Choice Questions based on your prompt.",
-                send: "Send",
-                sending: "Sending...",
-                thinking: "Thinking...",
-                loadingChat: "Loading conversation...",
-                errorApiKey: "Gemini API Key not set.",
-                errorLogin: "Please log in.",
-                errorSelectChat: "Please select or create a conversation.",
-                errorSend: "Could not send message. Please try again.",
-                errorSaveUserMsg: "Error saving your message.",
-                errorSaveAiMsg: "Error saving response. It might not appear.",
-                errorFetch: "Network error or issue during request.",
-                errorApiGeneric: "API Error",
-                errorApiKeyInvalid: "Invalid Gemini API Key removed. Reload to enter a new one.",
-                errorApiResponse: "Error: Could not extract valid text from response.",
-                responseBlocked: "Blocked: {reason}",
-                emptyResponse: "Sorry, received an empty response.",
-                mcqCreated: 'MCQs created successfully! You can find and take this test on the <a href="{testsPageUrl}" target="_blank">Manage Tests</a> page.',
-                errorMCQSave: "MCQs generated, but failed to save the test definition to the database.",
-                errorMCQParse: "Failed to parse MCQ JSON from response.",
-                errorMCQFormat: "AI response for MCQs was not in the expected JSON array format.",
-                errorMCQValidation: "MCQ JSON validation failed (missing question, options, or answer).",
-                generatingTitle: "Generating title...",
-                errorCheckingFirstMsg: "Error checking for first message.",
-                errorUpdatingTitle: "Error updating chat title in Firestore.",
-                chatTitleUpdated: "Chat title automatically updated: {title}",
-                newChatUntitled: "(Untitled Chat)",
-                suggestionHistory: "5 Qs US History",
-                suggestionRecursion: "What is recursion?",
-                suggestionLimit: "Explain sin(x)/x limit",
-                apiKeyPrompt: "--- INSECURE DEMO ---\nPlease enter your Gemini API Key (stored in local storage - use Cloud Function for security):",
-                apiKeyNeeded: "Gemini API Key needed. Please reload.",
-                apiKeyMissing: "API Key missing",
-                loginInProgress: "Logging in...",
-                logoutInProgress: "Logging out...",
-                errorLoginFailed: "Login failed: {message}",
-                errorLogoutFailed: "Logout failed: {message}",
-                userLoggedIn: "User logged in:",
-                userLoggedOut: "User logged out",
-                loadingUserSettings: "Loading user settings...",
-                errorLoadingSettings: "Error loading user settings:",
-                errorSavingSettings: "Error saving user settings:",
-                listeningChats: "Listening for chats for user {userId}",
-                chatListSnapshot: "Chat list snapshot received:",
-                deletingChatSkip: "Skipping chat list update during delete.",
-                activeChatNoExist: "Active chat doesn't exist or was deleted, selecting newest:",
-                noChatsForUser: "User has no chats.",
-                switchingChat: "Switching chat:",
-                errorListeningChats: "Error listening to chat list:",
-                errorLoadingChatList: "Failed to load chat list.",
-                chatTitleInvalid: "(Invalid Title)",
-                listeningMessages: "Listening for messages for chat {chatId}",
-                chatMessagesSnapshot: "Chat {chatId} messages snapshot received: {count} messages",
-                chatIsEmpty: "Conversation is empty.",
-                errorListeningMessages: "Error listening to messages for chat {chatId}:",
-                errorLoadingMessages: "Could not load messages for this conversation.",
-                savingUserMsg: "User message saved to Firestore.",
-                firstMsgCheck: "First user message, attempting title generation.",
-                insecureApiCall: "SECURITY WARNING: Calling Gemini API with client-side key.",
-                savingAiMsg: "AI response/error saved to Firestore.",
-                mcqsParsedSuccess: "MCQs parsed successfully, saving to /tests collection:",
-                savingTestDef: "Saving test definition to Firestore...",
-                savingTestDefSuccess: "Test definition saved successfully with ID: {testId}",
-                normalAiResponse: "Saving normal AI response."
-            },
-            ta: {
-                appTitle: "ஜெமினி அரட்டை",
-                newChat: "புதிய உரையாடல்",
-                manageTests: "சோதனைகளை நிர்வகி",
-                chats: "உரையாடல்கள்",
-                loginToSeeChats: "உரையாடல்களைப் பார்க்க உள்நுழையவும்.",
-                noChatsYet: "இன்னும் உரையாடல்கள் இல்லை.",
-                errorLoadingChats: "உரையாடல்களை ஏற்றுவதில் பிழை.",
-                deleteChat: "உரையாடலை நீக்கு",
-                confirmDelete: '"{chatTitle}" மற்றும் அதன் அனைத்து செய்திகளையும் நிரந்தரமாக நீக்க விரும்புகிறீர்களா?',
-                deletingChat: "உரையாடலை நீக்குகிறது...",
-                errorDeletingChat: "உரையாடலை நீக்க முடியவில்லை. அனுமதிகள் அல்லது இணைப்பைச் சரிபார்க்கவும்.",
-                textSize: "எழுத்து அளவு",
-                decreaseTextSize: "எழுத்து அளவைக் குறைக்கவும்",
-                increaseTextSize: "எழுத்து அளவை அதிகரிக்கவும்",
-                toggleThemeLight: "ஒளி பயன்முறை",
-                toggleThemeDark: "இருண்ட பயன்முறை",
-                switchLanguage: "மொழியை மாற்று",
-                languageName: "தமிழ்",
-                loginGoogle: "Google மூலம் உள்நுழைக",
-                logout: "வெளியேறு",
-                notLoggedIn: "உள்நுழையவில்லை",
-                firebaseUser: "Firebase பயனர்",
-                greeting: "வணக்கம், {userName}!",
-                welcome: "வருக!",
-                selectOrCreateChat: "ஒரு உரையாடலைத் தேர்ந்தெடுக்கவும் அல்லது புதியதாகத் தொடங்கவும்.",
-                loginToStart: "அரட்டையைத் தொடங்க அல்லது உங்கள் வரலாற்றைக் காண sidebar-இல் உள்ள Google பொத்தானைப் பயன்படுத்தி உள்நுழையவும்.",
-                enterQuestion: "கேள்வியை உள்ளிடவும்...",
-                enterQuestionMCQ: "MCQ-களுக்கான தூண்டலை உள்ளிடவும்...",
-                mcqCheckboxLabel: "MCQ-களை உருவாக்கு?",
-                mcqCheckboxTitle: "உங்கள் தூண்டலின் அடிப்படையில் பல தேர்வு கேள்விகளை உருவாக்க இதைத் தேர்வுசெய்க.",
-                send: "அனுப்பு",
-                sending: "அனுப்புகிறது...",
-                thinking: "சிந்திக்கிறது...",
-                loadingChat: "உரையாடலை ஏற்றுகிறது...",
-                errorApiKey: "Gemini API Key அமைக்கப்படவில்லை.",
-                errorLogin: "தயவுசெய்து உள்நுழையவும்.",
-                errorSelectChat: "தயவுசெய்து ஒரு உரையாடலைத் தேர்ந்தெடுக்கவும் அல்லது உருவாக்கவும்.",
-                errorSend: "செய்தியை அனுப்ப முடியவில்லை. மீண்டும் முயற்சிக்கவும்.",
-                errorSaveUserMsg: "உங்கள் செய்தியைச் சேமிப்பதில் பிழை.",
-                errorSaveAiMsg: "பதிலைச் சேமிப்பதில் பிழை. அது தோன்றாமல் போகலாம்.",
-                errorFetch: "பிணையப் பிழை அல்லது கோரிக்கையின் போது சிக்கல்.",
-                errorApiGeneric: "API பிழை",
-                errorApiKeyInvalid: "தவறான Gemini API Key நீக்கப்பட்டது. புதியதை உள்ளிட மீண்டும் ஏற்றவும்.",
-                errorApiResponse: "பிழை: பதிலிலிருந்து சரியான உரையைப் பிரிக்க முடியவில்லை.",
-                responseBlocked: "தடுக்கப்பட்டது: {reason}",
-                emptyResponse: "மன்னிக்கவும், வெற்றுப் பதில் கிடைத்தது.",
-                mcqCreated: 'MCQகள் வெற்றிகரமாக உருவாக்கப்பட்டன! இந்த சோதனையை <a href="{testsPageUrl}" target="_blank">சோதனைகளை நிர்வகி</a> பக்கத்தில் காணலாம் மற்றும் எடுக்கலாம்.',
-                errorMCQSave: "MCQகள் உருவாக்கப்பட்டன, ஆனால் சோதனை வரையறையை தரவுத்தளத்தில் சேமிக்க முடியவில்லை.",
-                errorMCQParse: "பதிலிலிருந்து MCQ JSON-ஐப் பிரித்தெடுப்பதில் தோல்வி.",
-                errorMCQFormat: "MCQ-களுக்கான AI பதில் எதிர்பார்க்கப்பட்ட JSON வரிசை வடிவத்தில் இல்லை.",
-                errorMCQValidation: "MCQ JSON சரிபார்ப்பு தோல்வி (கேள்வி, விருப்பங்கள் அல்லது பதில் இல்லை).",
-                generatingTitle: "தலைப்பை உருவாக்குகிறது...",
-                errorCheckingFirstMsg: "முதல் செய்தியைச் சரிபார்ப்பதில் பிழை:",
-                errorUpdatingTitle: "Firestore-இல் அரட்டை தலைப்பைப் புதுப்பிப்பதில் பிழை:",
-                chatTitleUpdated: "அரட்டை தலைப்பு தானாகப் புதுப்பிக்கப்பட்டது: {title}",
-                newChatUntitled: "(பெயரிடப்படாத அரட்டை)",
-                suggestionHistory: "5 Qs US வரலாறு",
-                suggestionRecursion: "Recursion என்றால் என்ன?",
-                suggestionLimit: "sin(x)/x எல்லையை விளக்கு",
-                apiKeyPrompt: "--- பாதுகாப்பற்ற டெமோ ---\nஉங்கள் Gemini API Key-ஐ உள்ளிடவும் (இது local storage-இல் சேமிக்கப்படும் - பாதுகாப்பிற்கு Cloud Function தேவை):",
-                apiKeyNeeded: "Gemini API Key தேவை. மீண்டும் ஏற்றவும்.",
-                apiKeyMissing: "API Key இல்லை",
-                loginInProgress: "உள்நுழைகிறது...",
-                logoutInProgress: "வெளியேறுகிறது...",
-                errorLoginFailed: "உள்நுழைவு தோல்வி: {message}",
-                errorLogoutFailed: "வெளியேறுதல் தோல்வி: {message}",
-                userLoggedIn: "பயனர் உள்நுழைந்துள்ளார்:",
-                userLoggedOut: "பயனர் வெளியேறிவிட்டார்",
-                loadingUserSettings: "பயனர் அமைப்புகளை ஏற்றுகிறது...",
-                errorLoadingSettings: "பயனர் அமைப்புகளை ஏற்றுவதில் பிழை:",
-                errorSavingSettings: "பயனர் அமைப்புகளைச் சேமிப்பதில் பிழை:",
-                listeningChats: "{userId} பயனருக்கான அரட்டைகளைக் கவனிக்கிறது",
-                chatListSnapshot: "அரட்டை பட்டியல் snapshot கிடைத்தது:",
-                deletingChatSkip: "நீக்கும்போது அரட்டை பட்டியல் புதுப்பிப்பு தவிர்க்கப்பட்டது.",
-                activeChatNoExist: "செயலில் உள்ள அரட்டை இல்லை/நீக்கப்பட்டது, புதியது தேர்ந்தெடுக்கப்பட்டது:",
-                noChatsForUser: "பயனருக்கு அரட்டைகள் இல்லை.",
-                switchingChat: "அரட்டை மாறுகிறது:",
-                errorListeningChats: "அரட்டை பட்டியலைக் கவனிப்பதில் பிழை:",
-                errorLoadingChatList: "அரட்டை பட்டியலை ஏற்ற முடியவில்லை.",
-                chatTitleInvalid: "(தவறான தலைப்பு)",
-                listeningMessages: "{chatId} அரட்டைக்கான செய்திகளைக் கவனிக்கிறது",
-                chatMessagesSnapshot: "{chatId} அரட்டை செய்திகள் snapshot கிடைத்தது: {count} செய்திகள்",
-                chatIsEmpty: "உரையாடல் காலியாக உள்ளது.",
-                errorListeningMessages: "{chatId} அரட்டை செய்திகளைக் கவனிப்பதில் பிழை:",
-                errorLoadingMessages: "இந்த உரையாடலின் செய்திகளை ஏற்ற முடியவில்லை.",
-                savingUserMsg: "பயனர் செய்தி Firestore-இல் சேமிக்கப்பட்டது.",
-                firstMsgCheck: "முதல் பயனர் செய்தி, தலைப்பு உருவாக்க முயற்சி.",
-                insecureApiCall: "பாதுகாப்பு எச்சரிக்கை: Client-side key உடன் Gemini API அழைக்கப்படுகிறது.",
-                savingAiMsg: "AI பதில்/பிழை Firestore-இல் சேமிக்கப்பட்டது.",
-                mcqsParsedSuccess: "MCQகள் வெற்றிகரமாகப் பிரிக்கப்பட்டு, /tests collection-இல் சேமிக்கப்படுகின்றன:",
-                savingTestDef: "சோதனை வரையறையை Firestore-இல் சேமிக்கிறது...",
-                savingTestDefSuccess: "சோதனை வரையறை ID: {testId} உடன் வெற்றிகரமாகச் சேமிக்கப்பட்டது",
-                normalAiResponse: "சாதாரண AI பதிலைச் சேமிக்கிறது."
-            }
-        };
-        let currentLanguage = 'ta'; // Default language
+        const MODEL_NAME="gemini-1.5-flash-latest"; // Or your preferred model
+        const API_URL_BASE=`https://generativelanguage.googleapis.com/v1beta/models/${MODEL_NAME}:generateContent?key=`;
+        const STORAGE_KEY_API_KEY='geminiApiKey_insecureDemo'; // Use a distinct key name
+        const NEW_CHAT_TITLE="(New Chat)";
+        const TEXT_SIZE_STEP=0.1;
+        const MIN_TEXT_SIZE_MULTIPLIER=0.7;
+        const MAX_TEXT_SIZE_MULTIPLIER=1.5;
+        const LIGHT_THEME_ICON='☀️';
+        const DARK_THEME_ICON='🌙';
+        const DELETE_ICON = '×'; // Or use an SVG like trash icon
 
         // --- State Variables ---
-        let API_KEY = '';
+        let API_KEY='';
         let currentUser = null;
         let activeChatId = null;
-        let currentChatHistory = []; // For API context only
-        let currentTextSizeMultiplier = 1.0;
-        let currentTheme = 'light';
-        let activeChatListener = null;
-        let chatListListener = null;
-        let isDeletingChat = false;
-        let userSettingsListener = null; // Listener for user settings document
+        let currentChatHistory=[]; // Holds {role, parts: [{text}]} for API calls, populated by listener
+        let currentTextSizeMultiplier=1.0;
+        let currentTheme='light';
+        let isTestMode=false;
+        let isReviewMode=false;
+        let currentTestMCQs=[];
+        let currentQuestionIndex=0;
+        let userAnswers=[];
+        let testStartTime=null;
+        let testTimerInterval=null;
+        let generatedMCQData=null; // Temporarily stores parsed MCQs before starting test
+        let reviewResultsCache = null; // Stores results for display and saving
+        // Firestore Listeners
+        let activeChatListener = null; // Listener for messages in the active chat
+        let chatListListener = null;   // Listener for the list of chats in the sidebar
+        let isDeletingChat = false;    // Flag to prevent UI shifts during delete operations
 
         // --- Initialization ---
         initializeApp();
@@ -436,929 +359,1352 @@
         userInput.addEventListener('keydown', handleInputKeydown);
         suggestionsContainer.addEventListener('click', handleSuggestionClick);
         startChatButton.addEventListener('click', createNewChat);
-        gotoTestsButton.addEventListener('click', () => { window.open(TESTS_PAGE_URL, '_blank'); }); // Open tests page in new tab
-        chatListContainer.addEventListener('click', handleChatListClick);
+        chatListContainer.addEventListener('click', handleChatListClick); // Handles both switching and deleting
         decreaseTextBtn.addEventListener('click', () => adjustTextSize(-TEXT_SIZE_STEP));
         increaseTextBtn.addEventListener('click', () => adjustTextSize(TEXT_SIZE_STEP));
         themeToggleButton.addEventListener('click', toggleTheme);
-        languageToggleButton.addEventListener('click', toggleLanguage);
+        // Test listeners
+        prevQuestionBtn.addEventListener('click', () => handleTestNavigation('prev'));
+        nextQuestionBtn.addEventListener('click', () => handleTestNavigation('next'));
+        submitTestBtn.addEventListener('click', submitTest);
+        // Review listeners
+        exitReviewBtn.addEventListener('click', exitReview);
+        chatArea.addEventListener('click', handleChatAreaClick); // For the "Start Mock Test" button
+        reviewFilters.addEventListener('click', handleReviewFilterClick);
+        saveReviewBtn.addEventListener('click', saveTestReviewToCloud);
+        // Auth listeners
         loginBtn.addEventListener('click', signInWithGoogle);
         logoutBtn.addEventListener('click', signOut);
 
+
         // --- Initialization Functions ---
         async function initializeApp() {
-            loadGeminiApiKey();
-            fbAuth.onAuthStateChanged(handleAuthStateChange);
+            loadGeminiApiKey(); // Load or prompt for the *insecure* API key
+            fbAuth.onAuthStateChanged(handleAuthStateChange); // Listen for login/logout
+            switchView('chat'); // Start in chat view
             userInput.focus();
-            updateUIText(); // Initial UI text update
         }
 
         function loadGeminiApiKey() {
-            console.warn(getText('insecureApiCall'));
-            const k = localStorage.getItem(STORAGE_KEY_API_KEY);
-            if (k) { API_KEY = k; }
-            else {
-                API_KEY = prompt(getText('apiKeyPrompt'));
-                if (API_KEY) { localStorage.setItem(STORAGE_KEY_API_KEY, API_KEY); }
-                else { displayError(getText('apiKeyNeeded')); setLoadingState(true, getText('apiKeyMissing')); }
-            }
-            if (API_KEY) setLoadingState(false);
+             console.warn("!!! SECURITY WARNING !!! Gemini API Key is stored in localStorage. This is highly insecure and only for demonstration. Use a server-side solution (like Cloud Functions) to protect your key in production.");
+             const k=localStorage.getItem(STORAGE_KEY_API_KEY);
+             if(k){
+                 API_KEY=k;
+                 console.log("Loaded insecure API Key from localStorage.");
+             }
+             else {
+                 API_KEY=prompt("--- INSECURE DEMO --- Please enter your Gemini API Key.\nIt will be stored *insecurely* in your browser's localStorage.\nDo NOT use this method in production!");
+                 if(API_KEY){
+                     localStorage.setItem(STORAGE_KEY_API_KEY, API_KEY);
+                     console.log("Saved insecure API Key to localStorage.");
+                 }
+                 else {
+                     displayError("Gemini API Key is required for this demo. Reload the page to enter it.");
+                     setLoadingState(true, "API Key Missing"); // Keep UI disabled
+                 }
+             }
+             // Initial state setting, will be potentially overridden by auth change
+             setLoadingState(false); // Set to non-loading initially, auth state might disable later
         }
-
-        // --- Translation Function ---
-        function getText(key, replacements = {}) {
-            let text = translations[currentLanguage]?.[key] || translations['en']?.[key] || `Missing Key: ${key}`;
-            for (const placeholder in replacements) {
-                text = text.replace(`{${placeholder}}`, replacements[placeholder]);
-            }
-            return text;
-        }
-
-        // --- Update UI Text based on Language ---
-        function updateUIText() {
-            // Update all elements with data-translate-key attribute
-            document.querySelectorAll('[data-translate-key]').forEach(el => {
-                const key = el.dataset.translateKey;
-                // Use innerText or textContent based on element type if needed, default to textContent
-                if (el.tagName === 'BUTTON' || el.tagName === 'SPAN' || el.tagName === 'DIV' || el.tagName === 'LABEL' || el.tagName === 'A') {
-                     // Handle potential nested elements like icons in buttons
-                    const textNode = Array.from(el.childNodes).find(node => node.nodeType === Node.TEXT_NODE);
-                    if (textNode) {
-                        textNode.textContent = getText(key);
-                    } else if (el.textContent) {
-                         // Fallback for simple elements
-                         el.textContent = getText(key);
-                    }
-                } else {
-                     el.textContent = getText(key); // Or handle other attributes like placeholder, title
-                }
-            });
-
-            // Update specific elements without data-translate-key
-            userInput.placeholder = mcqModeCheckbox.checked ? getText('enterQuestionMCQ') : getText('enterQuestion');
-            decreaseTextBtn.title = getText('decreaseTextSize');
-            increaseTextBtn.title = getText('increaseTextSize');
-            themeToggleButton.title = currentTheme === 'light' ? getText('toggleThemeDark') : getText('toggleThemeLight');
-            languageToggleButton.title = getText('switchLanguage');
-            languageToggleButton.textContent = getText('languageName'); // Show the *other* language name? Or current? Let's show current.
-            mcqLabel.textContent = getText('mcqCheckboxLabel');
-            mcqModeCheckbox.title = getText('mcqCheckboxTitle');
-            sendButton.title = getText('send');
-
-            // Update account status text if needed (handled mostly in authStateChange)
-            if (!currentUser) {
-                 accountEmail.textContent = getText('notLoggedIn');
-                 chatListContainer.innerHTML = `<div style="padding:10px;color:var(--text-secondary);font-size:0.9em;">${getText('loginToSeeChats')}</div>`;
-            }
-
-            // Update suggestions
-             suggestionsContainer.innerHTML = `
-                 <button class="suggestion-chip" data-prompt="5 questions about US History">${getText('suggestionHistory')} (MCQ?)</button>
-                 <button class="suggestion-chip" data-prompt="What is recursion?">${getText('suggestionRecursion')}</button>
-                 <button class="suggestion-chip" data-prompt="Explain $\\lim_{x\\to 0} \\frac{\\sin x}{x} = 1$">${getText('suggestionLimit')}</button>
-             `;
-
-            // Update thinking/loading messages if they exist
-            const thinkingMsg = chatArea.querySelector('.thinking');
-            if (thinkingMsg) thinkingMsg.textContent = getText('thinking');
-            // Similarly update other status messages if needed
-
-            // Update greeting
-             renderGreetingOrLoginPrompt(); // Re-render greeting with current language
-        }
-
 
         // --- Authentication Functions ---
+
         async function signInWithGoogle() {
             const provider = new firebase.auth.GoogleAuthProvider();
             try {
-                setLoadingState(true, getText('loginInProgress'));
+                setLoadingState(true, "Logging in...");
                 await fbAuth.signInWithPopup(provider);
-                // handleAuthStateChange will be triggered
+                // onAuthStateChanged will handle the UI updates and data loading
             } catch (error) {
-                console.error("Google login error:", error);
-                displayError(getText('errorLoginFailed', { message: error.message }));
-                setLoadingState(false);
+                console.error("Google Sign-In Error:", error);
+                displayError(`Login failed: ${error.message || 'Unknown error'}`);
+                setLoadingState(false); // Reset loading state on error
             }
         }
 
         async function signOut() {
             try {
-                setLoadingState(true, getText('logoutInProgress'));
+                setLoadingState(true, "Logging out...");
                 await fbAuth.signOut();
-                 // handleAuthStateChange will be triggered
+                // onAuthStateChanged will handle the UI cleanup
             } catch (error) {
-                console.error("Logout error:", error);
-                displayError(getText('errorLogoutFailed', { message: error.message }));
-                setLoadingState(false);
+                console.error("Sign Out Error:", error);
+                displayError(`Logout failed: ${error.message || 'Unknown error'}`);
+                setLoadingState(false); // Reset loading state on error
             }
         }
 
+        // Central function to handle UI/data changes on login/logout
         function handleAuthStateChange(user) {
-            // Clean up previous listeners
+            // --- Cleanup previous state ---
+            // Detach existing Firestore listeners to prevent leaks/errors
             if (activeChatListener) { activeChatListener(); activeChatListener = null; }
             if (chatListListener) { chatListListener(); chatListListener = null; }
-            if (userSettingsListener) { userSettingsListener(); userSettingsListener = null; } // Detach settings listener
 
+            // Reset UI elements related to chat
             chatArea.innerHTML = '';
-            chatListContainer.innerHTML = `<div style="padding:10px;color:var(--text-secondary);font-size:0.9em;">${getText('loginToSeeChats')}</div>`;
+            chatListContainer.innerHTML = '';
             activeChatId = null;
             currentChatHistory = [];
+            isDeletingChat = false; // Ensure flag is reset on logout/login
 
-            if (user) { // User is signed in
+            if (user) {
+                // --- User is logged IN ---
                 currentUser = user;
-                console.log(getText('userLoggedIn'), currentUser.uid, currentUser.displayName || currentUser.email);
+                console.log("User logged in:", currentUser.uid, currentUser.displayName || currentUser.email);
+
+                // Update sidebar auth buttons & account info
                 loginBtn.style.display = 'none';
                 logoutBtn.style.display = 'inline-block';
                 accountEmail.textContent = currentUser.email || currentUser.displayName || `User`;
                 accountAvatar.textContent = (currentUser.displayName || currentUser.email || 'U')[0].toUpperCase();
-                accountPlan.textContent = getText('firebaseUser');
+                accountPlan.textContent = "Firebase User"; // Placeholder plan
+
+                // Enable sidebar controls
                 startChatButton.disabled = false;
-                gotoTestsButton.disabled = false; // Enable tests button
                 decreaseTextBtn.disabled = false;
                 increaseTextBtn.disabled = false;
                 themeToggleButton.disabled = false;
-                languageToggleButton.disabled = false;
-                sendButton.disabled = false; // Re-enabled, but handleSendMessage checks activeChatId
+
+                // Enable input area
+                sendButton.disabled = true; // Will be enabled once a chat is active
                 userInput.disabled = false;
-                mcqModeCheckbox.disabled = false;
+                userInput.placeholder = "Select or create a chat"; // Initial prompt
                 inputContainer.style.display = 'block';
                 suggestionsContainer.style.display = 'flex';
 
-                listenUserSettings(currentUser.uid); // Load and listen for settings (theme, lang, size)
-                loadAndListenForChats(currentUser.uid);
+                // Load user-specific data and settings
+                loadUserSettings(currentUser.uid); // Load theme, text size
+                loadAndListenForChats(currentUser.uid); // Load chat list and attach listener
 
-            } else { // User is signed out
+                // No immediate greeting needed here, will be shown if no chats or after loading
+                setLoadingState(false); // Ensure loading overlay is off initially
+
+            } else {
+                // --- User is logged OUT ---
                 currentUser = null;
-                console.log(getText('userLoggedOut'));
+                console.log("User logged out");
+
+                // Update sidebar auth buttons & account info
                 loginBtn.style.display = 'inline-block';
                 logoutBtn.style.display = 'none';
-                accountEmail.textContent = getText('notLoggedIn');
+                accountEmail.textContent = "Not logged in";
                 accountAvatar.textContent = '?';
                 accountPlan.textContent = "";
+
+                // Disable sidebar controls
                 startChatButton.disabled = true;
-                gotoTestsButton.disabled = true; // Disable tests button
                 decreaseTextBtn.disabled = true;
                 increaseTextBtn.disabled = true;
                 themeToggleButton.disabled = true;
-                languageToggleButton.disabled = true;
+
+                // Disable input area
                 sendButton.disabled = true;
                 userInput.disabled = true;
-                mcqModeCheckbox.disabled = true;
+                userInput.placeholder = "Please log in";
                 inputContainer.style.display = 'none';
                 suggestionsContainer.style.display = 'none';
 
-                // Reset to defaults on logout
+                // Show logged-out prompt in chat area and sidebar
+                renderGreetingOrLoginPrompt();
+                chatListContainer.innerHTML = '<div style="padding:10px;color:var(--text-secondary);font-size:0.9em;">Please log in to see chats.</div>';
+
+                // Reset settings to defaults (they will reload on next login)
                 currentTheme = 'light'; applyTheme();
                 currentTextSizeMultiplier = 1.0; applyTextSize();
-                currentLanguage = 'ta'; updateUIText(); // Reset language and update UI
 
-                renderGreetingOrLoginPrompt();
+                setLoadingState(false); // Ensure loading overlay is off
             }
-             updateUIText(); // Ensure UI text is correct after login/logout state change
-             setLoadingState(false); // Ensure loading state is reset
+            // Ensure loading indicator reflects the final state after processing
+            // setLoadingState(false); // Moved inside if/else for clarity
         }
 
+
+        // Helper to show initial greeting or login message in the chat area
         function renderGreetingOrLoginPrompt() {
-             // Only render if no active chat is loaded or user is logged out
-             if (chatArea.querySelector('.message')) return; // Don't overwrite existing messages
-
-            chatArea.innerHTML = ''; // Clear previous greeting if any
-            const g = document.createElement('div');
-            g.classList.add('greeting');
+            chatArea.innerHTML = ''; // Clear previous content
+            const greetingElement = document.createElement('div');
+            greetingElement.classList.add('greeting');
             if (currentUser) {
-                g.innerHTML = `<span class="asterisk">*</span>${getText('greeting', { userName: currentUser.displayName || 'பயனர்' })}`;
-                chatArea.appendChild(g);
-                if (!activeChatId) {
-                    displayMessage(getText('selectOrCreateChat'), 'ai');
-                }
+                 greetingElement.innerHTML = `<span class="asterisk">*</span>Good day, ${currentUser.displayName || 'User'}!`;
+                 chatArea.appendChild(greetingElement);
+                 // If logged in but no chat is active (e.g., after deleting the last one)
+                 if (!activeChatId) {
+                     displayMessage("Select a chat from the sidebar or start a new one.", 'ai');
+                 }
             } else {
-                g.innerHTML = `<span class="asterisk">*</span>${getText('welcome')}`;
-                chatArea.appendChild(g);
-                displayMessage(getText('loginToStart'), 'ai');
+                greetingElement.innerHTML = `<span class="asterisk">*</span>Welcome!`;
+                chatArea.appendChild(greetingElement);
+                displayMessage("Please log in using the Google button in the sidebar to start chatting or view your history.", 'ai');
             }
-            scrollToBottom(true);
+            scrollToBottom(true); // Scroll down immediately
         }
 
-        // --- Settings (Theme/Text Size/Language) Functions ---
-         function listenUserSettings(userId) {
-             if (userSettingsListener) userSettingsListener(); // Detach previous listener
 
-             const userDocRef = db.collection('users').doc(userId);
-             console.log(getText('loadingUserSettings'));
+        // --- Settings (Theme/Text Size) ---
 
-             userSettingsListener = userDocRef.onSnapshot(docSnap => {
-                 if (docSnap.exists) {
-                     const settings = docSnap.data();
-                     let changed = false;
-                     if (settings.theme && settings.theme !== currentTheme) {
-                         currentTheme = settings.theme;
-                         applyTheme();
-                         changed = true;
-                     }
-                     if (settings.textSizeMultiplier && settings.textSizeMultiplier !== currentTextSizeMultiplier) {
-                         currentTextSizeMultiplier = settings.textSizeMultiplier;
-                         applyTextSize();
-                         changed = true;
-                     }
-                      if (settings.language && settings.language !== currentLanguage) {
-                         currentLanguage = settings.language;
-                         // Don't call updateUIText here directly, leads to loops sometimes
-                         // Instead, just update the toggle button state
-                         languageToggleButton.textContent = getText('languageName');
-                         changed = true;
-                         updateUIText(); // Update UI if language loaded from settings
-                     }
-
-                 } else {
-                     // No settings found, save defaults
-                     console.log("No user settings found, creating default settings.");
-                     currentTheme = 'light';
-                     currentTextSizeMultiplier = 1.0;
-                     currentLanguage = 'ta'; // Default to Tamil
-                     saveUserSettings(); // Save defaults
-                     applyTheme();
-                     applyTextSize();
-                     updateUIText(); // Update UI with defaults
-                 }
-             }, error => {
-                 console.error(getText('errorLoadingSettings'), error);
-                 // Apply defaults if loading fails
-                 currentTheme = 'light'; applyTheme();
-                 currentTextSizeMultiplier = 1.0; applyTextSize();
-                 currentLanguage = 'ta'; updateUIText();
-             });
-         }
+        async function loadUserSettings(userId) {
+            const userDocRef = db.collection('users').doc(userId);
+            try {
+                const docSnap = await userDocRef.get();
+                if (docSnap.exists) {
+                    const settings = docSnap.data();
+                    currentTheme = settings.theme || 'light';
+                    currentTextSizeMultiplier = settings.textSizeMultiplier || 1.0;
+                    console.log("Loaded user settings:", settings);
+                } else {
+                    console.log("No user settings found, using defaults and saving.");
+                    currentTheme = 'light';
+                    currentTextSizeMultiplier = 1.0;
+                    await saveUserSettings(); // Save defaults for next time
+                }
+            } catch (error) {
+                console.error("Error loading user settings:", error);
+                // Fallback to defaults on error
+                currentTheme = 'light';
+                currentTextSizeMultiplier = 1.0;
+            }
+            // Apply loaded/default settings
+            applyTheme();
+            applyTextSize();
+        }
 
         async function saveUserSettings() {
-            if (!currentUser) return;
+            if (!currentUser) return; // Only save if logged in
             const userDocRef = db.collection('users').doc(currentUser.uid);
             const settings = {
                 theme: currentTheme,
-                textSizeMultiplier: currentTextSizeMultiplier,
-                language: currentLanguage
+                textSizeMultiplier: currentTextSizeMultiplier
             };
             try {
+                // Use set with merge:true to create or update the document
                 await userDocRef.set(settings, { merge: true });
+                console.log("User settings saved:", settings);
             } catch (error) {
-                console.error(getText('errorSavingSettings'), error);
+                console.error("Error saving user settings:", error);
+                // Optionally notify user of save failure
             }
         }
 
         function applyTheme() {
-             if (currentTheme === 'dark') {
+            if(currentTheme==='dark'){
                 document.body.classList.add('dark-theme');
-                themeToggleButton.textContent = LIGHT_THEME_ICON;
-                themeToggleButton.title = getText('toggleThemeLight');
+                themeToggleButton.textContent=LIGHT_THEME_ICON;
+                themeToggleButton.title="Switch to Light Theme";
             } else {
                 document.body.classList.remove('dark-theme');
-                themeToggleButton.textContent = DARK_THEME_ICON;
-                themeToggleButton.title = getText('toggleThemeDark');
+                themeToggleButton.textContent=DARK_THEME_ICON;
+                themeToggleButton.title="Switch to Dark Theme";
             }
         }
 
         function toggleTheme() {
-            if (!currentUser) return;
+            if (!currentUser) return; // Prevent changing theme if logged out
             currentTheme = (currentTheme === 'light') ? 'dark' : 'light';
             applyTheme();
-            saveUserSettings();
+            saveUserSettings(); // Persist the change
         }
 
-         function applyTextSize() {
+        function applyTextSize() {
             const newSize = `calc(var(--message-font-size-base) * ${currentTextSizeMultiplier})`;
             document.documentElement.style.setProperty('--message-font-size', newSize);
-            // Enable/disable buttons based on limits
-            decreaseTextBtn.disabled = currentTextSizeMultiplier <= MIN_TEXT_SIZE_MULTIPLIER;
-            increaseTextBtn.disabled = currentTextSizeMultiplier >= MAX_TEXT_SIZE_MULTIPLIER;
+            // Enable/disable buttons at limits
+            decreaseTextBtn.disabled = !currentUser || currentTextSizeMultiplier <= MIN_TEXT_SIZE_MULTIPLIER;
+            increaseTextBtn.disabled = !currentUser || currentTextSizeMultiplier >= MAX_TEXT_SIZE_MULTIPLIER;
+            console.log("Applied text size multiplier:", currentTextSizeMultiplier);
         }
 
-
         function adjustTextSize(change) {
-            if (!currentUser) return;
+            if (!currentUser) return; // Prevent adjustment if logged out
             let newMultiplier = Math.max(MIN_TEXT_SIZE_MULTIPLIER, Math.min(MAX_TEXT_SIZE_MULTIPLIER, currentTextSizeMultiplier + change));
             newMultiplier = Math.round(newMultiplier * 10) / 10; // Round to one decimal place
             if (newMultiplier !== currentTextSizeMultiplier) {
                 currentTextSizeMultiplier = newMultiplier;
-                applyTextSize();
-                saveUserSettings();
+                applyTextSize(); // Update UI and button states
+                saveUserSettings(); // Persist the change
             }
-        }
-
-        function toggleLanguage() {
-            if (!currentUser) return;
-            currentLanguage = (currentLanguage === 'ta') ? 'en' : 'ta';
-            updateUIText(); // Update all UI text
-            saveUserSettings();
-             // Maybe reload chat history or messages if they contain language-specific system messages?
-             // For now, just update UI elements.
         }
 
         // --- Chat Storage & Loading (Firestore) ---
 
+        // Loads the list of chats for the sidebar and listens for changes
         function loadAndListenForChats(userId) {
-             if (chatListListener) { chatListListener(); chatListListener = null; }
+            if (chatListListener) { chatListListener(); chatListListener = null; } // Detach previous listener
 
-             const chatsRef = db.collection('chats')
-                 .where('userId', '==', userId)
-                 .orderBy('lastUpdated', 'desc');
+            const chatsRef = db.collection('chats')
+                               .where('userId', '==', userId)
+                               .orderBy('lastUpdated', 'desc'); // Newest first
 
-             console.log(getText('listeningChats', { userId: userId }));
-             chatListListener = chatsRef.onSnapshot(snapshot => {
+            console.log(`Listening for chats for user ${userId}`);
+            chatListListener = chatsRef.onSnapshot(snapshot => {
+                 // If a delete operation is in progress, wait for it to finish
+                 // before processing the snapshot to avoid UI flickering.
                  if (isDeletingChat) {
-                     console.log(getText('deletingChatSkip'));
+                     console.log("Skipping chat list update during delete operation.");
                      return;
                  }
-                 const chats = [];
-                 snapshot.forEach(doc => { chats.push({ id: doc.id, ...doc.data() }); });
-                 console.log(getText('chatListSnapshot'), chats.length);
-                 renderSidebarChatList(chats);
 
-                 let chatToLoad = null;
-                 if (activeChatId && chats.some(c => c.id === activeChatId)) {
-                     chatToLoad = activeChatId;
-                 } else if (chats.length > 0) {
-                      chatToLoad = chats[0].id;
-                      console.log(getText('activeChatNoExist'), chatToLoad);
-                 } else {
-                     console.log(getText('noChatsForUser'));
-                     activeChatId = null;
-                     if (activeChatListener) { activeChatListener(); activeChatListener = null; }
-                     currentChatHistory = [];
-                     chatArea.innerHTML = ''; // Clear area if no chats exist
-                     renderGreetingOrLoginPrompt();
-                 }
-
-                 if (chatToLoad && chatToLoad !== activeChatId) {
-                     console.log(getText('switchingChat'), chatToLoad);
-                     switchChat(chatToLoad);
-                 } else if (activeChatId) {
-                     highlightActiveChatInSidebar(); // Just highlight if no change
-                 }
-
-             }, error => {
-                 console.error(getText('errorListeningChats'), error);
-                 displayError(getText('errorLoadingChatList'));
-                 chatListContainer.innerHTML = `<div style="padding:10px;color:var(--text-secondary);font-size:0.9em;">${getText('errorLoadingChats')}</div>`;
-             });
-        }
-
-        function renderSidebarChatList(chats) {
-            chatListContainer.innerHTML = '';
-            if (!currentUser) {
-                chatListContainer.innerHTML = `<div style="padding:10px;color:var(--text-secondary);font-size:0.9em;">${getText('loginToSeeChats')}</div>`;
-                return;
-            }
-            if (chats.length === 0) {
-                const i = document.createElement('div');
-                i.textContent = getText('noChatsYet');
-                i.style.padding = '10px'; i.style.color = 'var(--text-secondary)'; i.style.fontSize = '0.9em';
-                chatListContainer.appendChild(i);
-            } else {
-                chats.forEach(c => {
-                    const i = document.createElement('div');
-                    i.classList.add('chat-list-item');
-                    let title = c.title || getText(NEW_CHAT_KEY); // Use translated untitled
-                    // Basic check if title is reasonable string, fallback if not
-                    if (typeof title !== 'string' || title.length > 100) title = getText(NEW_CHAT_KEY);
-                    i.textContent = title;
-                    i.dataset.id = c.id;
-                    i.title = title;
-
-                    const deleteBtn = document.createElement('button');
-                    deleteBtn.classList.add('delete-chat-button');
-                    deleteBtn.innerHTML = DELETE_ICON;
-                    deleteBtn.title = getText('deleteChat');
-                    deleteBtn.dataset.id = c.id;
-                    i.appendChild(deleteBtn);
-
-                    chatListContainer.appendChild(i);
+                const chats = [];
+                snapshot.forEach(doc => {
+                    chats.push({ id: doc.id, ...doc.data() });
                 });
-            }
-            highlightActiveChatInSidebar();
-        }
+                console.log("Received chat list snapshot:", chats.length, "chats");
+                renderSidebarChatList(chats); // Update the sidebar UI
 
-        function highlightActiveChatInSidebar() {
-            const items = chatListContainer.querySelectorAll('.chat-list-item');
-            items.forEach(item => {
-                item.classList.toggle('active', item.dataset.id === activeChatId);
+                // Determine which chat should be active
+                let chatToLoad = null;
+                if (activeChatId && chats.some(c => c.id === activeChatId)) {
+                    // If the currently active chat still exists, keep it active
+                    chatToLoad = activeChatId;
+                } else if (chats.length > 0) {
+                    // If active chat was deleted or none was active, load the newest chat
+                    chatToLoad = chats[0].id;
+                    console.log("Active chat not found or was deleted, selecting newest:", chatToLoad);
+                } else {
+                    // No chats exist for the user
+                    console.log("No chats found for user.");
+                    activeChatId = null;
+                    if (activeChatListener) { activeChatListener(); activeChatListener = null; } // Detach message listener
+                    renderGreetingOrLoginPrompt(); // Show the initial prompt
+                    setLoadingState(false); // Ensure input isn't stuck in loading
+                }
+
+                 // Switch to the determined chat if it's different from the current one
+                 if (chatToLoad && chatToLoad !== activeChatId) {
+                     console.log("Switching to chat:", chatToLoad);
+                     switchChat(chatToLoad); // Handles loading messages etc.
+                 } else if (activeChatId) {
+                      // If the chat didn't switch, ensure the correct item is still highlighted
+                      highlightActiveChatInSidebar();
+                      setLoadingState(false); // Ensure input state is correct if already on active chat
+                 }
+
+            }, error => {
+                console.error("Error listening for chats:", error);
+                displayError("Could not load your chat list. Please check your connection or try again later.");
+                chatListContainer.innerHTML = '<div style="padding:10px;color:var(--text-secondary);font-size:0.9em;">Error loading chats.</div>';
             });
         }
 
+        // Renders the chat items in the sidebar
+        function renderSidebarChatList(chats) {
+            chatListContainer.innerHTML = ''; // Clear previous list
+            if (!currentUser) { // Should not happen if called correctly, but safety check
+                chatListContainer.innerHTML = '<div style="padding:10px;color:var(--text-secondary);font-size:0.9em;">Please log in.</div>';
+                return;
+            }
+            if (chats.length === 0) {
+                const infoElement = document.createElement('div');
+                infoElement.textContent = "No chats yet. Start one!";
+                infoElement.style.cssText = "padding:10px;color:var(--text-secondary);font-size:0.9em;";
+                chatListContainer.appendChild(infoElement);
+            } else {
+                chats.forEach(chatData => {
+                    const itemElement = document.createElement('div');
+                    itemElement.classList.add('chat-list-item');
+
+                    // Ensure title is a string, provide fallback
+                    let title = chatData.title;
+                    if (typeof title !== 'string' || !title.trim()) {
+                         title = '(Untitled Chat)';
+                    }
+                    title = title.trim(); // Trim whitespace
+
+                    itemElement.textContent = title;
+                    itemElement.dataset.id = chatData.id;
+                    itemElement.title = title; // Tooltip for long names
+
+                    // Add Delete Button
+                    const deleteBtn = document.createElement('button');
+                    deleteBtn.classList.add('delete-chat-button');
+                    deleteBtn.innerHTML = DELETE_ICON; // Use '×' or an SVG icon
+                    deleteBtn.title = "Delete chat";
+                    deleteBtn.dataset.id = chatData.id; // Store ID on button for easy access in event handler
+                    itemElement.appendChild(deleteBtn);
+
+                    chatListContainer.appendChild(itemElement);
+                });
+            }
+            highlightActiveChatInSidebar(); // Ensure the active one is highlighted
+        }
+
+        // Adds/removes the 'active' class from sidebar items
+        function highlightActiveChatInSidebar() {
+             const items = chatListContainer.querySelectorAll('.chat-list-item');
+             items.forEach(item => {
+                 item.classList.toggle('active', item.dataset.id === activeChatId);
+             });
+             // Also update loading state based on whether a chat is active
+             setLoadingState(false); // setLoadingState handles the placeholder/button state
+        }
+
+        // Creates a new chat document in Firestore
         async function createNewChat() {
-             if (!currentUser) { displayError(getText('errorLogin')); return; }
-             setLoadingState(true, getText('sending')); // Use 'sending' or a specific 'creating' text
-             const newChatRef = db.collection('chats').doc();
-             const timestamp = firebase.firestore.FieldValue.serverTimestamp();
-             try {
-                 await newChatRef.set({
-                     userId: currentUser.uid,
-                     title: getText(NEW_CHAT_KEY), // Use translated key
-                     createdAt: timestamp,
-                     lastUpdated: timestamp
-                 });
-                 console.log("New chat document created:", newChatRef.id);
-                 // The listener will pick this up and switch to it
-             } catch (error) {
-                 console.error("Error creating new chat:", error);
-                 displayError(getText('errorSend')); // Generic error
-             } finally {
-                 setLoadingState(false);
-                 userInput.focus();
+            if (!currentUser) { displayError("Please log in to create a new chat."); return; }
+            setLoadingState(true, "Creating chat...");
+            const newChatRef = db.collection('chats').doc(); // Generate new ID
+            const timestamp = firebase.firestore.FieldValue.serverTimestamp();
+
+            try {
+                await newChatRef.set({
+                    userId: currentUser.uid,
+                    title: NEW_CHAT_TITLE, // Start with a default title
+                    createdAt: timestamp,
+                    lastUpdated: timestamp
+                });
+                console.log("New chat document created:", newChatRef.id);
+                // The chatListListener will automatically pick up the new chat
+                // and (usually) select it as the newest one.
+            } catch (error) {
+                console.error("Error creating new chat:", error);
+                displayError("Failed to create the chat. Please try again.");
+            } finally {
+                // setLoadingState will be reset by the listener selecting the chat
+                // or if an error occurred above. Ensure focus returns.
+                if (!isTestMode && !isReviewMode) userInput.focus();
+            }
+        }
+
+        // Handles clicks within the chat list area (delegated)
+        function handleChatListClick(event) {
+             const target = event.target;
+
+             // Check if the delete button (or its icon) was clicked
+             const deleteButton = target.closest('.delete-chat-button');
+             if (deleteButton) {
+                 event.stopPropagation(); // IMPORTANT: Prevent chat switching when clicking delete
+                 const chatId = deleteButton.dataset.id;
+                 // Find the parent list item to get the title for the confirmation message
+                 const chatListItem = deleteButton.closest('.chat-list-item');
+                 const chatTitle = chatListItem?.textContent?.replace(DELETE_ICON, '').trim() || 'this chat';
+                 if (chatId) {
+                     confirmAndDeleteChat(chatId, chatTitle);
+                 }
+                 return; // Stop further processing
+             }
+
+             // Otherwise, check if a chat list item (but not the delete button) was clicked
+             const item = target.closest('.chat-list-item');
+             const clickedId = item?.dataset?.id;
+             if (clickedId && clickedId !== activeChatId) {
+                 console.log("Chat list item clicked, switching to:", clickedId);
+                 switchChat(clickedId);
              }
         }
 
-        function handleChatListClick(event) {
-            const target = event.target;
+        // Prompts user before deleting a chat
+        function confirmAndDeleteChat(chatId, chatTitle) {
+            if (!currentUser || !chatId) return;
+            // Use the chat title in the confirmation for better context
+            if (confirm(`Are you sure you want to permanently delete the chat "${chatTitle}" and all its messages? This cannot be undone.`)) {
+                deleteChatFromFirestore(chatId);
+            }
+        }
 
-            if (target.classList.contains('delete-chat-button')) {
-                event.stopPropagation();
-                const chatId = target.dataset.id;
-                const chatItem = target.closest('.chat-list-item');
-                const chatTitle = chatItem?.textContent.replace(DELETE_ICON, '').trim() || getText(NEW_CHAT_KEY);
-                if (chatId) {
-                    confirmAndDeleteChat(chatId, chatTitle);
+        // Deletes a chat document and its messages subcollection from Firestore
+        async function deleteChatFromFirestore(chatId) {
+            if (!currentUser || !chatId) return;
+
+            console.log(`Attempting to delete chat: ${chatId}`);
+            isDeletingChat = true; // Set flag to pause chatListListener updates
+            setLoadingState(true, "Deleting chat..."); // Show loading state
+
+            const chatDocRef = db.collection('chats').doc(chatId);
+            const messagesRef = chatDocRef.collection('messages');
+
+            try {
+                // 1. Delete all messages in the subcollection (using batch write for efficiency)
+                const messagesSnapshot = await messagesRef.get();
+                if (!messagesSnapshot.empty) {
+                    const batch = db.batch();
+                    messagesSnapshot.docs.forEach(doc => {
+                        batch.delete(doc.ref);
+                    });
+                    await batch.commit();
+                    console.log(`Deleted ${messagesSnapshot.size} messages for chat ${chatId}`);
+                } else {
+                    console.log(`No messages to delete for chat ${chatId}`);
                 }
+
+                // 2. Delete the chat document itself
+                await chatDocRef.delete();
+                console.log(`Successfully deleted chat document: ${chatId}`);
+
+                // 3. Handle UI update if the *active* chat was the one deleted
+                if (activeChatId === chatId) {
+                    console.log("Active chat was deleted. Resetting view.");
+                    activeChatId = null; // Clear active chat ID
+                    currentChatHistory = []; // Clear local history cache
+                    if (activeChatListener) { activeChatListener(); activeChatListener = null; } // Detach message listener
+                    chatArea.innerHTML = ''; // Clear chat area immediately
+                    renderGreetingOrLoginPrompt(); // Show default prompt immediately
+                    // The chat list listener (when unpaused) will handle selecting the next chat if available.
+                }
+
+            } catch (error) {
+                console.error(`Error deleting chat ${chatId}:`, error);
+                displayError("Failed to delete the chat. Please check your connection or try again.");
+            } finally {
+                // Crucially, unset the flag *after* operations, allowing the listener to process the deletion.
+                isDeletingChat = false;
+                // Loading state will be reset either by switching to a new chat (via listener)
+                // or by the explicit setLoadingState(false) in handleAuthStateChange if user logs out,
+                // or if no chats remain (handled in listener).
+                // We call it here just in case the listener doesn't trigger a state change immediately.
+                setLoadingState(false);
+            }
+        }
+
+
+        // Switches the active chat view and loads its messages
+        function switchChat(chatId) {
+             if (!currentUser || !chatId || chatId === activeChatId) return; // No change needed
+
+             console.log("Switching to chat:", chatId);
+             activeChatId = chatId; // Set the new active ID
+             highlightActiveChatInSidebar(); // Update sidebar highlighting
+             loadAndListenForActiveChat(chatId); // Load messages for the new chat
+
+             // Clear the input state for the new chat
+             userInput.value = '';
+             autoGrowTextarea(); // Reset textarea size
+             mcqModeCheckbox.checked = false; // Reset MCQ checkbox
+             if (!isTestMode && !isReviewMode) userInput.focus(); // Focus input if in chat view
+        }
+
+        // --- Message Loading (Firestore) ---
+
+        // Loads messages for the currently active chat and listens for new ones
+        function loadAndListenForActiveChat(chatId) {
+            // Ensure valid state
+            if (!currentUser || !chatId) {
+                console.log("Cannot load messages: Missing user or chatId.");
+                chatArea.innerHTML = '';
+                if (activeChatListener) { activeChatListener(); activeChatListener = null; } // Clean up old listener
+                renderGreetingOrLoginPrompt(); // Show appropriate prompt
+                setLoadingState(false); // Ensure input is usable if logged in
                 return;
             }
 
-            const item = target.closest('.chat-list-item');
-            const clickedId = item?.dataset?.id;
-            if (clickedId && clickedId !== activeChatId) {
-                switchChat(clickedId);
-            }
-        }
+            // Detach any existing listener for the previous chat
+            if (activeChatListener) { activeChatListener(); activeChatListener = null; }
+            highlightActiveChatInSidebar(); // Ensure sidebar is correct
 
-        function confirmAndDeleteChat(chatId, chatTitle) {
-             if (!currentUser || !chatId) return;
-             if (confirm(getText('confirmDelete', { chatTitle: chatTitle }))) {
-                 deleteChatFromFirestore(chatId);
-             }
-        }
+            const messagesRef = db.collection('chats').doc(chatId)
+                                  .collection('messages')
+                                  .orderBy('timestamp', 'asc'); // Oldest first
 
-        async function deleteChatFromFirestore(chatId) {
-             if (!currentUser || !chatId) return;
-             // Ensure Security Rules allow deletion:
-             // match /chats/{chatId} { allow delete: if request.auth.uid == resource.data.userId; }
-             // match /chats/{chatId}/messages/{messageId} { allow delete: if get(/databases/$(database)/documents/chats/$(chatId)).data.userId == request.auth.uid; }
+            chatArea.innerHTML = ''; // Clear chat area for new messages
+            const loadingMsg = displayMessage("Loading chat history...", 'ai', ['thinking']); // Show temporary loading message
 
-             isDeletingChat = true;
-             setLoadingState(true, getText('deletingChat'));
+            console.log(`Listening for messages in chat ${chatId}`);
+            activeChatListener = messagesRef.onSnapshot(snapshot => {
+                console.log(`Received messages snapshot for chat ${chatId}:`, snapshot.size, "messages");
+                removeMessageElement(loadingMsg); // Remove the temporary loading message
+                chatArea.innerHTML = '';          // Clear again before rendering (safer)
+                currentChatHistory = [];        // Reset local history cache before rebuilding
 
-             const chatDocRef = db.collection('chats').doc(chatId);
-             const messagesRef = chatDocRef.collection('messages');
+                if (snapshot.empty && activeChatId === chatId) { // Check activeChatId again in case of race condition
+                    console.log("Chat is empty or newly created.");
+                    // Don't show greeting if messages are about to be added
+                    // If chat remains empty after initial load, show prompt.
+                     // Find the chat title from the sidebar for context
+                     const chatListItem = chatListContainer.querySelector(`.chat-list-item[data-id="${chatId}"]`);
+                     const chatTitle = chatListItem?.textContent?.replace(DELETE_ICON, '').trim() || '';
+                     if (chatTitle && chatTitle !== NEW_CHAT_TITLE) {
+                         // If it's an existing empty chat, prompt user
+                         displayMessage("This chat is empty. Send a message to start!", 'ai');
+                     } else {
+                         // If it's a brand new chat or title is missing, show general greeting
+                         renderGreetingOrLoginPrompt();
+                     }
 
-             try {
-                 // 1. Delete messages subcollection (batched)
-                 const messagesSnapshot = await messagesRef.get();
-                 if (!messagesSnapshot.empty) {
-                     const batch = db.batch();
-                     messagesSnapshot.docs.forEach(doc => { batch.delete(doc.ref); });
-                     await batch.commit();
-                     console.log(`${messagesSnapshot.size} messages deleted for chat ${chatId}`);
-                 }
+                } else {
+                    snapshot.forEach(doc => {
+                        const msgData = doc.data();
+                         const text = msgData.text || ""; // Ensure text exists
+                         const role = msgData.role === 'user' ? 'user' : 'model'; // Normalize role for display/API
 
-                 // 2. Delete chat document
-                 await chatDocRef.delete();
-                 console.log(`Chat document successfully deleted: ${chatId}`);
-
-                 // 3. Handle UI if active chat was deleted
-                 if (activeChatId === chatId) {
-                     activeChatId = null;
-                     currentChatHistory = [];
-                     if (activeChatListener) { activeChatListener(); activeChatListener = null; }
-                     chatArea.innerHTML = ''; // Immediately clear chat area
-                     renderGreetingOrLoginPrompt(); // Show default prompt
-                 }
-                 // The chat list listener (once isDeletingChat=false) will handle selecting the next chat if available.
-
-             } catch (error) {
-                 console.error(`Error deleting chat ${chatId}:`, error);
-                 displayError(getText('errorDeletingChat'));
-             } finally {
-                 isDeletingChat = false;
-                 setLoadingState(false);
-             }
-        }
-
-        function switchChat(chatId) {
-            if (!currentUser || !chatId || chatId === activeChatId) return;
-            activeChatId = chatId;
-            highlightActiveChatInSidebar();
-            loadAndListenForActiveChat(chatId);
-            userInput.focus();
-            userInput.value = ''; autoGrowTextarea(); mcqModeCheckbox.checked = false;
-            updateUIText(); // Update placeholder etc.
-        }
-
-        function loadAndListenForActiveChat(chatId) {
-             if (!currentUser || !chatId) return;
-             if (activeChatListener) { activeChatListener(); activeChatListener = null; }
-             highlightActiveChatInSidebar(); // Ensure it's highlighted
-
-             const messagesRef = db.collection('chats').doc(chatId).collection('messages').orderBy('timestamp', 'asc');
-             chatArea.innerHTML = ''; // Clear previous chat
-             currentChatHistory = []; // Reset history for API context
-             const loadingMsg = displayMessage(getText('loadingChat'), 'ai', ['thinking']);
-
-             activeChatListener = messagesRef.onSnapshot(snapshot => {
-                 console.log(getText('chatMessagesSnapshot', { chatId: chatId, count: snapshot.size }));
-                 removeMessageElement(loadingMsg);
-                 chatArea.innerHTML = ''; // Clear again before rendering
-                 currentChatHistory = []; // Reset context history before repopulating
-
-                 if (snapshot.empty) {
-                     console.log(getText('chatIsEmpty'));
-                     // Don't necessarily show the greeting here, maybe just an empty state?
-                     // Or let the user start typing.
-                 } else {
-                     snapshot.forEach(doc => {
-                         const msgData = doc.data();
-                         const text = msgData.text || "";
-                         const role = msgData.role || "model"; // 'user' or 'model'
-
-                         // Add to API context history
+                         // 1. Add to local history cache for API context
+                         // Ensure it matches the format expected by the Gemini API
                          currentChatHistory.push({
-                             role: role === 'user' ? 'user' : 'model',
+                             role: role,
                              parts: [{ text: text }]
                          });
 
-                         // Display the message
-                         // Pass full msgData to check for mcqData later if needed, though we save directly now
+                         // 2. Render the message in the UI
+                         // Pass the full messageData to handle potential MCQ buttons etc.
                          displayMessage(text, role, [], null, msgData);
-                     });
-                 }
-                  // If after loading messages, the chat area is still empty (e.g., only thinking message was there)
-                  // show the greeting if appropriate (though usually snapshot.empty handles this)
-                  if (!chatArea.querySelector('.message') && currentUser) {
-                      renderGreetingOrLoginPrompt();
-                  }
-                 scrollToBottom(true);
+                    });
+                }
+                scrollToBottom(true); // Scroll to the latest message immediately after rendering
+                setLoadingState(false); // Messages loaded, enable input
 
-             }, error => {
-                 console.error(getText('errorListeningMessages', { chatId: chatId }), error);
-                 displayError(getText('errorLoadingMessages'));
-                 removeMessageElement(loadingMsg);
-                 chatArea.innerHTML = ''; // Clear on error
-                 currentChatHistory = [];
-             });
+            }, error => {
+                console.error(`Error listening for messages in chat ${chatId}:`, error);
+                displayError("Could not load messages for this chat. Please check your connection.");
+                removeMessageElement(loadingMsg); // Remove loading indicator on error
+                chatArea.innerHTML = '';        // Clear area
+                currentChatHistory = [];      // Reset history
+                setLoadingState(false);         // Ensure input is usable
+            });
         }
 
-
         // --- Message Sending (Gemini API & Firestore Save) ---
+
+        // Handles sending user message, calling API, and saving results
         async function handleSendMessage() {
-            const txt = userInput.value.trim();
-            if (!API_KEY) { displayError(getText('errorApiKey')); return; }
-            if (!currentUser) { displayError(getText('errorLogin')); return; }
-            if (!activeChatId) { displayError(getText('errorSelectChat')); return; }
-            if (!txt || sendButton.disabled) return;
+            const userMessageText = userInput.value.trim();
+
+            // --- Pre-send Checks ---
+            if (!API_KEY) { displayError("Gemini API Key not set. Reload to enter."); return; }
+            if (!currentUser) { displayError("Please log in first."); return; }
+            if (!activeChatId) { displayError("Please select or create a chat first."); return; }
+            if (!userMessageText || sendButton.disabled) return; // Ignore empty input or if disabled
 
             const isMCQRequest = mcqModeCheckbox.checked;
-            setLoadingState(true, getText('sending'));
-            const userMessageText = txt; // Keep original text for display/history
+            setLoadingState(true, "Sending..."); // Disable input/button
 
-            userInput.value = ''; autoGrowTextarea();
-            if (isMCQRequest) mcqModeCheckbox.checked = false; // Reset checkbox
-            updateUIText(); // Update placeholder
+            // Clear input immediately
+            userInput.value = '';
+            autoGrowTextarea();
+            if (isMCQRequest) mcqModeCheckbox.checked = false; // Reset checkbox after sending
 
             const timestamp = firebase.firestore.FieldValue.serverTimestamp();
             const messagesColRef = db.collection('chats').doc(activeChatId).collection('messages');
             const chatDocRef = db.collection('chats').doc(activeChatId);
 
-             // --- Check if it's the first user message in this chat (for title generation) ---
-             let isFirstUserMessageInNewChat = false;
+            // --- Determine if Title Needs Update (Moved logic inside try block below) ---
+            let isFirstUserMessageInNewChat = false; // Flag to check later
+
+            // 1. Add user message to Firestore (Listener will display it)
+             const userMsgData = {
+                 role: "user",
+                 text: userMessageText,
+                 timestamp: timestamp
+             };
              try {
+                 // --- Check if this is the first message BEFORE saving it ---
+                 // Check the chat document's title directly
                  const chatSnap = await chatDocRef.get();
-                 // Check if title is the default 'untitled' key's translation
-                 if (chatSnap.exists && chatSnap.data().title === getText(NEW_CHAT_KEY)) {
+                 if (chatSnap.exists && chatSnap.data().title === NEW_CHAT_TITLE) {
+                     // Check if the messages subcollection is empty
                      const messagesSnap = await messagesColRef.limit(1).get();
-                     if (messagesSnap.empty) { isFirstUserMessageInNewChat = true; }
-                 }
-             } catch(err) { console.error(getText('errorCheckingFirstMsg'), err); }
-             // --- End Check ---
-
-
-            // 1. Save User Message to Firestore (before API call)
-            // The listener will automatically display it.
-             const userMsgData = { role: "user", text: userMessageText, timestamp: timestamp };
-            try {
-                const userMsgRef = await messagesColRef.add(userMsgData);
-                await chatDocRef.update({ lastUpdated: timestamp });
-                console.log(getText('savingUserMsg'));
-
-                 // --- Automatic Title Update Logic (moved here) ---
-                 if (isFirstUserMessageInNewChat) {
-                     console.log(getText('firstMsgCheck'));
-                     setLoadingState(true, getText('generatingTitle')); // Show status
-                     // Use a simpler title generation for now
-                     const generatedTitle = generateChatTitle(userMessageText);
-                     if (generatedTitle !== getText(NEW_CHAT_KEY)) {
-                         await updateActiveChatTitle(generatedTitle);
-                         console.log(getText('chatTitleUpdated', { title: generatedTitle }));
+                     if (messagesSnap.empty) {
+                         isFirstUserMessageInNewChat = true;
                      }
-                      setLoadingState(true, getText('sending')); // Revert status back
+                 }
+
+                 // Save the user message
+                 await messagesColRef.add(userMsgData);
+                 // Update the chat's lastUpdated timestamp (do this after successful message add)
+                 await chatDocRef.update({ lastUpdated: timestamp });
+                 console.log("User message saved to Firestore.");
+
+                 // --- Automatic Title Update Logic (Now AFTER successful save) ---
+                 if (isFirstUserMessageInNewChat) {
+                     console.log("First user message detected, attempting to generate title.");
+                     const generatedTitle = generateChatTitle(userMessageText);
+                     if (generatedTitle && generatedTitle !== NEW_CHAT_TITLE) {
+                         await updateActiveChatTitle(generatedTitle); // Update title in Firestore
+                         console.log("Chat title updated automatically:", generatedTitle);
+                     } else {
+                         console.log("Generated title was empty or same as default, not updating.");
+                     }
                  }
                  // --- End Title Update ---
 
-            } catch(error) {
-                console.error(getText('errorSaveUserMsg'), error);
-                displayError(getText('errorSend'));
-                setLoadingState(false); return; // Stop if user message can't be saved
-            }
+             } catch(error) {
+                 console.error("Error saving user message or updating title:", error);
+                 displayError("Failed to send message. Please check connection and try again.");
+                 setLoadingState(false); // Re-enable input on failure
+                 return; // Stop processing if save failed
+             }
 
-            // 2. Prepare for API Call
-            const thinking = displayMessage(getText('thinking'), 'ai', ['thinking']);
-            // Build history *from current state* just before sending
-            const requestHistory = [ ...currentChatHistory ]; // History now includes the user message saved above
+            // 2. Prepare for API call
+            const thinking = displayMessage("Thinking...", 'ai', ['thinking']); // Show thinking indicator
 
-            let modifiedPrompt = userMessageText;
-             let mcqPromptDetails = `Please provide the response strictly in JSON format containing an array of objects. Each object must have 'question' (string), 'options' (array of 4 strings, e.g., ["A) Opt1", "B) Opt2", "C) Opt3", "D) Opt4"]), and 'answer' (string, the letter corresponding to the correct option, e.g., "B"). Example: \`\`\`json\n[{"question":"Capital of France?","options":["A) Berlin","B) Paris","C) Rome","D) Madrid"],"answer":"B"}]\n\`\`\` Do not include any text before or after the JSON array. Generate based on the following topic:`;
+            // Build API history. Include the just-sent message for context.
+            // Use the currentChatHistory which is populated by the listener,
+            // then add the latest user message which hasn't arrived via listener yet.
+            const requestHistory = [
+                 ...currentChatHistory, // History loaded by the listener
+                 // The user message just saved might not be in currentChatHistory yet,
+                 // but we need it for the API call context.
+                 // Ensure role is correct ('user')
+                 { role: "user", parts: [{ text: userMessageText }] }
+             ];
 
-            if (isMCQRequest) {
-                modifiedPrompt = `${mcqPromptDetails}\n\n${userMessageText}`;
-                 // Modify the last user message in the history for the API call
-                 if (requestHistory.length > 0 && requestHistory[requestHistory.length - 1].role === 'user') {
-                     requestHistory[requestHistory.length - 1].parts = [{ text: modifiedPrompt }];
-                 } else {
-                     // Should not happen if user message was just added, but as a fallback:
-                     requestHistory.push({ role: "user", parts: [{ text: modifiedPrompt }] });
-                 }
-            }
+            // Modify the last message if it's an MCQ request
+             let promptForAPI = userMessageText;
+             if (isMCQRequest) {
+                 // Append instructions for JSON format to the prompt text itself
+                 promptForAPI = `${userMessageText}\n\nPlease generate multiple choice questions based on the above text or topic. Provide the response *only* as a valid JSON array string, enclosed within \`\`\`json ... \`\`\`. Each object in the array must have these exact keys: "question" (string), "options" (array of 4 strings), and "answer" (string, representing the correct option letter 'A', 'B', 'C', or 'D'). Do not include any text outside the JSON structure.`;
+                 // Update the last item in requestHistory to use the modified prompt
+                 requestHistory[requestHistory.length - 1] = { role: "user", parts: [{ text: promptForAPI }] };
+                 console.log("MCQ mode: Modified prompt for API.");
+             }
 
-            // 3. Call Gemini API
-             console.warn(getText('insecureApiCall'));
-            let aiResponseText = null;
-            let mcqData = null;
-            let saveError = null;
-            let apiError = null;
-
-            try {
+            // 3. Call Gemini API (INSECURE CLIENT-SIDE CALL)
+             console.warn("Calling Gemini API using client-side key. Replace with a secure Cloud Function.");
+             try {
                  const response = await fetch(API_URL_BASE + API_KEY, {
                      method: 'POST',
                      headers: { 'Content-Type': 'application/json' },
                      body: JSON.stringify({
-                         contents: requestHistory, // Send the history built just before the call
-                         safetySettings: [ /* ... safety settings ... */
-                            {category:"HARM_CATEGORY_HARASSMENT",threshold:"BLOCK_MEDIUM_AND_ABOVE"},
-                            {category:"HARM_CATEGORY_HATE_SPEECH",threshold:"BLOCK_MEDIUM_AND_ABOVE"},
-                            {category:"HARM_CATEGORY_SEXUALLY_EXPLICIT",threshold:"BLOCK_MEDIUM_AND_ABOVE"},
-                            {category:"HARM_CATEGORY_DANGEROUS_CONTENT",threshold:"BLOCK_MEDIUM_AND_ABOVE"}
+                         contents: requestHistory,
+                         // Configure safety settings as needed
+                         safetySettings: [
+                            { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_MEDIUM_AND_ABOVE" },
+                            { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_MEDIUM_AND_ABOVE" },
+                            { category: "HARM_CATEGORY_SEXUALLY_EXPLICIT", threshold: "BLOCK_MEDIUM_AND_ABOVE" },
+                            { category: "HARM_CATEGORY_DANGEROUS_CONTENT", threshold: "BLOCK_MEDIUM_AND_ABOVE" },
                          ]
-                    }),
-                });
+                         // Add generationConfig if needed (e.g., temperature, maxOutputTokens)
+                         // generationConfig: { temperature: 0.7, maxOutputTokens: 1000 }
+                     }),
+                 });
+                 removeMessageElement(thinking); // Remove "Thinking..." message
 
-                removeMessageElement(thinking); // Remove thinking message
-
-                if (!response.ok) {
-                    let errData = { message: `API Error (${response.status})` };
-                    try { errData = (await response.json()).error || errData; } catch {}
-                    apiError = errData.message || getText('errorApiGeneric');
-                    aiResponseText = `Error: ${apiError}`; // Set text for saving
-                     console.error("API Error:", errData);
-                     if(response.status===400 && apiError.toLowerCase().includes('api key not valid')){
-                        localStorage.removeItem(STORAGE_KEY_API_KEY); API_KEY='';
-                        apiError = getText('errorApiKeyInvalid'); // More specific error
-                        aiResponseText = `Error: ${apiError}`;
-                     }
-                     displayError(apiError); // Display specific or generic API error
-                } else {
-                    const data = await response.json();
-                    if (data.promptFeedback?.blockReason) {
-                        aiResponseText = getText('responseBlocked', { reason: data.promptFeedback.blockReason });
-                        displayMessage(aiResponseText, 'ai', ['error-message']); // Display block reason as an error
-                    } else if (data.candidates?.[0]?.content?.parts?.[0]?.text) {
-                        aiResponseText = data.candidates[0].content.parts[0].text;
-
-                        if (isMCQRequest) {
-                             // Attempt to parse MCQs
-                            try {
-                                const jsonMatch = aiResponseText.match(/```json\s*([\s\S]*?)\s*```/);
-                                const jsonString = jsonMatch ? jsonMatch[1].trim() : aiResponseText.trim();
-
-                                if (jsonString.startsWith('[') && jsonString.endsWith(']')) {
-                                    const parsedMCQs = JSON.parse(jsonString);
-                                    // Validate structure
-                                     if (Array.isArray(parsedMCQs) && parsedMCQs.length > 0 && parsedMCQs.every(q => q.question && Array.isArray(q.options) && q.options.length === 4 && q.answer && typeof q.answer === 'string' && ['A','B','C','D'].includes(q.answer.toUpperCase()))) {
-                                        mcqData = parsedMCQs; // Store valid MCQ data
-                                        console.log(getText('mcqsParsedSuccess'), mcqData);
-                                        // Don't display MCQs here, save them instead.
-                                        // Change the aiResponseText to an informational message for the chat.
-                                         aiResponseText = getText('mcqCreated', { testsPageUrl: TESTS_PAGE_URL });
-                                         // Display this info message in the chat immediately
-                                         displayMessage(aiResponseText, 'ai', ['info-message']);
-                                    } else {
-                                         console.warn(getText('errorMCQValidation'));
-                                         // Keep original AI text if validation fails, maybe add a note
-                                         aiResponseText += `\n\n(${getText('errorMCQValidation')})`;
-                                         displayMessage(aiResponseText, 'ai'); // Show the original response with error note
-                                     }
-                                } else {
-                                    console.warn(getText('errorMCQFormat'));
-                                     // Keep original AI text if not JSON array
-                                     aiResponseText += `\n\n(${getText('errorMCQFormat')})`;
-                                     displayMessage(aiResponseText, 'ai');
-                                }
-                            } catch (parseError) {
-                                console.error(getText('errorMCQParse'), parseError);
-                                // Keep original AI text on parse error
-                                aiResponseText += `\n\n(${getText('errorMCQParse')})`;
-                                displayMessage(aiResponseText, 'ai');
-                            }
-                        } else {
-                            // Normal response, display it (listener will pick it up after saving)
-                             console.log(getText('normalAiResponse'));
-                             // displayMessage(aiResponseText, 'ai'); // Let the listener handle display after save
-                        }
-                    } else {
-                         aiResponseText = getText('emptyResponse'); // Handle empty but successful response
-                         displayMessage(aiResponseText, 'ai');
-                    }
-                }
-            } catch (error) { // Network or other fetch errors
-                removeMessageElement(thinking);
-                apiError = error.message || getText('errorFetch');
-                aiResponseText = `Error: ${apiError}`;
-                console.error("Fetch/Processing Error:", error);
-                displayError(apiError);
-                saveError = apiError; // Mark save as potentially problematic
-            }
-
-            // 4. Save AI Response (or Error) & Test Definition to Firestore
-            if (aiResponseText) {
-                 // If MCQs were generated and parsed successfully, save to /tests collection
-                 let testDefId = null;
-                 if (mcqData) {
-                     setLoadingState(true, getText('savingTestDef'));
-                     const testDef = {
-                         userId: currentUser.uid,
-                         title: generateChatTitle(userMessageText) + " (MCQ)", // Generate title from user prompt
-                         questions: mcqData,
-                         createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-                         sourceChatId: activeChatId // Link back to the chat
-                     };
-                     try {
-                         const testRef = await db.collection('tests').add(testDef);
-                         testDefId = testRef.id;
-                         console.log(getText('savingTestDefSuccess', {testId: testDefId}));
-                         // The aiResponseText already contains the link message for the user
-                     } catch (err) {
-                         console.error(getText('errorMCQSave'), err);
-                         // Display an error IN ADDITION to the info message already shown
-                         displayError(getText('errorMCQSave'));
-                         saveError = getText('errorMCQSave'); // Mark save error
-                     }
-                     setLoadingState(false); // Reset loading state after test save attempt
-                 }
-
-                 // Save the AI message (info message or actual response/error) to the chat messages
-                 const aiMsgData = {
-                     role: "model",
-                     text: aiResponseText, // This is either the normal response, block reason, error, or the MCQ created message
-                     timestamp: firebase.firestore.FieldValue.serverTimestamp(),
-                     // Optionally store testDefId if created
-                     ...(testDefId && { createdTestId: testDefId })
+                 // Prepare default AI message data (will be overwritten on success)
+                 let aiMsgData = {
+                     role: "model", // Firestore role
+                     text: "Error: No valid response received from API.",
+                     timestamp: firebase.firestore.FieldValue.serverTimestamp()
                  };
+                 let displayAsError = true; // Flag to control UI display style
 
-                 try {
-                     if (!saveError) { // Only try saving AI msg if no major error occurred before
-                         await messagesColRef.add(aiMsgData);
-                         await chatDocRef.update({ lastUpdated: firebase.firestore.FieldValue.serverTimestamp() });
-                         console.log(getText('savingAiMsg'));
-                         // The listener will now display the saved AI message if it wasn't displayed manually (like the info message was)
+                 if (!response.ok) {
+                     // Handle API errors (e.g., 4xx, 5xx)
+                     let errorDetails = `API error (${response.status})`;
+                     try {
+                         const errorJson = await response.json();
+                         errorDetails = errorJson.error?.message || errorDetails;
+                     } catch {} // Ignore if response isn't JSON
+                     console.error("API Error:", response.status, errorDetails);
+                     aiMsgData.text = `Error: ${errorDetails}`;
+                     // Special handling for invalid API key
+                     if (response.status === 400 && errorDetails.toLowerCase().includes('api key not valid')) {
+                          localStorage.removeItem(STORAGE_KEY_API_KEY); API_KEY='';
+                          aiMsgData.text += " Your API Key seems invalid and has been cleared. Reload the page to enter a new key.";
                      }
-                 } catch (error) {
-                     console.error(getText('errorSaveAiMsg'), error);
-                     displayError(getText('errorSaveAiMsg'));
-                 }
-            }
+                 } else {
+                     // Handle successful API response
+                     const data = await response.json();
+                     let aiText = "";
+                     let blocked = false;
+                     displayAsError = false; // Assume success unless changed below
 
-            // 5. Finalize
-            setLoadingState(false);
-            userInput.focus();
-            // Listener should handle displaying the final AI message from Firestore
-        }
+                     // Check for safety blocks first
+                     if (data.promptFeedback?.blockReason) {
+                         aiText = `Blocked: Your prompt was blocked due to safety concerns (${data.promptFeedback.blockReason}).`;
+                         blocked = true;
+                         displayAsError = true; // Display safety blocks as errors
+                         console.warn("Prompt blocked:", data.promptFeedback.blockReason);
+                     } else if (data.candidates?.[0]?.finishReason === 'SAFETY') {
+                          aiText = `Blocked: The response was blocked due to safety concerns.`;
+                          blocked = true;
+                          displayAsError = true; // Display safety blocks as errors
+                          console.warn("Response blocked due to safety.");
+                     } else if (data.candidates?.[0]?.content?.parts?.[0]?.text) {
+                         // Extract the AI's response text
+                         aiText = data.candidates[0].content.parts[0].text;
+                         aiMsgData.text = aiText; // Default text to save
 
-        // --- Helper function to generate a simple title ---
-        function generateChatTitle(text) {
-             if (!text) return getText(NEW_CHAT_KEY);
-             const words = text.split(/\s+/);
-             // Limit title length (e.g., 5 words or 35 chars)
-             let title = words.slice(0, 5).join(' ');
-             if (title.length > 35) {
-                 title = title.substring(0, 32) + '...';
-             }
-             // Remove trailing punctuation if any
-             title = title.replace(/[.,!?;:]$/, '');
-             return title || getText(NEW_CHAT_KEY); // Fallback if result is empty
-        }
+                         // Attempt to parse MCQs if requested and not blocked
+                         if (isMCQRequest && !blocked) {
+                              console.log("Attempting to parse MCQ JSON from response...");
+                              try {
+                                  // Look for ```json ... ``` block first
+                                  const jsonMatch = aiText.match(/```json\s*([\s\S]*?)\s*```/);
+                                  // If no block, try parsing the whole text (less reliable)
+                                  const jsonString = jsonMatch ? jsonMatch[1].trim() : aiText.trim();
 
+                                  // Basic validation: does it look like a JSON array?
+                                  if (jsonString.startsWith('[') && jsonString.endsWith(']')) {
+                                      const mcqs = JSON.parse(jsonString);
+                                      // More robust validation: is it an array, non-empty, and do items have expected structure?
+                                      if (Array.isArray(mcqs) && mcqs.length > 0 &&
+                                          mcqs.every(q => q && typeof q.question === 'string' && Array.isArray(q.options) && q.options.length === 4 && typeof q.answer === 'string' && ['A','B','C','D'].includes(q.answer.toUpperCase())))
+                                      {
+                                          const summaryText = `Successfully generated ${mcqs.length} multiple choice questions based on your prompt. Click the button below to start the test.`;
+                                          aiMsgData.text = summaryText; // Save summary text instead of raw JSON
+                                          aiMsgData.mcqData = mcqs;    // Add parsed MCQ data to the Firestore object
+                                          console.log("MCQs parsed successfully, saving summary and data to Firestore:", mcqs.length, "questions");
+                                      } else {
+                                           console.warn("MCQ JSON validation failed: Structure incorrect or missing fields.", mcqs);
+                                           // Save the original text if parsing/validation failed, maybe add a note
+                                           aiMsgData.text = "Received MCQ data, but it wasn't in the expected format.\n\n" + aiText;
+                                           displayAsError = true; // Show as error if format is wrong
+                                      }
+                                  } else {
+                                       console.warn("AI response for MCQ request didn't look like a JSON array string.");
+                                       aiMsgData.text = "Expected MCQs in JSON format, but didn't receive it correctly.\n\n" + aiText;
+                                       displayAsError = true; // Show as error if format is wrong
+                                  }
+                              } catch (parseError) {
+                                   console.error("Failed to parse MCQ JSON:", parseError, "\nResponse Text:", aiText);
+                                   aiMsgData.text = "Error parsing the generated MCQ JSON data.\n\n" + aiText;
+                                   displayAsError = true; // Show as error if parsing failed
+                              }
+                          } // End MCQ parsing block
 
-        // --- Update Firestore Chat Title ---
-        async function updateActiveChatTitle(newTitle) {
-            if (!currentUser || !activeChatId || !newTitle || newTitle === getText(NEW_CHAT_KEY)) { return; }
-            const chatDocRef = db.collection('chats').doc(activeChatId);
-            try {
-                await chatDocRef.update({ title: newTitle });
-                // Listener will update sidebar
-            } catch (error) {
-                console.error(getText('errorUpdatingTitle'), error);
-            }
-        }
-
-
-        // --- UI & Message Display Functions ---
-        function autoGrowTextarea() { userInput.style.height = 'auto'; userInput.style.height = (userInput.scrollHeight) + 'px'; }
-        function handleInputKeydown(event) { if (event.key === 'Enter' && !event.shiftKey) { event.preventDefault(); handleSendMessage(); } }
-        function handleSuggestionClick(event) { if (event.target.classList.contains('suggestion-chip')) { userInput.value = event.target.dataset.prompt || ''; autoGrowTextarea(); userInput.focus(); } }
-
-        function displayError(text) {
-            // Avoid displaying duplicate errors rapidly
-            const lastMsg = chatArea.lastElementChild;
-            if (lastMsg && lastMsg.classList.contains('error-message') && lastMsg.textContent.includes(text)) {
-                return;
-            }
-            displayMessage(` பிழை: ${text}`, 'ai', ['error-message']); // Prefix with "பிழை:"
-             scrollToBottom();
-        }
-
-        function scrollToBottom(immediate = false) { chatArea.scrollTo({ top: chatArea.scrollHeight, behavior: immediate ? 'auto' : 'smooth' }); }
-        function removeMessageElement(element) { if (element?.parentNode === chatArea) chatArea.removeChild(element); }
-
-        function setLoadingState(isLoading, message = getText('thinking')) {
-            const isDisabled = isLoading || !currentUser || (!activeChatId && !isDeletingChat);
-            const inputDisabled = isLoading || !currentUser;
-
-            userInput.disabled = inputDisabled;
-            sendButton.disabled = isDisabled;
-            mcqModeCheckbox.disabled = isDisabled;
-
-            if (isLoading) { userInput.placeholder = message; }
-            else if (!currentUser) { userInput.placeholder = getText('loginToStart'); }
-            else if (!activeChatId && !isDeletingChat) { userInput.placeholder = getText('selectOrCreateChat'); }
-            else if (!activeChatId && isDeletingChat) { userInput.placeholder = getText('loadingChat'); }
-            else { userInput.placeholder = mcqModeCheckbox.checked ? getText('enterQuestionMCQ') : getText('enterQuestion'); }
-
-            startChatButton.disabled = isLoading || !currentUser;
-            gotoTestsButton.disabled = isLoading || !currentUser; // Also disable tests button during load/logout
-        }
-
-         function displayMessage(text, sender, cssClasses = [], appendHtml = null, messageData = null) {
-             const element = document.createElement('div');
-             element.classList.add('message', `${sender}-message`, ...cssClasses);
-
-             // Basic Markdown-like formatting + HTML Escaping
-             // IMPORTANT: This is basic. For robust rendering, use a library like Marked.js or sanitize carefully.
-             let formattedText = text
-                 .replace(/&/g, "&amp;") // Escape basic HTML first
-                 .replace(/</g, "&lt;")
-                 .replace(/>/g, "&gt;")
-                 .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>') // Bold
-                 .replace(/\*(.*?)\*/g, '<em>$1</em>')     // Italics
-                 // Basic Code block - careful with complex nesting or languages
-                 .replace(/```([\s\S]*?)```/g, (match, code) => `<pre><code>${code}</code></pre>`)
-                 // Inline code
-                 .replace(/`([^`]+)`/g, `<code>$1</code>`)
-                 // Basic link detection (very simple) - needs improvement for reliability
-                 .replace(/(?<!href="|src=")(https?:\/\/[^\s<]+)/g, '<a href="$1" target="_blank">$1</a>')
-                 .replace(/\n/g, '<br>'); // Newlines
-
-             // Allow specific HTML for info messages (like the link to tests page)
-             if (cssClasses.includes('info-message')) {
-                 // Allow 'a' tags within info messages - This is a simplification!
-                 // A proper sanitizer is better.
-                 formattedText = formattedText.replace(/&lt;a href="(.*?)" target="_blank"&gt;(.*?)&lt;\/a&gt;/g, '<a href="$1" target="_blank">$2</a>');
-             }
-
-              element.innerHTML = formattedText;
-
-             // Handle MathJax rendering
-             if (text.includes('$') || text.includes('\\(') || text.includes('\\[')) {
-                 try {
-                     if (typeof MathJax !== "undefined" && MathJax.typesetPromise) {
-                         // Use a timeout to ensure DOM is updated before typesetting
-                         setTimeout(() => {
-                             MathJax.typesetPromise([element]).catch(err => console.error('MathJax typeset error:', err));
-                         }, 0);
+                     } else {
+                         // Handle cases where response format is unexpected
+                         console.warn("Unexpected API response format:", data);
+                         aiText = "Sorry, I received an unexpected response format from the API.";
+                         displayAsError = true;
                      }
-                 } catch (e) {
-                     console.error("MathJax call failed:", e);
+                      aiMsgData.text = aiText; // Ensure aiMsgData.text holds the final text to save
                  }
-             }
 
-             if (appendHtml) { // This was for the old "Start Test" button, might remove
-                 const tempDiv = document.createElement('div');
-                 tempDiv.innerHTML = appendHtml;
-                 while (tempDiv.firstChild) {
-                     element.appendChild(tempDiv.firstChild);
+                 // 4. Save AI response/error to Firestore (Listener will display it)
+                 try {
+                      // Add the prepared aiMsgData (contains text, maybe mcqData)
+                      await messagesColRef.add(aiMsgData);
+                      // Update lastUpdated again after AI response
+                      await chatDocRef.update({ lastUpdated: firebase.firestore.FieldValue.serverTimestamp() });
+                      console.log("AI response/error saved to Firestore.");
+                      // If it was displayed as an error, also show it via displayError for immediate feedback
+                      if (displayAsError) {
+                          displayError(aiMsgData.text); // Show prominent error in UI now
+                      }
+                 } catch (saveError) {
+                      console.error("Error saving AI response to Firestore:", saveError);
+                      // Display the AI response directly if saving failed, otherwise it's lost
+                      displayError(`Received response, but failed to save it: ${aiMsgData.text}`);
                  }
-             }
 
-             chatArea.appendChild(element);
-              // Scroll only if the user isn't scrolled up significantly
-              if (chatArea.scrollHeight - chatArea.scrollTop < chatArea.clientHeight + 150) {
-                   scrollToBottom();
-              }
-             return element;
+             } catch (error) { // Catch network errors during fetch or other JS errors
+                 console.error("Fetch/Processing Error:", error);
+                 removeMessageElement(thinking);
+                 const errorText = `Error communicating with the API: ${error.message || "Check network connection."}`;
+                 displayError(errorText);
+                 // Attempt to save this network/script error to Firestore history
+                 try {
+                     await messagesColRef.add({ role: "model", text: errorText, timestamp: firebase.firestore.FieldValue.serverTimestamp() });
+                     await chatDocRef.update({ lastUpdated: firebase.firestore.FieldValue.serverTimestamp() });
+                 } catch (saveError) {
+                      console.error("Failed to save fetch/processing error to history:", saveError);
+                 }
+             } finally {
+                 // Ensure input is re-enabled regardless of success/failure
+                 setLoadingState(false);
+                 // Refocus input only if user is still in chat view
+                 if (!isTestMode && !isReviewMode) userInput.focus();
+             }
+        }
+
+
+         // Generates a short title from the first user message
+         function generateChatTitle(firstUserMessageText) {
+             if (!firstUserMessageText || typeof firstUserMessageText !== 'string') {
+                 return NEW_CHAT_TITLE; // Return default if input is invalid
+             }
+             const text = firstUserMessageText.trim();
+             if (!text) {
+                 return NEW_CHAT_TITLE; // Return default if input is empty after trimming
+             }
+             // Take first 5 words, remove trailing punctuation
+             const title = text.split(/\s+/).slice(0, 5).join(' ').replace(/[.,!?;:]+$/, '');
+             // Truncate if too long
+             return title.length > 35 ? title.substring(0, 32) + '...' : title;
          }
+
+
+         // Updates the title of the active chat in Firestore
+         async function updateActiveChatTitle(newTitle) {
+              // Basic validation
+              if (!currentUser || !activeChatId || !newTitle || typeof newTitle !== 'string' || newTitle.trim() === NEW_CHAT_TITLE || !newTitle.trim()) {
+                  console.log("Skipping title update (invalid input or no change needed).");
+                  return;
+              }
+              const finalTitle = newTitle.trim(); // Use trimmed title
+
+              const chatDocRef = db.collection('chats').doc(activeChatId);
+              try {
+                  await chatDocRef.update({ title: finalTitle });
+                  console.log(`Chat ${activeChatId} title updated to: "${finalTitle}"`);
+                  // The chatListListener will handle updating the UI in the sidebar
+              } catch (error) {
+                  console.error("Error updating chat title in Firestore:", error);
+                  // Optionally notify user or retry
+              }
+         }
+
+
+        // --- UI & Message Display Helpers ---
+        function autoGrowTextarea() { userInput.style.height='auto'; userInput.style.height=(userInput.scrollHeight)+'px'; }
+        function handleInputKeydown(event) { if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();handleSendMessage();} }
+        function handleSuggestionClick(event) { if(event.target.classList.contains('suggestion-chip')){userInput.value=event.target.dataset.prompt||'';autoGrowTextarea();userInput.focus();} }
+        function displayError(text) { displayMessage(`Error: ${text}`, 'ai', ['error-message']); } // Display as an AI message with error styling
+        function scrollToBottom(immediate = false) { chatArea.scrollTo({top:chatArea.scrollHeight,behavior:immediate?'auto':'smooth'}); }
+        function removeMessageElement(element) { if(element && element.parentNode === chatArea) { chatArea.removeChild(element); } } // Added null check
+
+
+        // Manages the loading state of input elements and placeholders
+        function setLoadingState(isLoading, message = "Generating...") {
+            // Determine disable states based on loading status and auth/chat status
+            const isInputDisabled = isLoading || !currentUser; // Input disabled if loading or logged out
+            const isSendDisabled = isLoading || !currentUser || !activeChatId; // Send disabled if loading, logged out, OR no chat active
+            const isControlsDisabled = isLoading || !currentUser; // Sidebar controls generally disabled if loading or logged out
+
+            // Apply states to elements
+            userInput.disabled = isInputDisabled;
+            sendButton.disabled = isSendDisabled;
+            mcqModeCheckbox.disabled = isSendDisabled; // Link MCQ checkbox state to send button state
+            startChatButton.disabled = isControlsDisabled; // Disable 'New Chat' if loading or logged out
+
+            // Update placeholder text based on current state
+            if (isLoading) {
+                userInput.placeholder = message; // Show dynamic loading message
+            } else if (!currentUser) {
+                userInput.placeholder = "Please log in"; // Logged out prompt
+            } else if (!activeChatId && isDeletingChat) {
+                 // Special case: Deleting the last active chat
+                 userInput.placeholder = "Loading..."; // Neutral placeholder during deletion transition
+            } else if (!activeChatId) {
+                // Logged in, but no chat selected (e.g., after login before selection, or after deleting last chat finished)
+                userInput.placeholder = "Select or create a chat";
+            } else {
+                // Logged in and a chat is active - normal state
+                userInput.placeholder = "Enter prompt (Check 'MCQs?' to generate test)";
+            }
+        }
+
+        // Switches between Chat, Test, and Review views
+        function switchView(viewName) {
+            console.log("Switching view to:", viewName);
+            // Hide all main views initially
+            chatView.classList.remove('active');
+            reviewView.classList.remove('active');
+            testView.classList.remove('active');
+            appContainer.classList.remove('hidden'); // Show main app container by default
+
+            isTestMode = false;
+            isReviewMode = false;
+
+            // Activate the selected view
+            if(viewName==='test'){
+                appContainer.classList.add('hidden'); // Hide sidebar/chat area for test
+                testView.classList.add('active');
+                isTestMode=true;
+            } else if(viewName==='review'){
+                reviewView.classList.add('active'); // Review view uses main container
+                isReviewMode=true;
+            } else { // Default to chat view
+                chatView.classList.add('active');
+            }
+
+            // Clean up test timer if leaving test view
+            if (viewName !== 'test' && testTimerInterval) {
+                clearInterval(testTimerInterval);
+                testTimerInterval = null;
+                console.log("Test timer cleared.");
+            }
+        }
+
+        // Displays a message in the chat area, handles formatting, MathJax, and MCQ buttons
+        function displayMessage(text, sender, cssClasses = [], appendHtml = null, messageData = null) {
+            const messageElement = document.createElement('div');
+            // Basic classes: message type and sender
+            messageElement.classList.add('message', `${sender}-message`);
+            // Add any extra classes provided (e.g., 'thinking', 'error-message')
+            if (cssClasses && cssClasses.length > 0) {
+                messageElement.classList.add(...cssClasses);
+            }
+
+             // --- Basic Markdown to HTML Conversion & Escaping ---
+             // IMPORTANT: Escape HTML characters FIRST before applying formatting
+             // to prevent injection via markdown (e.g., **<script>...**).
+             // Using innerText first helps, then replace markdown.
+             const tempDiv = document.createElement('div');
+             tempDiv.innerText = text || ""; // Let browser handle initial escaping
+             let formattedText = tempDiv.innerHTML; // Get escaped text
+
+             // Apply formatting (Bold, Italic, Code, Pre) using Regex
+             // Order matters: handle pre/code blocks before simpler inline styles
+             formattedText = formattedText
+                .replace(/```([\s\S]*?)```/g, (match, code) => `<pre><code>${code}</code></pre>`) // Code blocks (already escaped)
+                .replace(/`([^`]+)`/g, (match, code) => `<code>${code}</code>`)          // Inline code (already escaped)
+                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')                         // Bold
+                .replace(/\*(.*?)\*/g, '<em>$1</em>')                               // Italic
+                .replace(/\n/g, '<br>');                                               // Newlines
+
+
+            messageElement.innerHTML = formattedText;
+
+            // --- Handle MCQ Offer ---
+            // Check if this message contains MCQ data (comes from Firestore load or API response processing)
+            if (messageData && messageData.role === 'model' && messageData.mcqData && Array.isArray(messageData.mcqData) && messageData.mcqData.length > 0) {
+                 console.log("Rendering message with MCQ offer:", messageData.mcqData.length, "questions");
+                 // Store the data globally for the button click handler
+                 // Note: This assumes only one test offer is active at a time.
+                 generatedMCQData = messageData.mcqData;
+                 displayMCQOffer(messageData.mcqData.length, messageElement);
+            }
+            // --- Handle other appended HTML (legacy, maybe remove if only used for MCQs) ---
+            else if (appendHtml) {
+                const appendDiv = document.createElement('div');
+                appendDiv.innerHTML = appendHtml;
+                while (appendDiv.firstChild) {
+                    messageElement.appendChild(appendDiv.firstChild);
+                }
+            }
+
+            chatArea.appendChild(messageElement);
+
+            // --- Trigger MathJax ---
+            // Check if MathJax is loaded and ready
+             try {
+                 if (typeof MathJax !== "undefined" && MathJax.typesetPromise) {
+                     // Typeset only the newly added element for efficiency
+                     MathJax.typesetPromise([messageElement]).catch(err => console.error('MathJax typeset error on message:', err));
+                 }
+             } catch (e) { console.error("MathJax call failed:", e); }
+
+            // Don't scroll here, scrolling is handled after batch updates or user send
+            // scrollToBottom();
+            return messageElement; // Return the element for potential removal (e.g., loading indicator)
+        }
+
+
+        // --- MCQ/Test Specific Functions ---
+
+        // Handles clicks on the "Start Mock Test" button within a chat message
+        function handleChatAreaClick(event) {
+            if (event.target.classList.contains('start-test-button')) {
+                 // Check if there's MCQ data stored from the message render
+                 if (generatedMCQData && Array.isArray(generatedMCQData) && generatedMCQData.length > 0) {
+                     startMockTest(generatedMCQData); // Pass the stored data
+                     generatedMCQData = null; // Clear the temporary data after starting
+                 } else {
+                     console.error("MCQ data not found when 'Start Test' button clicked.");
+                     displayError("Could not start the test. MCQ data seems missing or invalid.");
+                 }
+            }
+        }
+
+        // Appends the "Start Mock Test" button to an AI message element
+        function displayMCQOffer(questionCount, aiMessageElement) {
+             const buttonHtml = `<button class="start-test-button">Start Mock Test (${questionCount} Questions)</button>`;
+             const buttonContainer = document.createElement('div');
+             buttonContainer.style.marginTop = '10px'; // Add some space
+             buttonContainer.innerHTML = buttonHtml;
+             aiMessageElement.appendChild(buttonContainer);
+             scrollToBottom(); // Scroll to ensure button is visible
+        }
+
+        // Initializes and starts the mock test view
+        function startMockTest(mcqs) {
+            if (!currentUser) { displayError("Please log in to start a test."); return; }
+            if (!mcqs || mcqs.length === 0) { displayError("No questions available for this test."); return; }
+            console.log("Starting mock test with", mcqs.length, "questions.");
+
+            // Reset test state
+            currentTestMCQs = mcqs;
+            currentQuestionIndex = 0;
+            userAnswers = new Array(mcqs.length).fill(null); // Array to store user's selected option index
+            reviewResultsCache = null; // Clear previous review results
+
+            // Switch to the test view
+            switchView('test');
+
+            // Display the first question and start the timer
+            displayTestQuestion(0);
+            startTestTimer();
+            testTitle.textContent = `Mock Test (${mcqs.length} Questions)`; // Update test title
+        }
+
+        // Displays a specific question in the test view
+        function displayTestQuestion(index) {
+            if (index < 0 || index >= currentTestMCQs.length) return; // Index out of bounds
+
+            currentQuestionIndex = index;
+            const questionData = currentTestMCQs[index];
+
+            // Update question number and text
+            testQuestionNumber.textContent = `Question ${index + 1}`;
+            testQuestion.innerHTML = questionData.question || "(Question text missing)"; // Use innerHTML for potential formatting
+
+            // Clear previous options
+            testOptionsContainer.innerHTML = '';
+
+            // Create and display options as radio buttons
+            const options = Array.isArray(questionData.options) ? questionData.options : [];
+             // Map A, B, C, D to options array index
+             const optionLetters = ['A', 'B', 'C', 'D'];
+            options.forEach((optionText, optionIndex) => {
+                 if (optionIndex >= optionLetters.length) return; // Support only 4 options max
+
+                 const label = document.createElement('label');
+                 const input = document.createElement('input');
+                 input.type = 'radio';
+                 input.name = `q_${index}`; // Group radios for the same question
+                 input.value = optionIndex;  // Store the index (0, 1, 2, 3) as the value
+                 // Check if this option was previously selected by the user
+                 input.checked = (userAnswers[index] === optionIndex);
+                 // Update userAnswers array when an option is selected
+                 input.onchange = () => handleOptionSelect(optionIndex);
+
+                 label.appendChild(input);
+                 // Display option letter (A, B, C, D) along with the text
+                 label.appendChild(document.createTextNode(` ${optionLetters[optionIndex]}. ${optionText || '(Empty Option)'}`));
+                 testOptionsContainer.appendChild(label);
+            });
+
+            // Typeset MathJax for the new question and options
+             try {
+                 if (typeof MathJax !== "undefined" && MathJax.typesetPromise) {
+                     MathJax.typesetPromise([testQuestion, testOptionsContainer]).catch(err => console.error('MathJax typeset error on test question:', err));
+                 }
+             } catch(e){ console.error("MathJax call failed:", e); }
+
+            // Update navigation button states
+            prevQuestionBtn.disabled = (index === 0);
+            nextQuestionBtn.disabled = (index === currentTestMCQs.length - 1);
+            // Update question counter display
+            questionCounter.textContent = `Q: ${index + 1} / ${currentTestMCQs.length}`;
+        }
+
+        // Stores the user's selected answer for the current question
+        function handleOptionSelect(optionIndex) {
+            if (currentQuestionIndex >= 0 && currentQuestionIndex < userAnswers.length) {
+                userAnswers[currentQuestionIndex] = optionIndex; // Store the selected index (0-3)
+                console.log(`Answered Q${currentQuestionIndex + 1}: Option index ${optionIndex}`);
+            }
+        }
+
+        // Handles navigation between test questions
+        function handleTestNavigation(direction) {
+            let newIndex = currentQuestionIndex;
+            if (direction === 'prev' && currentQuestionIndex > 0) {
+                newIndex--;
+            } else if (direction === 'next' && currentQuestionIndex < currentTestMCQs.length - 1) {
+                newIndex++;
+            }
+            // If the index changed, display the new question
+            if (newIndex !== currentQuestionIndex) {
+                displayTestQuestion(newIndex);
+            }
+        }
+
+        // Starts or resets the test timer
+        function startTestTimer() {
+            if (testTimerInterval) clearInterval(testTimerInterval); // Clear existing timer
+            testStartTime = Date.now(); // Record the start time
+            testTimer.textContent = `Time: 00:00`; // Reset display immediately
+            testTimerInterval = setInterval(() => {
+                const elapsedSeconds = Math.floor((Date.now() - testStartTime) / 1000);
+                const minutes = Math.floor(elapsedSeconds / 60).toString().padStart(2, '0');
+                const seconds = (elapsedSeconds % 60).toString().padStart(2, '0');
+                testTimer.textContent = `Time: ${minutes}:${seconds}`;
+            }, 1000); // Update every second
+        }
+
+        // Submits the test, calculates results, and switches to review view
+        function submitTest() {
+            if (!confirm("Are you sure you want to submit the test?")) return;
+
+            if (testTimerInterval) clearInterval(testTimerInterval); // Stop the timer
+            const endTime = Date.now();
+            const timeTakenMs = testStartTime ? endTime - testStartTime : 0; // Calculate time taken
+            console.log("Submitting test. Time taken (ms):", timeTakenMs);
+
+            // Switch to the review view and pass results
+            switchView('review');
+            displayReview(timeTakenMs);
+        }
+
+        // --- Review Functions ---
+
+        // Displays the test results and review details
+        function displayReview(timeTakenMs) {
+             reviewContent.innerHTML = ''; // Clear previous review content
+             saveReviewBtn.disabled = false; // Enable save button initially
+             saveReviewBtn.textContent = "Save Review"; // Reset button text
+
+             // Check if there's valid test data
+             if (!currentTestMCQs || currentTestMCQs.length === 0 || !userAnswers || userAnswers.length !== currentTestMCQs.length) {
+                 reviewSummary.innerHTML = "<span>No valid test data available to review.</span>";
+                 reviewContent.innerHTML = "<p>It seems the test data is missing or incomplete.</p>";
+                 saveReviewBtn.disabled = true; // Disable saving if no data
+                 return;
+             }
+
+             let correctCount = 0, incorrectCount = 0, skippedCount = 0;
+             // Prepare cache object to store structured results for saving
+             reviewResultsCache = {
+                 questions: [], // Array of {question, options, correctAnswer, userAnswer, status}
+                 summary: {},   // Object with score, counts, time
+                 testDate: new Date().toISOString(), // Timestamp of test completion
+                 timeTakenMs: timeTakenMs,
+                 sourceChatId: activeChatId // Store which chat generated the test
+             };
+
+             currentTestMCQs.forEach((qData, index) => {
+                 const userAnswerIndex = userAnswers[index]; // User's selected option index (0-3 or null)
+                 const options = Array.isArray(qData.options) ? qData.options : [];
+                 const correctAnswerLetter = qData.answer?.trim().toUpperCase(); // Correct answer letter (A, B, C, D)
+
+                 // Determine the index (0-3) of the correct answer from the letter
+                 const correctAnswerIndex = correctAnswerLetter ? correctAnswerLetter.charCodeAt(0) - 'A'.charCodeAt(0) : -1;
+
+                 // Get the text of the correct answer
+                 const correctAnswerText = (correctAnswerIndex >= 0 && correctAnswerIndex < options.length)
+                                           ? options[correctAnswerIndex]
+                                           : "N/A (Invalid Correct Answer)";
+
+                 let userAnswerText = "Skipped";
+                 let status = "skipped"; // 'correct', 'incorrect', 'skipped'
+                 let itemStatusClass = "status-skipped"; // CSS class for styling the item
+                 let answerDetailClass = "user-answer-skipped"; // CSS class for user answer text
+
+                 if (userAnswerIndex !== null && userAnswerIndex >= 0 && userAnswerIndex < options.length) {
+                     // User selected a valid option
+                     userAnswerText = options[userAnswerIndex];
+                     if (userAnswerIndex === correctAnswerIndex) {
+                         // Correct answer
+                         status = "correct";
+                         itemStatusClass = "status-correct";
+                         answerDetailClass = "user-answer-correct";
+                         correctCount++;
+                     } else {
+                         // Incorrect answer
+                         status = "incorrect";
+                         itemStatusClass = "status-incorrect";
+                         answerDetailClass = "user-answer-incorrect";
+                         incorrectCount++;
+                     }
+                 } else if (userAnswerIndex !== null) {
+                      // User selected something invalid (shouldn't happen with radio buttons, but safety check)
+                      userAnswerText = "Invalid Selection";
+                      status = "incorrect";
+                      itemStatusClass = "status-incorrect";
+                      answerDetailClass = "user-answer-incorrect";
+                      incorrectCount++;
+                 } else {
+                     // User did not select anything (null)
+                     skippedCount++;
+                 }
+
+                 // Store detailed results for saving
+                 reviewResultsCache.questions.push({
+                     question: qData.question,
+                     options: options,
+                     correctAnswer: correctAnswerText,
+                     userAnswer: userAnswerText,
+                     status: status
+                 });
+
+                 // Create HTML elements for the review item
+                 const reviewItem = document.createElement('div');
+                 reviewItem.classList.add('review-item', itemStatusClass);
+                 reviewItem.dataset.status = status; // Store status for filtering
+
+                 let detailsHtml = `<span class="${answerDetailClass}">Your Answer: ${userAnswerText}</span>`;
+                 if (status !== 'correct') { // Show correct answer only if user was wrong or skipped
+                     detailsHtml += `<br><span class="correct-answer">Correct Answer: ${correctAnswerText}</span>`;
+                 }
+
+                 reviewItem.innerHTML = `
+                     <div class="review-item-qnum">Question ${index + 1}</div>
+                     <div class="review-item-question">${qData.question}</div>
+                     <div class="review-item-details">${detailsHtml}</div>
+                 `;
+                 reviewContent.appendChild(reviewItem);
+             });
+
+             // Calculate summary details
+             const totalQuestions = currentTestMCQs.length;
+             const score = `${correctCount}/${totalQuestions}`;
+             const timeSeconds = Math.round(timeTakenMs / 1000);
+             const minutes = Math.floor(timeSeconds / 60);
+             const seconds = timeSeconds % 60;
+             const timeString = `${minutes}m ${seconds}s`;
+
+             // Display summary
+             reviewSummary.innerHTML = `
+                  <span>Score: ${score}</span>
+                  <span class="score-correct">Correct: ${correctCount}</span>
+                  <span class="score-incorrect">Incorrect: ${incorrectCount}</span>
+                  <span class="score-skipped">Skipped: ${skippedCount}</span>
+                  <span>Total Time: ${timeString}</span>
+             `;
+
+             // Store summary in cache for saving
+             reviewResultsCache.summary = { score, correct: correctCount, incorrect: incorrectCount, skipped: skippedCount, timeString };
+
+             // Typeset MathJax for the review content
+              try {
+                  if (typeof MathJax !== "undefined" && MathJax.typesetPromise) {
+                       MathJax.typesetPromise([reviewContent]).catch(err => console.error('MathJax typeset error on review:', err));
+                  }
+              } catch (e) { console.error("MathJax call failed:", e); }
+
+             // Apply the default 'all' filter
+             filterReviewItems('all');
+        }
+
+        // Handles clicks on the review filter buttons
+        function handleReviewFilterClick(event) {
+            const button = event.target.closest('button[data-filter]');
+            if (button) {
+                filterReviewItems(button.dataset.filter);
+            }
+        }
+
+        // Filters the displayed review items based on status (all, incorrect, skipped)
+        function filterReviewItems(filter) {
+            // Update active state of filter buttons
+            reviewFilters.querySelectorAll('button').forEach(btn => {
+                btn.classList.toggle('active-filter', btn.dataset.filter === filter);
+            });
+            // Show/hide review items based on their status
+            reviewContent.querySelectorAll('.review-item').forEach(item => {
+                const show = (filter === 'all') || item.dataset.status === filter;
+                item.classList.toggle('hidden-by-filter', !show);
+            });
+        }
+
+        // Exits the review view and returns to the chat view
+        function exitReview() {
+            switchView('chat');
+            reviewResultsCache = null; // Clear cached results when leaving
+        }
+
+        // Saves the cached test review results to Firestore
+        async function saveTestReviewToCloud() {
+            if (!currentUser) { alert("Please log in to save the review."); return; }
+            if (!reviewResultsCache) { alert("No review data available to save."); return; }
+
+            // Add user ID and timestamp to the data before saving
+            const reviewDataToSave = {
+                ...reviewResultsCache,
+                userId: currentUser.uid,
+                savedAt: firebase.firestore.FieldValue.serverTimestamp()
+                // You might want to add the original prompt or test title here too
+                // testTitle: testTitle.textContent
+            };
+
+            // Disable button and show saving state
+            saveReviewBtn.disabled = true;
+            saveReviewBtn.textContent = "Saving...";
+
+            try {
+                // Add the data to a 'testReviews' collection in Firestore
+                const newReviewRef = await db.collection('testReviews').add(reviewDataToSave);
+                console.log("Review saved to Firestore with ID:", newReviewRef.id);
+                alert("Test review saved successfully!");
+                saveReviewBtn.textContent = "Review Saved"; // Keep disabled, show saved status
+            } catch (error) {
+                console.error("Error saving review to Firestore:", error);
+                alert("Failed to save the review. Please check your connection and try again.");
+                // Re-enable button on failure to allow retry
+                saveReviewBtn.disabled = false;
+                saveReviewBtn.textContent = "Save Review";
+            }
+        }
 
     </script>
 
