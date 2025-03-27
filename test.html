@@ -1,0 +1,1042 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Tests</title>
+
+    <script> window.MathJax={tex:{inlineMath:[['$','$'],['\\(','\\)']],displayMath:[['$$','$$'],['\\[','\\]']]},svg:{fontCache:'global'},options:{skipHtmlTags:['script','noscript','style','textarea','pre','code']}}; </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
+
+    <style>
+         /* Basic Styles - Adapt from index.html or create new theme */
+        :root {
+            --font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+             /* Use theme variables from index.html or define new ones */
+             /* LIGHT */ --main-bg: #ffffff; --border-color: #e0e0e0; --text-primary: #2c2c2c; --text-secondary: #5f5f5f; --accent-color: #d97a7a; --button-bg: #f0f0f0; --button-hover-bg: #e0e0e0; --list-item-hover: #f8f9fa; --link-color: #007bff; --link-hover-color: #0056b3; --error-bg: #ffebee; --error-text: #c62828; --error-border: #ef9a9a; --correct-color: #28a745; --incorrect-color: #dc3545; --skipped-color: #fd7e14; --modal-bg: rgba(0,0,0,0.5); --modal-content-bg: #fff;
+        }
+         body.dark-theme {
+            /* DARK */ --main-bg: #1e1e1e; --border-color: #404040; --text-primary: #e0e0e0; --text-secondary: #a0a0a0; --accent-color: #e58b8b; --button-bg: #404040; --button-hover-bg: #505050; --list-item-hover: #2a2a2e; --link-color: #6cadff; --link-hover-color: #a3ceff; --error-bg: #5c2b2b; --error-text: #ffcdd2; --error-border: #8c4343; --correct-color: #5cb85c; --incorrect-color: #d9534f; --skipped-color: #f0ad4e; --modal-content-bg: #2a2a2e;
+        }
+
+        body { font-family: var(--font-family); margin: 0; padding: 0; background-color: var(--main-bg); color: var(--text-primary); line-height: 1.6; }
+        .container { max-width: 900px; margin: 20px auto; padding: 20px; background-color: var(--main-bg); border: 1px solid var(--border-color); border-radius: 8px; }
+        .page-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 15px; margin-bottom: 20px; flex-wrap: wrap; }
+        .page-header h1 { margin: 0; font-size: 1.8em; }
+        .header-controls { display: flex; gap: 10px; align-items: center; }
+        .header-controls button { padding: 8px 12px; font-size: 0.9em; cursor: pointer; border-radius: 6px; border: 1px solid var(--border-color); background-color: var(--button-bg); color: var(--text-primary); }
+        .header-controls button:hover:not(:disabled) { background-color: var(--button-hover-bg); }
+        .header-controls button#logout-btn-tests { background-color: var(--accent-color); color: #fff; border-color: var(--accent-color); }
+        body.dark-theme .header-controls button#logout-btn-tests { color: #1e1e1e; }
+        .header-controls button:disabled { opacity: 0.6; cursor: not-allowed; }
+        .user-info { font-size: 0.9em; color: var(--text-secondary); }
+
+        .search-container { margin-bottom: 20px; display: flex; gap: 10px; }
+        .search-container input { flex-grow: 1; padding: 10px; border: 1px solid var(--border-color); border-radius: 6px; font-size: 1em; background-color: var(--main-bg); color: var(--text-primary); }
+        .search-container button { padding: 10px 15px; cursor: pointer; /* Style similarly */ }
+
+        .test-list-container { margin-top: 20px; }
+        .test-list-item { display: flex; justify-content: space-between; align-items: center; padding: 15px; border: 1px solid var(--border-color); border-radius: 6px; margin-bottom: 10px; transition: background-color 0.2s ease; }
+        .test-list-item:hover { background-color: var(--list-item-hover); }
+        .test-item-details { flex-grow: 1; }
+        .test-item-title { font-weight: 600; font-size: 1.1em; margin-bottom: 5px; color: var(--text-primary); }
+        .test-item-meta { font-size: 0.85em; color: var(--text-secondary); }
+        .test-item-actions { display: flex; gap: 8px; flex-shrink: 0; margin-left: 15px; }
+        .test-item-actions button { padding: 6px 12px; font-size: 0.9em; cursor: pointer; border-radius: 4px; border: 1px solid var(--border-color); background-color: var(--button-bg); color: var(--text-primary); }
+        .test-item-actions button:hover:not(:disabled) { background-color: var(--button-hover-bg); }
+        .test-item-actions button.take-btn { background-color: var(--accent-color); color: #fff; border-color: var(--accent-color); }
+        body.dark-theme .test-item-actions button.take-btn { color: #1e1e1e; }
+
+
+        /* --- Modal Styles (Basic) --- */
+        .modal { display: none; position: fixed; z-index: 100; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: var(--modal-bg); }
+        .modal-content { background-color: var(--modal-content-bg); margin: 5% auto; padding: 25px; border: 1px solid var(--border-color); border-radius: 8px; width: 80%; max-width: 700px; position: relative; max-height: 85vh; display: flex; flex-direction: column; }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 10px; margin-bottom: 15px; }
+        .modal-header h2 { margin: 0; font-size: 1.4em; }
+        .modal-close-btn { background: none; border: none; font-size: 2em; font-weight: bold; cursor: pointer; color: var(--text-secondary); line-height: 1; padding: 0; }
+        .modal-close-btn:hover { color: var(--text-primary); }
+        .modal-body { flex-grow: 1; overflow-y: auto; padding-right: 10px; /* For scrollbar */ }
+        .modal-footer { border-top: 1px solid var(--border-color); padding-top: 15px; margin-top: 20px; display: flex; justify-content: space-between; }
+        .modal-footer button { padding: 10px 20px; font-size: 1em; cursor: pointer; border-radius: 6px; border: 1px solid var(--border-color); background-color: var(--button-bg); color: var(--text-primary); }
+        .modal-footer button:hover:not(:disabled) { background-color: var(--button-hover-bg); }
+        .modal-footer button.submit-btn { background-color: var(--accent-color); color: #fff; border-color: var(--accent-color); }
+        body.dark-theme .modal-footer button.submit-btn { color: #1e1e1e; }
+         .modal-footer button:disabled { opacity: 0.5; cursor: not-allowed; }
+
+        /* Test Taking Styles within Modal */
+        .test-info-modal span { margin-right: 15px; font-size: 0.9em; color: var(--text-secondary); }
+        .test-question-container-modal { margin-bottom: 20px; }
+        .test-question-number-modal { font-weight: bold; margin-bottom: 8px; color: var(--text-secondary); }
+        .test-question-modal { font-size: 1.1em; margin-bottom: 15px; }
+        .test-options-modal label { display: block; margin-bottom: 10px; background-color: var(--button-bg); padding: 10px 15px; border-radius: 6px; border: 1px solid var(--border-color); cursor: pointer; transition: background-color 0.2s ease, border-color 0.2s ease; }
+        .test-options-modal label:hover { background-color: var(--button-hover-bg); }
+        .test-options-modal input[type="radio"] { margin-right: 10px; accent-color: var(--accent-color); }
+
+         /* Review Styles within Modal */
+         .review-summary-modal span { margin-right: 15px; font-size: 1em; }
+         .review-summary-modal .score-correct { color: var(--correct-color); font-weight: bold; }
+         .review-summary-modal .score-incorrect { color: var(--incorrect-color); font-weight: bold; }
+         .review-summary-modal .score-skipped { color: var(--skipped-color); font-weight: bold; }
+         .review-item-modal { margin-bottom: 15px; padding: 15px; border: 1px solid var(--border-color); border-radius: 6px; background-color: var(--button-bg); }
+         .review-item-modal.status-correct { border-left: 5px solid var(--correct-color); }
+         .review-item-modal.status-incorrect { border-left: 5px solid var(--incorrect-color); }
+         .review-item-modal.status-skipped { border-left: 5px solid var(--skipped-color); }
+         .review-item-qnum-modal { font-weight: bold; margin-bottom: 8px; color: var(--text-secondary); }
+         .review-item-question-modal { margin-bottom: 10px; }
+         .review-item-details-modal span { display: block; margin-bottom: 5px; font-size: 0.95em; }
+         .review-item-details-modal .correct-answer { color: var(--correct-color); font-weight: bold; }
+         .review-item-details-modal .user-answer-correct { color: var(--correct-color); }
+         .review-item-details-modal .user-answer-incorrect { color: var(--incorrect-color); text-decoration: line-through; }
+         .review-item-details-modal .user-answer-skipped { color: var(--skipped-color); font-style: italic; }
+
+        /* Attempt List Styles */
+        .attempt-list-item { display: flex; justify-content: space-between; align-items: center; padding: 10px; border-bottom: 1px solid var(--border-color); cursor: pointer; }
+        .attempt-list-item:hover { background-color: var(--list-item-hover); }
+        .attempt-list-item:last-child { border-bottom: none; }
+        .attempt-info { font-size: 0.95em; }
+        .attempt-score { font-weight: bold; margin-left: 15px; }
+
+         #loading-indicator { text-align: center; padding: 30px; font-size: 1.2em; color: var(--text-secondary); }
+         #login-prompt { text-align: center; padding: 50px; font-size: 1.1em; }
+         #login-prompt button { padding: 10px 20px; font-size: 1em; cursor: pointer; /* Style */ }
+
+    </style>
+</head>
+<body class="light-theme"> <div class="container" id="main-container" style="display: none;">
+        <div class="page-header">
+            <h1 data-translate-key="manageTestsTitle">Manage Tests</h1>
+            <div class="header-controls">
+                 <span class="user-info" id="user-email-tests"></span>
+                 <button id="language-toggle-button-tests" title="Switch Language">தமிழ்</button>
+                 <button id="theme-toggle-button-tests" title="Toggle Theme">🌙</button>
+                 <button id="logout-btn-tests" data-translate-key="logout">Logout</button>
+            </div>
+        </div>
+
+        <div class="search-container">
+            <input type="text" id="search-input" placeholder="Search tests by title...">
+            <button id="search-button" data-translate-key="search">Search</button>
+        </div>
+
+        <div id="test-list-container" class="test-list-container">
+            </div>
+         <div id="no-tests-message" style="display: none; text-align: center; padding: 20px; color: var(--text-secondary);" data-translate-key="noTestsFound">No tests found. Create one using the MCQ feature in the chat!</div>
+    </div>
+
+    <div id="loading-indicator">Loading...</div>
+
+    <div id="login-prompt" style="display: none;">
+        <h2 data-translate-key="pleaseLogin">Please Login</h2>
+        <p data-translate-key="loginToManageTests">You need to log in to manage your tests.</p>
+        <button id="login-google-btn-tests" data-translate-key="loginGoogle">Login with Google</button>
+    </div>
+
+    <div id="test-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="test-modal-title">Mock Test</h2>
+                 <div class="test-info-modal">
+                    <span id="question-counter-modal">Q: 1 / N</span>
+                    <span id="test-timer-modal">Time: 00:00</span>
+                 </div>
+                <button class="modal-close-btn" id="test-modal-close-btn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="test-question-container-modal">
+                    <div class="test-question-number-modal" id="test-question-number-modal"></div>
+                    <div class="test-question-modal" id="test-question-modal"></div>
+                    <div class="test-options-modal" id="test-options-modal"></div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="prev-question-btn-modal" disabled data-translate-key="previous">Previous</button>
+                <button id="next-question-btn-modal" data-translate-key="next">Next</button>
+                <button id="submit-test-btn-modal" class="submit-btn" data-translate-key="submitTest">Submit Test</button>
+            </div>
+        </div>
+    </div>
+
+     <div id="review-attempts-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="review-attempts-modal-title" data-translate-key="reviewAttemptsTitle">Review Attempts</h2>
+                <button class="modal-close-btn" id="review-attempts-modal-close-btn">&times;</button>
+            </div>
+            <div class="modal-body" id="review-attempts-list">
+                <p id="no-attempts-message" style="display: none;" data-translate-key="noAttemptsYet">No previous attempts recorded for this test.</p>
+            </div>
+             <div class="modal-footer">
+                 <button id="close-review-attempts-btn-modal" data-translate-key="close">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="single-review-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="single-review-modal-title" data-translate-key="testReviewTitle">Test Review</h2>
+                <button class="modal-close-btn" id="single-review-modal-close-btn">&times;</button>
+            </div>
+            <div class="modal-body">
+                 <div class="review-summary-modal" id="single-review-summary-modal" style="margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px solid var(--border-color);">
+                     </div>
+                 <div id="single-review-content-modal">
+                     </div>
+            </div>
+             <div class="modal-footer">
+                 <button id="close-single-review-btn-modal" data-translate-key="close">Close</button>
+                 </div>
+        </div>
+    </div>
+
+
+    <script>
+        // --- Firebase Config ---
+         // !!! SECURITY WARNING !!! Replace with your actual config. RESTRICT YOUR API KEY!
+        const firebaseConfig = {
+            apiKey: "AIzaSyDgw604fe5jnNu4kTOv1cQ-3n7PL8gcN58", // <- SHARED, INSECURE KEY - REPLACE AND SECURE!
+            authDomain: "krish-c5db8.firebaseapp.com",
+            projectId: "krish-c5db8",
+            storageBucket: "krish-c5db8.appspot.com",
+            messagingSenderId: "217175257890",
+            appId: "1:217175257890:web:209f0f290eabab6b1fab7b",
+            measurementId: "G-97SHYGL2J4"
+        };
+
+        // --- Initialize Firebase ---
+        firebase.initializeApp(firebaseConfig);
+        const fbAuth = firebase.auth();
+        const db = firebase.firestore();
+
+        // --- DOM Elements ---
+        const mainContainer = document.getElementById('main-container');
+        const loadingIndicator = document.getElementById('loading-indicator');
+        const loginPrompt = document.getElementById('login-prompt');
+        const loginBtnTests = document.getElementById('login-google-btn-tests');
+        const userEmailTests = document.getElementById('user-email-tests');
+        const logoutBtnTests = document.getElementById('logout-btn-tests');
+        const themeToggleBtnTests = document.getElementById('theme-toggle-button-tests');
+        const langToggleBtnTests = document.getElementById('language-toggle-button-tests');
+        const searchInput = document.getElementById('search-input');
+        const searchButton = document.getElementById('search-button');
+        const testListContainer = document.getElementById('test-list-container');
+        const noTestsMessage = document.getElementById('no-tests-message');
+
+        // Modals & Content
+        const testModal = document.getElementById('test-modal');
+        const testModalCloseBtn = document.getElementById('test-modal-close-btn');
+        const testModalTitle = document.getElementById('test-modal-title');
+        const questionCounterModal = document.getElementById('question-counter-modal');
+        const testTimerModal = document.getElementById('test-timer-modal');
+        const testQuestionNumberModal = document.getElementById('test-question-number-modal');
+        const testQuestionModal = document.getElementById('test-question-modal');
+        const testOptionsModal = document.getElementById('test-options-modal');
+        const prevQuestionBtnModal = document.getElementById('prev-question-btn-modal');
+        const nextQuestionBtnModal = document.getElementById('next-question-btn-modal');
+        const submitTestBtnModal = document.getElementById('submit-test-btn-modal');
+
+        const reviewAttemptsModal = document.getElementById('review-attempts-modal');
+        const reviewAttemptsModalCloseBtn = document.getElementById('review-attempts-modal-close-btn');
+        const reviewAttemptsModalTitle = document.getElementById('review-attempts-modal-title');
+        const reviewAttemptsList = document.getElementById('review-attempts-list');
+        const noAttemptsMessage = document.getElementById('no-attempts-message');
+        const closeReviewAttemptsBtnModal = document.getElementById('close-review-attempts-btn-modal');
+
+
+        const singleReviewModal = document.getElementById('single-review-modal');
+        const singleReviewModalCloseBtn = document.getElementById('single-review-modal-close-btn');
+        const singleReviewModalTitle = document.getElementById('single-review-modal-title');
+        const singleReviewSummaryModal = document.getElementById('single-review-summary-modal');
+        const singleReviewContentModal = document.getElementById('single-review-content-modal');
+        const closeSingleReviewBtnModal = document.getElementById('close-single-review-btn-modal');
+
+
+        // --- Translations ---
+         const translations = {
+             en: {
+                 loading: "Loading...",
+                 pleaseLogin: "Please Login",
+                 loginToManageTests: "You need to log in to manage your tests.",
+                 loginGoogle: "Login with Google",
+                 logout: "Logout",
+                 manageTestsTitle: "Manage Tests",
+                 searchTestsPlaceholder: "Search tests by title...",
+                 search: "Search",
+                 noTestsFound: "No tests found. Create one using the MCQ feature in the chat!",
+                 testCreated: "Created:",
+                 questionsCount: "{count} Questions",
+                 takeTest: "Take Test",
+                 reviewAttempts: "Review Attempts",
+                 // Test Modal
+                 mockTestTitle: "Mock Test",
+                 questionLabel: "Question {num}",
+                 previous: "Previous",
+                 next: "Next",
+                 submitTest: "Submit Test",
+                 confirmSubmit: "Are you sure you want to submit the test?",
+                 // Attempts Modal
+                 reviewAttemptsTitle: "Review Attempts",
+                 attemptDate: "Attempted:",
+                 scoreLabel: "Score:",
+                 timeTakenLabel: "Time:",
+                 viewReview: "View Review",
+                 noAttemptsYet: "No previous attempts recorded for this test.",
+                 close: "Close",
+                 // Single Review Modal
+                 testReviewTitle: "Test Review",
+                 score: "Score:",
+                 correct: "Correct:",
+                 incorrect: "Incorrect:",
+                 skipped: "Skipped:",
+                 totalTime: "Total Time:",
+                 questionNum: "Question {num}",
+                 yourAnswer: "Your Answer:",
+                 correctAnswer: "Correct Answer:",
+                 answerSkipped: "Skipped",
+                 answerInvalid: "Invalid Option",
+                 // General
+                 errorLoadingTests: "Error loading tests.",
+                 errorLoadingAttempts: "Error loading attempts.",
+                 errorSavingAttempt: "Error saving test attempt.",
+                 errorTestDefinition: "Could not load test definition.",
+                 testSavedSuccess: "Test attempt saved successfully!",
+                 // Settings
+                 toggleThemeLight: "Light Mode",
+                 toggleThemeDark: "Dark Mode",
+                 switchLanguage: "Switch Language",
+                 languageName: "English",
+                 errorLoadingSettings: "Error loading settings.",
+                 errorSavingSettings: "Error saving settings."
+
+             },
+             ta: {
+                 loading: "ஏற்றுகிறது...",
+                 pleaseLogin: "தயவுசெய்து உள்நுழையவும்",
+                 loginToManageTests: "உங்கள் சோதனைகளை நிர்வகிக்க நீங்கள் உள்நுழைய வேண்டும்.",
+                 loginGoogle: "Google மூலம் உள்நுழைக",
+                 logout: "வெளியேறு",
+                 manageTestsTitle: "சோதனைகளை நிர்வகி",
+                 searchTestsPlaceholder: "தலைப்பு மூலம் சோதனைகளைத் தேடு...",
+                 search: "தேடு",
+                 noTestsFound: "சோதனைகள் எதுவும் இல்லை. அரட்டையில் உள்ள MCQ அம்சத்தைப் பயன்படுத்தி ஒன்றை உருவாக்கவும்!",
+                 testCreated: "உருவாக்கப்பட்டது:",
+                 questionsCount: "{count} கேள்விகள்",
+                 takeTest: "தேர்வை எடு",
+                 reviewAttempts: "முயற்சிகளை மதிப்பாய்வு செய்",
+                  // Test Modal
+                 mockTestTitle: "மாதிரித் தேர்வு",
+                 questionLabel: "கேள்வி {num}",
+                 previous: "முந்தையது",
+                 next: "அடுத்தது",
+                 submitTest: "தேர்வைச் சமர்ப்பி",
+                 confirmSubmit: "தேர்வைச் சமர்ப்பிக்க விரும்புகிறீர்களா?",
+                 // Attempts Modal
+                 reviewAttemptsTitle: "முயற்சிகளை மதிப்பாய்வு செய்",
+                 attemptDate: "முயற்சித்த நேரம்:",
+                 scoreLabel: "மதிப்பெண்:",
+                 timeTakenLabel: "எடுத்த நேரம்:",
+                 viewReview: "மதிப்பாய்வைப் பார்",
+                 noAttemptsYet: "இந்த சோதனைக்கு முந்தைய முயற்சிகள் எதுவும் பதிவு செய்யப்படவில்லை.",
+                 close: "மூடு",
+                  // Single Review Modal
+                 testReviewTitle: "தேர்வு மதிப்பாய்வு",
+                 score: "மதிப்பெண்:",
+                 correct: "சரி:",
+                 incorrect: "தவறு:",
+                 skipped: "தவிர்த்தவை:",
+                 totalTime: "மொத்த நேரம்:",
+                 questionNum: "கேள்வி {num}",
+                 yourAnswer: "உங்கள் பதில்:",
+                 correctAnswer: "சரியான பதில்:",
+                 answerSkipped: "தவிர்க்கப்பட்டது",
+                 answerInvalid: "தவறான தேர்வு",
+                  // General
+                 errorLoadingTests: "சோதனைகளை ஏற்றுவதில் பிழை.",
+                 errorLoadingAttempts: "முயற்சிகளை ஏற்றுவதில் பிழை.",
+                 errorSavingAttempt: "தேர்வு முயற்சியைச் சேமிப்பதில் பிழை.",
+                 errorTestDefinition: "சோதனை வரையறையை ஏற்ற முடியவில்லை.",
+                 testSavedSuccess: "தேர்வு முயற்சி வெற்றிகரமாக சேமிக்கப்பட்டது!",
+                  // Settings
+                 toggleThemeLight: "ஒளி பயன்முறை",
+                 toggleThemeDark: "இருண்ட பயன்முறை",
+                 switchLanguage: "மொழியை மாற்று",
+                 languageName: "தமிழ்",
+                 errorLoadingSettings: "அமைப்புகளை ஏற்றுவதில் பிழை.",
+                 errorSavingSettings: "அமைப்புகளைச் சேமிப்பதில் பிழை."
+             }
+         };
+        let currentLanguage = 'ta'; // Default language
+        let currentTheme = 'light';
+
+        // --- State Variables ---
+        let currentUser = null;
+        let allTests = []; // Cache for fetched tests
+        let currentTestDefinition = null; // For the active test being taken
+        let currentQuestionIndex = 0;
+        let userAnswers = [];
+        let testStartTime = null;
+        let testTimerInterval = null;
+        let currentReviewingAttempt = null; // For single review modal
+        let userSettingsListener = null;
+
+
+         // --- Initialization ---
+         initializeAppTests();
+
+        // --- Event Listeners ---
+        loginBtnTests.addEventListener('click', signInWithGoogle);
+        logoutBtnTests.addEventListener('click', signOut);
+        themeToggleBtnTests.addEventListener('click', toggleTheme);
+        langToggleBtnTests.addEventListener('click', toggleLanguage);
+        searchButton.addEventListener('click', filterTests);
+        searchInput.addEventListener('input', filterTests); // Filter as user types
+
+         // Modal Close Buttons
+        testModalCloseBtn.addEventListener('click', () => closeTestModal()); // Use function to handle cleanup
+        reviewAttemptsModalCloseBtn.addEventListener('click', () => closeReviewAttemptsModal());
+        closeReviewAttemptsBtnModal.addEventListener('click', () => closeReviewAttemptsModal());
+        singleReviewModalCloseBtn.addEventListener('click', () => closeSingleReviewModal());
+        closeSingleReviewBtnModal.addEventListener('click', () => closeSingleReviewModal());
+
+
+         // Test Navigation/Submission
+        prevQuestionBtnModal.addEventListener('click', () => handleTestNavigation('prev'));
+        nextQuestionBtnModal.addEventListener('click', () => handleTestNavigation('next'));
+        submitTestBtnModal.addEventListener('click', submitTest);
+
+         // Dynamic listeners for test list items (added in renderTestList)
+        testListContainer.addEventListener('click', handleTestListAction);
+        // Dynamic listener for attempt list items (added in showReviewAttemptsModal)
+        reviewAttemptsList.addEventListener('click', handleAttemptListAction);
+
+
+        // --- Initialization Functions ---
+        function initializeAppTests() {
+            fbAuth.onAuthStateChanged(handleAuthStateChangeTests);
+            updateUITextTests(); // Initial UI text
+        }
+
+        // --- Translation & UI Update ---
+        function getTextTests(key, replacements = {}) {
+            let text = translations[currentLanguage]?.[key] || translations['en']?.[key] || `Missing Key: ${key}`;
+            for (const placeholder in replacements) {
+                text = text.replace(`{${placeholder}}`, replacements[placeholder]);
+            }
+            return text;
+        }
+
+        function updateUITextTests() {
+             document.querySelectorAll('[data-translate-key]').forEach(el => {
+                 const key = el.dataset.translateKey;
+                 if (key) {
+                     // Simple text update, assumes no complex children like icons
+                     el.textContent = getTextTests(key);
+                 }
+             });
+
+             // Specific Elements
+             loadingIndicator.textContent = getTextTests('loading');
+             searchInput.placeholder = getTextTests('searchTestsPlaceholder');
+             themeToggleBtnTests.title = currentTheme === 'light' ? getTextTests('toggleThemeDark') : getTextTests('toggleThemeLight');
+             themeToggleBtnTests.textContent = currentTheme === 'light' ? '🌙' : '☀️';
+             langToggleBtnTests.title = getTextTests('switchLanguage');
+             langToggleBtnTests.textContent = getTextTests('languageName'); // Shows current lang name
+
+              // Update modal titles if they are visible (might need adjustment)
+             if (testModal.style.display === 'block') {
+                 testModalTitle.textContent = currentTestDefinition?.title || getTextTests('mockTestTitle');
+             }
+             if (reviewAttemptsModal.style.display === 'block') {
+                 reviewAttemptsModalTitle.textContent = getTextTests('reviewAttemptsTitle');
+             }
+              if (singleReviewModal.style.display === 'block') {
+                 singleReviewModalTitle.textContent = getTextTests('testReviewTitle');
+             }
+             // Re-render dynamic lists if needed (test list, attempt list) to update button text etc.
+              if (currentUser) renderTestList(allTests); // Re-render list with current language
+        }
+
+        // --- Authentication ---
+         function handleAuthStateChangeTests(user) {
+             if (userSettingsListener) { userSettingsListener(); userSettingsListener = null; } // Detach listener on logout
+
+            if (user) {
+                currentUser = user;
+                mainContainer.style.display = 'block';
+                loginPrompt.style.display = 'none';
+                loadingIndicator.style.display = 'block'; // Show loading initially
+                testListContainer.innerHTML = ''; // Clear old list
+                userEmailTests.textContent = currentUser.email || 'User';
+                logoutBtnTests.disabled = false;
+                themeToggleBtnTests.disabled = false;
+                langToggleBtnTests.disabled = false;
+
+                listenUserSettingsTests(currentUser.uid); // Load settings (theme, lang)
+                fetchTestsForUser(currentUser.uid); // Fetch tests after login
+
+            } else {
+                currentUser = null;
+                mainContainer.style.display = 'none';
+                loginPrompt.style.display = 'block';
+                loadingIndicator.style.display = 'none';
+                userEmailTests.textContent = '';
+                logoutBtnTests.disabled = true;
+                themeToggleBtnTests.disabled = true;
+                 langToggleBtnTests.disabled = true;
+                 // Reset theme/lang on logout? Or keep last state? Resetting for consistency.
+                 currentTheme = 'light'; applyTheme();
+                 currentLanguage = 'ta'; updateUITextTests();
+            }
+        }
+
+        async function signInWithGoogle() {
+            const provider = new firebase.auth.GoogleAuthProvider();
+            try {
+                await fbAuth.signInWithPopup(provider);
+                // Auth state change handles the rest
+            } catch (error) {
+                console.error("Google login error:", error);
+                alert("Login failed: " + error.message);
+            }
+        }
+
+        async function signOut() {
+            try {
+                await fbAuth.signOut();
+                 // Auth state change handles the rest
+            } catch (error) {
+                console.error("Logout error:", error);
+                 alert("Logout failed: " + error.message);
+            }
+        }
+
+         // --- Settings (Theme/Lang) ---
+         function listenUserSettingsTests(userId) {
+             if (userSettingsListener) userSettingsListener();
+
+             const userDocRef = db.collection('users').doc(userId);
+
+             userSettingsListener = userDocRef.onSnapshot(docSnap => {
+                 let settingsLoaded = false;
+                 if (docSnap.exists) {
+                     const settings = docSnap.data();
+                     let themeChanged = false;
+                     let langChanged = false;
+
+                     if (settings.theme && settings.theme !== currentTheme) {
+                         currentTheme = settings.theme;
+                         themeChanged = true;
+                     }
+                      if (settings.language && settings.language !== currentLanguage) {
+                         currentLanguage = settings.language;
+                         langChanged = true;
+                     }
+                     settingsLoaded = true;
+                     if (themeChanged) applyTheme();
+                     if (langChanged || themeChanged) updateUITextTests(); // Update UI if lang or theme changed
+
+                 } else {
+                      // No settings found, use defaults (light, ta)
+                      console.log("No user settings found, using defaults.");
+                      currentTheme = 'light';
+                      currentLanguage = 'ta';
+                 }
+                 // Apply initial theme/lang based on loaded or default values
+                  applyTheme();
+                  updateUITextTests();
+
+             }, error => {
+                 console.error(getTextTests('errorLoadingSettings'), error);
+                 // Apply defaults on error
+                  currentTheme = 'light'; applyTheme();
+                  currentLanguage = 'ta'; updateUITextTests();
+             });
+         }
+
+         async function saveUserSettingsTests() {
+             if (!currentUser) return;
+             const userDocRef = db.collection('users').doc(currentUser.uid);
+             const settings = {
+                 theme: currentTheme,
+                 language: currentLanguage
+             };
+             try {
+                 await userDocRef.set(settings, { merge: true });
+             } catch (error) {
+                 console.error(getTextTests('errorSavingSettings'), error);
+             }
+         }
+
+        function applyTheme() {
+            document.body.classList.toggle('dark-theme', currentTheme === 'dark');
+             updateUITextTests(); // Update button icons/titles
+        }
+
+        function toggleTheme() {
+            currentTheme = (currentTheme === 'light') ? 'dark' : 'light';
+            applyTheme();
+            saveUserSettingsTests();
+        }
+
+        function toggleLanguage() {
+            currentLanguage = (currentLanguage === 'ta') ? 'en' : 'ta';
+             updateUITextTests(); // Update all UI text
+             saveUserSettingsTests();
+         }
+
+        // --- Test Data Fetching & Display ---
+        async function fetchTestsForUser(userId) {
+            loadingIndicator.style.display = 'block';
+            noTestsMessage.style.display = 'none';
+            testListContainer.innerHTML = ''; // Clear previous results
+
+            try {
+                // !! Ensure Firestore index exists for (userId, createdAt, desc) !!
+                const testsRef = db.collection('tests')
+                                   .where('userId', '==', userId)
+                                   .orderBy('createdAt', 'desc');
+                const snapshot = await testsRef.get();
+                allTests = []; // Reset cache
+                if (snapshot.empty) {
+                    noTestsMessage.style.display = 'block';
+                } else {
+                    snapshot.forEach(doc => {
+                        allTests.push({ id: doc.id, ...doc.data() });
+                    });
+                    renderTestList(allTests); // Initial render
+                }
+            } catch (error) {
+                console.error("Error fetching tests:", error);
+                testListContainer.innerHTML = `<div style="color: var(--error-text); padding: 15px;">${getTextTests('errorLoadingTests')}</div>`;
+                 noTestsMessage.style.display = 'none';
+            } finally {
+                 loadingIndicator.style.display = 'none';
+            }
+        }
+
+         function renderTestList(testsToRender) {
+             testListContainer.innerHTML = ''; // Clear previous items
+             noTestsMessage.style.display = testsToRender.length === 0 ? 'block' : 'none';
+
+             testsToRender.forEach(test => {
+                 const item = document.createElement('div');
+                 item.classList.add('test-list-item');
+                 item.dataset.testId = test.id; // Store ID on the element
+
+                 const createdDate = test.createdAt?.toDate ? test.createdAt.toDate().toLocaleDateString() : 'N/A';
+                 const questionCount = Array.isArray(test.questions) ? test.questions.length : 0;
+
+                 item.innerHTML = `
+                     <div class="test-item-details">
+                         <div class="test-item-title">${test.title || 'Untitled Test'}</div>
+                         <div class="test-item-meta">
+                             <span>${getTextTests('testCreated')} ${createdDate}</span> |
+                             <span>${getTextTests('questionsCount', { count: questionCount })}</span>
+                         </div>
+                     </div>
+                     <div class="test-item-actions">
+                         <button class="take-btn" data-action="take">${getTextTests('takeTest')}</button>
+                         <button data-action="review">${getTextTests('reviewAttempts')}</button>
+                     </div>
+                 `;
+                 testListContainer.appendChild(item);
+             });
+         }
+
+         function filterTests() {
+             const searchTerm = searchInput.value.toLowerCase().trim();
+             if (!searchTerm) {
+                 renderTestList(allTests); // Show all if search is empty
+                 return;
+             }
+             const filteredTests = allTests.filter(test =>
+                 (test.title || '').toLowerCase().includes(searchTerm)
+             );
+             renderTestList(filteredTests);
+         }
+
+         function handleTestListAction(event) {
+             const button = event.target.closest('button[data-action]');
+             if (!button) return;
+
+             const item = button.closest('.test-list-item');
+             const testId = item?.dataset.testId;
+             const action = button.dataset.action;
+
+             if (!testId) return;
+
+             const testDefinition = allTests.find(t => t.id === testId);
+             if (!testDefinition) {
+                 alert(getTextTests('errorTestDefinition'));
+                 return;
+             }
+
+             if (action === 'take') {
+                 startMockTest(testDefinition);
+             } else if (action === 'review') {
+                 showReviewAttemptsModal(testDefinition);
+             }
+         }
+
+        // --- Test Taking Logic ---
+        function startMockTest(testDefinition) {
+            if (!currentUser || !testDefinition || !Array.isArray(testDefinition.questions) || testDefinition.questions.length === 0) {
+                alert(getTextTests('errorTestDefinition'));
+                return;
+            }
+            currentTestDefinition = testDefinition;
+            currentQuestionIndex = 0;
+            userAnswers = new Array(testDefinition.questions.length).fill(null);
+
+            testModalTitle.textContent = testDefinition.title || getTextTests('mockTestTitle');
+            testModal.style.display = 'block';
+            displayTestQuestion(0);
+            startTestTimer();
+        }
+
+        function displayTestQuestion(index) {
+            if (index < 0 || index >= currentTestDefinition.questions.length) return;
+            currentQuestionIndex = index;
+            const q = currentTestDefinition.questions[index];
+
+            testQuestionNumberModal.textContent = getTextTests('questionLabel', { num: index + 1 });
+            testQuestionModal.innerHTML = q.question; // Assuming question text is safe HTML or plain text
+            testOptionsModal.innerHTML = '';
+
+             const options = Array.isArray(q.options) ? q.options : [];
+            options.forEach((opt, i) => {
+                const label = document.createElement('label');
+                const input = document.createElement('input');
+                input.type = 'radio';
+                input.name = `q_${index}`;
+                input.value = i; // Store option index (0-3)
+                input.checked = (userAnswers[index] === i); // Check if previously answered
+                input.onchange = () => handleOptionSelect(i);
+
+                label.appendChild(input);
+                label.appendChild(document.createTextNode(` ${opt || '(Option Missing)'}`)); // Display option text
+                testOptionsModal.appendChild(label);
+            });
+
+             // Re-render MathJax if present
+             if (typeof MathJax !== "undefined" && MathJax.typesetPromise) {
+                 MathJax.typesetPromise([testQuestionModal, testOptionsModal]).catch(err => console.error('MathJax typeset error:', err));
+             }
+
+            prevQuestionBtnModal.disabled = (index === 0);
+            nextQuestionBtnModal.disabled = (index === currentTestDefinition.questions.length - 1);
+            submitTestBtnModal.style.display = (index === currentTestDefinition.questions.length - 1) ? 'inline-block' : 'none'; // Show submit only on last question
+            questionCounterModal.textContent = `Q: ${index + 1} / ${currentTestDefinition.questions.length}`;
+        }
+
+        function handleOptionSelect(optionIndex) {
+             if (currentQuestionIndex >= 0 && currentQuestionIndex < userAnswers.length) {
+                 userAnswers[currentQuestionIndex] = optionIndex;
+             }
+        }
+
+         function handleTestNavigation(direction) {
+             let newIndex = currentQuestionIndex;
+             if (direction === 'prev' && currentQuestionIndex > 0) {
+                 newIndex--;
+             } else if (direction === 'next' && currentQuestionIndex < currentTestDefinition.questions.length - 1) {
+                 newIndex++;
+             }
+             if (newIndex !== currentQuestionIndex) {
+                 displayTestQuestion(newIndex);
+             }
+        }
+
+        function startTestTimer() {
+            if (testTimerInterval) clearInterval(testTimerInterval);
+            testStartTime = Date.now();
+            testTimerInterval = setInterval(() => {
+                const elapsedSeconds = Math.floor((Date.now() - testStartTime) / 1000);
+                const minutes = Math.floor(elapsedSeconds / 60).toString().padStart(2, '0');
+                const seconds = (elapsedSeconds % 60).toString().padStart(2, '0');
+                testTimerModal.textContent = `Time: ${minutes}:${seconds}`;
+            }, 1000);
+        }
+
+        function submitTest() {
+             if (!confirm(getTextTests('confirmSubmit'))) return;
+
+             if (testTimerInterval) clearInterval(testTimerInterval); testTimerInterval = null;
+             const endTime = Date.now();
+             const timeTakenMs = testStartTime ? endTime - testStartTime : 0;
+
+             // Calculate results
+             let correctCount = 0, incorrectCount = 0, skippedCount = 0;
+             const results = currentTestDefinition.questions.map((q, index) => {
+                 const userAnswerIndex = userAnswers[index];
+                 const correctAnswerLetter = q.answer?.trim().toUpperCase();
+                 // Convert letter 'A', 'B', 'C', 'D' to index 0, 1, 2, 3
+                 const correctAnswerIndex = correctAnswerLetter ? correctAnswerLetter.charCodeAt(0) - 'A'.charCodeAt(0) : -1;
+                 let status = 'skipped';
+
+                 if (userAnswerIndex !== null) {
+                     if (userAnswerIndex === correctAnswerIndex) {
+                         status = 'correct';
+                         correctCount++;
+                     } else {
+                         status = 'incorrect';
+                         incorrectCount++;
+                     }
+                 } else {
+                     skippedCount++;
+                 }
+                 return { status: status, userAnswerIndex: userAnswerIndex, correctAnswerIndex: correctAnswerIndex };
+             });
+
+             const attemptData = {
+                 userId: currentUser.uid,
+                 testId: currentTestDefinition.id,
+                 testTitle: currentTestDefinition.title || 'Untitled Test', // Store title for easier querying/display
+                 answers: userAnswers, // Store the indices selected by user
+                 results: results, // Store status per question
+                 score: correctCount,
+                 totalQuestions: currentTestDefinition.questions.length,
+                 timeTakenMs: timeTakenMs,
+                 completedAt: firebase.firestore.FieldValue.serverTimestamp()
+             };
+
+             // Save attempt to Firestore
+             saveTestAttempt(attemptData);
+
+             // Close test modal and potentially show review immediately?
+             // For now, just close it. User can review from the main list.
+              closeTestModal();
+
+         }
+
+         async function saveTestAttempt(attemptData) {
+             if (!currentUser) return;
+             try {
+                 await db.collection('testAttempts').add(attemptData);
+                 console.log("Test attempt saved successfully!");
+                 alert(getTextTests('testSavedSuccess')); // Simple confirmation
+             } catch (error) {
+                 console.error("Error saving test attempt:", error);
+                 alert(getTextTests('errorSavingAttempt'));
+             }
+         }
+
+         function closeTestModal() {
+             if (testTimerInterval) clearInterval(testTimerInterval); testTimerInterval = null;
+             testModal.style.display = 'none';
+             currentTestDefinition = null;
+             currentQuestionIndex = 0;
+             userAnswers = [];
+             testStartTime = null;
+         }
+
+        // --- Review Attempts Logic ---
+
+        async function showReviewAttemptsModal(testDefinition) {
+             if (!currentUser || !testDefinition) return;
+
+             reviewAttemptsModalTitle.textContent = `${getTextTests('reviewAttemptsTitle')}: ${testDefinition.title || 'Untitled'}`;
+             reviewAttemptsList.innerHTML = `<p>${getTextTests('loading')}</p>`; // Loading indicator
+             noAttemptsMessage.style.display = 'none';
+             reviewAttemptsModal.style.display = 'block';
+
+             try {
+                  // !! Ensure Firestore index exists for (userId, testId, completedAt, desc) !!
+                 const attemptsRef = db.collection('testAttempts')
+                                     .where('userId', '==', currentUser.uid)
+                                     .where('testId', '==', testDefinition.id)
+                                     .orderBy('completedAt', 'desc');
+                 const snapshot = await attemptsRef.get();
+
+                 if (snapshot.empty) {
+                     reviewAttemptsList.innerHTML = ''; // Clear loading
+                     noAttemptsMessage.style.display = 'block';
+                 } else {
+                     reviewAttemptsList.innerHTML = ''; // Clear loading
+                     snapshot.forEach(doc => {
+                         const attempt = { id: doc.id, ...doc.data() };
+                         const item = document.createElement('div');
+                         item.classList.add('attempt-list-item');
+                         item.dataset.attemptId = attempt.id;
+                         item.dataset.testId = testDefinition.id; // Pass testId for loading definition
+
+                         const completedDate = attempt.completedAt?.toDate ? attempt.completedAt.toDate().toLocaleString() : 'N/A';
+                         const score = `${attempt.score || 0} / ${attempt.totalQuestions || 'N/A'}`;
+                         const timeSeconds = Math.round((attempt.timeTakenMs || 0) / 1000);
+                         const minutes = Math.floor(timeSeconds / 60);
+                         const seconds = timeSeconds % 60;
+                         const timeString = `${minutes}m ${seconds}s`;
+
+
+                         item.innerHTML = `
+                             <div class="attempt-info">
+                                 <span>${getTextTests('attemptDate')} ${completedDate}</span>
+                             </div>
+                             <div>
+                                <span class="attempt-score">${getTextTests('scoreLabel')} ${score}</span>
+                                <span style="margin-left: 10px;">(${getTextTests('timeTakenLabel')} ${timeString})</span>
+                                <button data-action="view-single-review" style="margin-left: 15px; padding: 4px 8px; font-size: 0.85em;">${getTextTests('viewReview')}</button>
+                             </div>
+                         `;
+                         reviewAttemptsList.appendChild(item);
+                     });
+                 }
+
+             } catch (error) {
+                 console.error("Error fetching attempts:", error);
+                  reviewAttemptsList.innerHTML = `<div style="color: var(--error-text); padding: 15px;">${getTextTests('errorLoadingAttempts')}</div>`;
+                  noAttemptsMessage.style.display = 'none';
+             }
+        }
+
+         function handleAttemptListAction(event) {
+             const button = event.target.closest('button[data-action="view-single-review"]');
+             if (!button) return;
+
+             const item = button.closest('.attempt-list-item');
+             const attemptId = item?.dataset.attemptId;
+             const testId = item?.dataset.testId; // Get testId needed to load questions
+
+             if (attemptId && testId) {
+                 // Fetch the specific attempt data AND the corresponding test definition
+                 loadAndShowSingleReview(attemptId, testId);
+             }
+         }
+
+
+         async function loadAndShowSingleReview(attemptId, testId) {
+             // Show loading state in the single review modal maybe?
+             singleReviewModal.style.display = 'block';
+             singleReviewContentModal.innerHTML = `<p>${getTextTests('loading')}</p>`;
+             singleReviewSummaryModal.innerHTML = '';
+
+             try {
+                 // Fetch both attempt and test definition concurrently
+                 const attemptRef = db.collection('testAttempts').doc(attemptId);
+                 const testRef = db.collection('tests').doc(testId);
+
+                 const [attemptDoc, testDoc] = await Promise.all([attemptRef.get(), testRef.get()]);
+
+                 if (!attemptDoc.exists) throw new Error("Attempt data not found.");
+                 if (!testDoc.exists) throw new Error("Test definition not found.");
+
+                 const attemptData = attemptDoc.data();
+                 const testData = testDoc.data();
+
+                 if (!Array.isArray(testData.questions)) throw new Error("Invalid test definition questions.");
+
+                 currentReviewingAttempt = { ...attemptData, questions: testData.questions }; // Combine data
+
+                 displaySingleReview(currentReviewingAttempt);
+
+             } catch (error) {
+                 console.error("Error loading single review:", error);
+                 singleReviewContentModal.innerHTML = `<p style="color: var(--error-text);">${error.message || 'Failed to load review.'}</p>`;
+             }
+         }
+
+
+         function displaySingleReview(reviewData) {
+             const questions = reviewData.questions; // From test definition
+             const userAnswersIndices = reviewData.answers || []; // Array of indices
+             const results = reviewData.results || []; // Array of {status, userAnswerIndex, correctAnswerIndex}
+             const totalQuestions = reviewData.totalQuestions || questions.length;
+             const correctCount = reviewData.score || 0;
+             let incorrectCount = 0;
+             let skippedCount = 0;
+
+              // Recalculate incorrect/skipped if not stored directly in attempt
+              results.forEach(res => {
+                  if(res.status === 'incorrect') incorrectCount++;
+                  else if (res.status === 'skipped') skippedCount++;
+              });
+              // Fallback if results array wasn't stored
+              if (results.length === 0) {
+                   incorrectCount = totalQuestions - correctCount - skippedCount; // Approximate
+              }
+
+
+             const timeSeconds = Math.round((reviewData.timeTakenMs || 0) / 1000);
+             const minutes = Math.floor(timeSeconds / 60);
+             const seconds = timeSeconds % 60;
+             const timeString = `${minutes}m ${seconds}s`;
+
+             // Display Summary
+             singleReviewSummaryModal.innerHTML = `
+                 <span>${getTextTests('score')} ${correctCount}/${totalQuestions}</span>
+                 <span class="score-correct">${getTextTests('correct')} ${correctCount}</span>
+                 <span class="score-incorrect">${getTextTests('incorrect')} ${incorrectCount}</span>
+                 <span class="score-skipped">${getTextTests('skipped')} ${skippedCount}</span>
+                 <span>${getTextTests('totalTime')} ${timeString}</span>
+             `;
+
+             // Display Questions and Answers
+             singleReviewContentModal.innerHTML = ''; // Clear loading/previous
+             questions.forEach((q, index) => {
+                 const result = results[index] || { status: 'skipped', userAnswerIndex: null, correctAnswerIndex: -1 }; // Fallback if results array is short/missing
+                 const userAnswerIndex = result.userAnswerIndex;
+                 const correctAnswerLetter = q.answer?.trim().toUpperCase();
+                 const correctAnswerIndex = correctAnswerLetter ? correctAnswerLetter.charCodeAt(0) - 'A'.charCodeAt(0) : -1;
+                 const options = Array.isArray(q.options) ? q.options : [];
+
+                 let userAnswerText = getTextTests('answerSkipped');
+                 let answerDetailClass = "user-answer-skipped";
+
+                  if (userAnswerIndex !== null && userAnswerIndex >= 0 && userAnswerIndex < options.length) {
+                     userAnswerText = options[userAnswerIndex];
+                     if (result.status === 'correct') {
+                         answerDetailClass = "user-answer-correct";
+                     } else {
+                         answerDetailClass = "user-answer-incorrect";
+                     }
+                 } else if (userAnswerIndex !== null) { // Handle case where saved index might be invalid
+                     userAnswerText = getTextTests('answerInvalid');
+                     answerDetailClass = "user-answer-incorrect";
+                 }
+
+
+                 const correctAnswerText = (correctAnswerIndex >= 0 && correctAnswerIndex < options.length)
+                     ? options[correctAnswerIndex]
+                     : "N/A";
+
+                 const item = document.createElement('div');
+                 item.classList.add('review-item-modal', `status-${result.status}`);
+                 item.dataset.status = result.status;
+
+                 let detailsHtml = `<span class="${answerDetailClass}">${getTextTests('yourAnswer')} ${userAnswerText}</span>`;
+                 if (result.status !== 'correct') {
+                     detailsHtml += `<br><span class="correct-answer">${getTextTests('correctAnswer')} ${correctAnswerText}</span>`;
+                 }
+
+                 item.innerHTML = `
+                     <div class="review-item-qnum-modal">${getTextTests('questionNum', { num: index + 1 })}</div>
+                     <div class="review-item-question-modal">${q.question}</div>
+                     <div class="review-item-details-modal">${detailsHtml}</div>
+                 `;
+                 singleReviewContentModal.appendChild(item);
+             });
+
+              // Re-render MathJax if present
+              if (typeof MathJax !== "undefined" && MathJax.typesetPromise) {
+                  MathJax.typesetPromise([singleReviewContentModal]).catch(err => console.error('MathJax typeset error:', err));
+              }
+         }
+
+
+        function closeReviewAttemptsModal() {
+            reviewAttemptsModal.style.display = 'none';
+        }
+         function closeSingleReviewModal() {
+             singleReviewModal.style.display = 'none';
+             currentReviewingAttempt = null; // Clear state
+         }
+
+
+    </script>
+
+</body>
+</html>
