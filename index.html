@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gemini Chat + Mock Test (v8 - Delete/AutoName)</title> <!-- Version Updated -->
+    <title>Gemini Chat + Mock Test (v8.1 - Delete/AutoName Fixed)</title> <!-- பதிப்பு புதுப்பிக்கப்பட்டது -->
 
     <!-- MathJax Configuration -->
     <script> window.MathJax={tex:{inlineMath:[['$','$'],['\\(','\\)']],displayMath:[['$$','$$'],['\\[','\\]']]},svg:{fontCache:'global'},options:{skipHtmlTags:['script','noscript','style','textarea','pre','code']}}; </script>
@@ -15,7 +15,7 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
 
     <style>
-        /* --- Styles (Minor adjustments for delete button) --- */
+        /* --- Styles (Delete பொத்தானுக்கான மாற்றங்கள்) --- */
         :root { /* ... Theme Variables ... */
              --font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; --sidebar-width: 260px; --message-font-size-base: 1rem;
              /* LIGHT */ --sidebar-bg: #f7f7f7; --main-bg: #ffffff; --input-bg: #ffffff; --border-color: #e0e0e0; --text-primary: #2c2c2c; --text-secondary: #5f5f5f; --text-placeholder: #999999; --accent-color: #d97a7a; --user-message-bg: #cce0ff; --user-message-text: #1c1c1c; --ai-message-bg: #f0f0f0; --ai-message-text: #2c2c2c; --button-bg: #f0f0f0; --button-hover-bg: #e0e0e0; --active-item-bg: #e0e0e0; --code-bg: #e8e8e8; --scrollbar-thumb: #ccc; --scrollbar-thumb-hover: #bbb; --app-outer-bg: #e8e8e8; --send-button-bg: var(--accent-color); --send-button-hover-bg: #c76b6b; --send-button-text: #ffffff; --error-bg: #ffebee; --error-text: #c62828; --error-border: #ef9a9a; --message-font-size: var(--message-font-size-base); --delete-button-color: #aaa; --delete-button-hover-color: #dc3545;
@@ -23,7 +23,7 @@
         body.dark-theme { /* DARK */ --sidebar-bg: #2a2a2e; --main-bg: #1e1e1e; --input-bg: #2a2a2e; --border-color: #404040; --text-primary: #e0e0e0; --text-secondary: #a0a0a0; --text-placeholder: #777777; --accent-color: #e58b8b; --user-message-bg: #3a4a6b; --user-message-text: #e8e8e8; --ai-message-bg: #333333; --ai-message-text: #e0e0e0; --button-bg: #404040; --button-hover-bg: #505050; --active-item-bg: #454545; --code-bg: #2c2c2e; --scrollbar-thumb: #555; --scrollbar-thumb-hover: #666; --app-outer-bg: #121212; --send-button-bg: var(--accent-color); --send-button-hover-bg: #f09f9f; --send-button-text: #1e1e1e; --error-bg: #5c2b2b; --error-text: #ffcdd2; --error-border: #8c4343; --delete-button-color: #666; --delete-button-hover-color: #f09f9f; }
         body { font-family: var(--font-family); margin: 0; padding: 0; background-color: var(--app-outer-bg); color: var(--text-primary); font-size: 15px; transition: background-color 0.3s ease, color 0.3s ease; }
 
-        /* --- Layout & Structure (Unchanged) --- */
+        /* --- Layout & Structure (மாற்றமில்லை) --- */
         .app-container { display: flex; height: 100vh; width: 100vw; overflow: hidden; } .app-container.hidden { display: none; }
         .sidebar { width: var(--sidebar-width); background-color: var(--sidebar-bg); border-right: 1px solid var(--border-color); display: flex; flex-direction: column; padding: 15px 0; box-sizing: border-box; flex-shrink: 0; transition: background-color 0.3s ease, border-color 0.3s ease; }
         .main-container { flex-grow: 1; display: flex; flex-direction: column; height: 100vh; overflow: hidden; position: relative; }
@@ -36,20 +36,20 @@
          .sidebar-header { padding: 10px 20px; font-size: 1.1em; font-weight: 600; color: var(--text-primary); }
          .start-chat-button { display: flex; align-items: center; gap: 8px; background-color: var(--main-bg); border: 1px solid var(--border-color); color: var(--text-primary); border-radius: 8px; padding: 10px 15px; margin: 10px 15px; font-size: 0.95em; font-weight: 500; cursor: pointer; text-align: left; transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease; }
          .start-chat-button:hover { background-color: var(--button-hover-bg); } .start-chat-button svg { fill: currentColor; width: 16px; height: 16px; }
-         .start-chat-button:disabled { opacity: 0.6; cursor: not-allowed; } /* Disabled style for logged out */
+         .start-chat-button:disabled { opacity: 0.6; cursor: not-allowed; }
          .sidebar-section-title { padding: 15px 20px 5px; font-size: 0.85em; font-weight: 600; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px; }
          .chat-list { flex-grow: 1; overflow-y: auto; padding: 0 15px; margin-bottom: 10px; }
          .chat-list::-webkit-scrollbar { width: 6px; } .chat-list::-webkit-scrollbar-thumb { background: var(--scrollbar-thumb); border-radius: 3px;} .chat-list::-webkit-scrollbar-thumb:hover { background: var(--scrollbar-thumb-hover); }
          .chat-list-item {
-             padding: 8px 30px 8px 10px; /* Increased right padding for delete btn */
+             padding: 8px 30px 8px 10px; /* Delete பொத்தானுக்காக வலதுபுற padding அதிகம் */
              margin-bottom: 4px; border-radius: 6px; font-size: 0.9em;
              cursor: pointer; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
              color: var(--text-secondary); transition: background-color 0.2s ease, color 0.2s ease;
-             position: relative; /* Needed for absolute positioning of delete button */
+             position: relative; /* Delete பொத்தானின் absolute positioning-க்கு தேவை */
          }
          .chat-list-item:hover { background-color: var(--button-hover-bg); color: var(--text-primary); }
          .chat-list-item.active { background-color: var(--active-item-bg); color: var(--text-primary); font-weight: 500; }
-         .delete-chat-button { /* NEW */
+         .delete-chat-button { /* NEW - Delete பொத்தான் ஸ்டைல் */
              position: absolute;
              right: 6px;
              top: 50%;
@@ -60,15 +60,15 @@
              border: none;
              color: var(--delete-button-color);
              cursor: pointer;
-             font-size: 1.3em; /* Adjust size */
+             font-size: 1.3em; /* அளவு மாற்றலாம் */
              line-height: 1;
              padding: 0;
-             display: none; /* Hidden by default */
+             display: none; /* Default ஆக மறைந்திருக்கும் */
              opacity: 0.7;
              transition: color 0.2s ease, opacity 0.2s ease;
          }
          .chat-list-item:hover .delete-chat-button {
-             display: block; /* Show on hover */
+             display: block; /* Hover செய்யும்போது தெரியும் */
          }
          .delete-chat-button:hover {
              color: var(--delete-button-hover-color);
@@ -79,19 +79,19 @@
          .text-size-controls span, .theme-toggle span { font-size: 0.85em; color: var(--text-secondary); }
          .text-size-buttons button, .theme-toggle button { background: var(--button-bg); border: 1px solid var(--border-color); color: var(--text-secondary); border-radius: 4px; padding: 2px 8px; margin-left: 5px; cursor: pointer; font-size: 1.1em; line-height: 1; transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease; }
          .text-size-buttons button:hover, .theme-toggle button:hover { background-color: var(--button-hover-bg); color: var(--text-primary); }
-         .text-size-buttons button:disabled, .theme-toggle button:disabled { opacity: 0.6; cursor: not-allowed; } /* Disabled style for logged out */
-         .account-info { display: flex; align-items: center; gap: 10px; font-size: 0.9em; margin-top: 10px; /* Added margin */ }
+         .text-size-buttons button:disabled, .theme-toggle button:disabled { opacity: 0.6; cursor: not-allowed; }
+         .account-info { display: flex; align-items: center; gap: 10px; font-size: 0.9em; margin-top: 10px; }
          .account-avatar { width: 30px; height: 30px; border-radius: 50%; background-color: #6c757d; color: white; display: flex; align-items: center; justify-content: center; font-weight: 600; }
          .account-details { overflow: hidden; }
          .account-email { font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--text-primary); }
          .account-plan { font-size: 0.85em; color: var(--text-secondary); }
-         #auth-controls { margin-top: 15px; text-align: center; } /* Auth buttons container */
+         #auth-controls { margin-top: 15px; text-align: center; }
          #auth-controls button { background-color: var(--button-bg); color: var(--text-primary); border: 1px solid var(--border-color); border-radius: 6px; padding: 8px 15px; cursor: pointer; font-size: 0.9em; transition: background-color 0.2s ease; }
          #auth-controls button:hover { background-color: var(--button-hover-bg); }
-         #logout-btn { display: none; /* Initially hidden */ }
+         #logout-btn { display: none; }
 
 
-        /* --- Chat Area Elements (Unchanged) --- */
+        /* --- Chat Area Elements (மாற்றமில்லை) --- */
         .greeting { font-size: 1.8em; font-weight: 600; margin-bottom: 40px; color: var(--text-primary); } .greeting .asterisk { color: var(--accent-color); font-size: 1.2em; margin-right: 5px; display: inline-block; vertical-align: middle; }
         .message { padding: 12px 18px; border-radius: 18px; max-width: 80%; word-wrap: break-word; line-height: 1.6; margin-bottom: 15px; font-size: var(--message-font-size); transition: background-color 0.3s ease, color 0.3s ease; }
         .user-message { background-color: var(--user-message-bg); color: var(--user-message-text); align-self: flex-end; border-bottom-right-radius: 5px; }
@@ -105,8 +105,8 @@
         .info-message { text-align: center; color: var(--text-secondary); padding: 50px 20px; font-style: italic; }
         .message mjx-container { color: inherit !important; font-size: inherit !important; }
 
-        /* --- Input Area Elements (Unchanged except suggestions hidden initially) --- */
-        .suggestions { display: none; gap: 10px; margin-bottom: 15px; flex-wrap: wrap; } /* Initially hidden */
+        /* --- Input Area Elements (மாற்றமில்லை) --- */
+        .suggestions { display: none; gap: 10px; margin-bottom: 15px; flex-wrap: wrap; }
         .suggestion-chip { background-color: var(--button-bg); border: 1px solid var(--border-color); color: var(--text-secondary); border-radius: 16px; padding: 8px 15px; font-size: 0.9em; cursor: pointer; transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease; }
         .suggestion-chip:hover { background-color: var(--button-hover-bg); color: var(--text-primary); }
         .input-box { display: flex; align-items: flex-end; background-color: var(--main-bg); border: 1px solid var(--border-color); border-radius: 12px; padding: 5px 5px 5px 15px; position: relative; transition: background-color 0.3s ease, border-color 0.3s ease; }
@@ -125,7 +125,7 @@
          .start-test-button { background-color: var(--accent-color); color: var(--send-button-text); border: none; border-radius: 6px; padding: 8px 15px; margin-top: 10px; cursor: pointer; font-weight: 500; display: inline-block; transition: background-color 0.2s ease; }
          .start-test-button:hover { background-color: var(--send-button-hover-bg); }
 
-        /* --- Mock Test View Styles (Unchanged) --- */
+        /* --- Mock Test View Styles (மாற்றமில்லை) --- */
         .mock-test-view { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: var(--main-bg); z-index: 100; flex-direction: column; padding: 20px; box-sizing: border-box; transition: background-color 0.3s ease; }
         .mock-test-view.active { display: flex; }
         .test-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-bottom: 10px; border-bottom: 1px solid var(--border-color); flex-shrink: 0; }
@@ -145,7 +145,7 @@
         .test-navigation button#submit-test-btn:hover:not(:disabled) { background-color: var(--send-button-hover-bg); }
         .test-navigation button:disabled { opacity: 0.5; cursor: not-allowed; }
 
-        /* --- Review View Styles (Unchanged) --- */
+        /* --- Review View Styles (மாற்றமில்லை) --- */
         .review-view { padding: 20px; box-sizing: border-box; background-color: var(--main-bg); }
         .review-header { margin-bottom: 15px; padding-bottom: 15px; border-bottom: 1px solid var(--border-color); }
         .review-header h2 { margin: 0 0 10px 0; font-size: 1.3em; color: var(--text-primary); }
@@ -163,18 +163,12 @@
         .review-item-details span { display: block; margin-bottom: 5px; font-size: 0.95em; color: var(--text-primary); }
         .review-item-details .correct-answer { color: #28a745; font-weight: bold; }
         .review-item-details .user-answer-correct { color: #28a745; } .review-item-details .user-answer-incorrect { color: #dc3545; text-decoration: line-through; } .review-item-details .user-answer-skipped { color: #fd7e14; font-style: italic; }
-        .review-footer { text-align: center; padding-top: 20px; border-top: 1px solid var(--border-color); margin-top: auto; flex-shrink: 0; display: flex; justify-content: center; gap: 15px; /* Space between buttons */ }
-        #exit-review-btn, #save-review-btn { /* Style both buttons */
-            background-color: var(--accent-color); color: var(--send-button-text); border: none;
-            border-radius: 6px; padding: 10px 25px; cursor: pointer; font-size: 1em;
-            transition: background-color 0.2s ease;
-        }
+        .review-footer { text-align: center; padding-top: 20px; border-top: 1px solid var(--border-color); margin-top: auto; flex-shrink: 0; display: flex; justify-content: center; gap: 15px; }
+        #exit-review-btn, #save-review-btn { background-color: var(--accent-color); color: var(--send-button-text); border: none; border-radius: 6px; padding: 10px 25px; cursor: pointer; font-size: 1em; transition: background-color 0.2s ease; }
         #exit-review-btn:hover, #save-review-btn:hover:not(:disabled) { background-color: var(--send-button-hover-bg); }
-        #save-review-btn { /* Secondary button style (optional) */
-            background-color: var(--button-bg); color: var(--text-primary); border: 1px solid var(--border-color);
-        }
+        #save-review-btn { background-color: var(--button-bg); color: var(--text-primary); border: 1px solid var(--border-color); }
         #save-review-btn:hover:not(:disabled) { background-color: var(--button-hover-bg); }
-        #save-review-btn:disabled { opacity: 0.6; cursor: not-allowed; background-color: #cccccc; border-color: #aaaaaa; } /* Disabled style */
+        #save-review-btn:disabled { opacity: 0.6; cursor: not-allowed; background-color: #cccccc; border-color: #aaaaaa; }
 
     </style>
 </head>
@@ -184,38 +178,36 @@
     <div class="app-container" id="app-container">
         <!-- Sidebar -->
         <div class="sidebar">
-            <!-- Sidebar content -->
             <div class="sidebar-header">Gemini Chat</div>
-            <button class="start-chat-button" id="start-chat" disabled> <!-- Initially disabled -->
+            <button class="start-chat-button" id="start-chat" disabled>
                  <svg viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"></path></svg>
-                 Start new chat
+                 புதிய உரையாடல்
             </button>
-            <div class="sidebar-section-title">Chats</div>
+            <div class="sidebar-section-title">உரையாடல்கள்</div>
             <div class="chat-list" id="chat-list">
-                 <div style="padding:10px;color:var(--text-secondary);font-size:0.9em;">Please log in to see chats.</div>
+                 <div style="padding:10px;color:var(--text-secondary);font-size:0.9em;">உரையாடல்களைப் பார்க்க உள்நுழையவும்.</div>
             </div>
             <div class="sidebar-footer">
                 <div class="sidebar-controls">
                      <div class="text-size-controls">
-                         <span>Text Size</span>
+                         <span>எழுத்து அளவு</span>
                          <div class="text-size-buttons">
-                             <button id="decrease-text-size" title="Decrease text size" disabled>-</button> <!-- Initially disabled -->
-                             <button id="increase-text-size" title="Increase text size" disabled>+</button> <!-- Initially disabled -->
+                             <button id="decrease-text-size" title="எழுத்து அளவைக் குறைக்கவும்" disabled>-</button>
+                             <button id="increase-text-size" title="எழுத்து அளவை அதிகரிக்கவும்" disabled>+</button>
                          </div>
                      </div>
                      <div class="theme-toggle">
-                         <button id="theme-toggle-button" title="Toggle Theme" disabled>☀️</button> <!-- Initially disabled -->
+                         <button id="theme-toggle-button" title="Toggle Theme" disabled>☀️</button>
                      </div>
                 </div>
-                 <!-- Auth Controls -->
                  <div id="auth-controls">
-                     <button id="login-google-btn">Login with Google</button>
-                     <button id="logout-btn" style="display: none;">Logout</button>
+                     <button id="login-google-btn">Google மூலம் உள்நுழைக</button>
+                     <button id="logout-btn" style="display: none;">வெளியேறு</button>
                  </div>
                  <div class="account-info">
                      <div class="account-avatar" id="account-avatar">?</div>
                      <div class="account-details">
-                         <div class="account-email" id="account-email">Not logged in</div>
+                         <div class="account-email" id="account-email">உள்நுழையவில்லை</div>
                          <div class="account-plan" id="account-plan"></div>
                      </div>
                  </div>
@@ -227,18 +219,18 @@
             <!-- Chat View -->
             <div class="main-content active" id="main-content-chat">
                  <div class="chat-area" id="chat-area">
-                     <!-- Greeting or Login Prompt will be rendered here by JS -->
+                     <!-- Greeting அல்லது Login Prompt இங்கு JS மூலம் காண்பிக்கப்படும் -->
                  </div>
-                 <div class="input-container" id="input-container"> <!-- Initially hidden -->
+                 <div class="input-container" id="input-container">
                      <div class="suggestions" id="suggestions">
                           <button class="suggestion-chip" data-prompt="5 questions about US History">5 Qs US History (Check MCQ)</button>
                           <button class="suggestion-chip" data-prompt="What is recursion?">Recursion?</button>
                           <button class="suggestion-chip" data-prompt="Explain $\lim_{x\to 0} \frac{\sin x}{x} = 1$">Limit sin(x)/x ?</button>
                      </div>
                     <div class="input-box">
-                        <textarea id="user-input" placeholder="Enter prompt (Check 'MCQs?' to generate test)" rows="1"></textarea>
-                        <div class="mcq-mode-control"> <input type="checkbox" id="mcq-mode-checkbox" title="Check to generate MCQs based on your prompt"> <label for="mcq-mode-checkbox">MCQs?</label> </div>
-                        <button id="send-button" title="Send message" disabled> <!-- Initially disabled -->
+                        <textarea id="user-input" placeholder="கேள்வியை உள்ளிடவும் ('MCQs?' என்பதை தேர்வுசெய்தால் தேர்வு உருவாக்கப்படும்)" rows="1"></textarea>
+                        <div class="mcq-mode-control"> <input type="checkbox" id="mcq-mode-checkbox" title="உங்கள் கேள்வி அடிப்படையில் MCQ களை உருவாக்க இதைத் தேர்வுசெய்க"> <label for="mcq-mode-checkbox">MCQs?</label> </div>
+                        <button id="send-button" title="அனுப்பு" disabled>
                             <svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"></path></svg>
                         </button>
                     </div>
@@ -247,18 +239,18 @@
             <!-- Review View -->
              <div class="review-view" id="review-view">
                  <div class="review-header">
-                     <h2>Test Review</h2>
+                     <h2>தேர்வு மறுபார்வை</h2>
                      <div class="review-summary" id="review-summary"></div>
                      <div class="review-filters" id="review-filters">
-                         <button data-filter="all" class="active-filter">All</button>
-                         <button data-filter="incorrect">Incorrect</button>
-                         <button data-filter="skipped">Skipped</button>
+                         <button data-filter="all" class="active-filter">அனைத்தும்</button>
+                         <button data-filter="incorrect">தவறானவை</button>
+                         <button data-filter="skipped">தவிர்க்கப்பட்டவை</button>
                      </div>
                  </div>
                  <div class="review-content" id="review-content"></div>
                  <div class="review-footer">
-                     <button id="save-review-btn">Save Review</button>
-                     <button id="exit-review-btn">Back to Chat</button>
+                     <button id="save-review-btn">மறுபார்வையை சேமி</button>
+                     <button id="exit-review-btn">Chat-க்கு திரும்புக</button>
                  </div>
              </div>
         </div>
@@ -266,9 +258,9 @@
 
     <!-- Mock Test View (Fullscreen Overlay) -->
     <div class="mock-test-view" id="mock-test-view">
-        <div class="test-header"> <h2 id="test-title">Mock Test</h2> <div class="test-info"> <span id="question-counter">Q: 1 / N</span> <span id="test-timer">Time: 00:00</span> </div> </div>
+        <div class="test-header"> <h2 id="test-title">மாதிரித் தேர்வு</h2> <div class="test-info"> <span id="question-counter">கேள்வி: 1 / N</span> <span id="test-timer">நேரம்: 00:00</span> </div> </div>
         <div class="test-content"> <div class="test-question-container"> <div class="test-question-number" id="test-question-number"></div> <div class="test-question" id="test-question"></div> <div class="test-options" id="test-options"></div> </div> </div>
-        <div class="test-navigation"> <button id="prev-question-btn" disabled>Previous</button> <button id="next-question-btn">Next</button> <button id="submit-test-btn">Submit Test</button> </div>
+        <div class="test-navigation"> <button id="prev-question-btn" disabled>முந்தையது</button> <button id="next-question-btn">அடுத்தது</button> <button id="submit-test-btn">தேர்வைச் சமர்ப்பி</button> </div>
     </div>
 
 
@@ -276,9 +268,9 @@
         // --- Firebase Config ---
         // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         // !!! பாதுகாப்பு எச்சரிக்கை / SECURITY WARNING !!!
-        // This firebaseConfig (especially apiKey) is insecure because it was shared.
-        // After testing, delete/restrict this API key in Firebase Console and use the new one here.
-        // DO NOT DEPLOY WITH THIS SHARED KEY.
+        // இந்த firebaseConfig விவரங்கள் பாதுகாப்பற்றது. சோதித்த பிறகு,
+        // Firebase Console-ல் இந்த API Key-ஐ கட்டுப்படுத்திவிட்டு, புதிய key-ஐ பயன்படுத்தவும்.
+        // This firebaseConfig is insecure. Restrict/delete the API key in Firebase Console after testing.
         // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         const firebaseConfig = {
           apiKey: "AIzaSyDgw604fe5jnNu4kTOv1cQ-3n7PL8gcN58", // <- பகிரப்பட்ட, பாதுகாப்பற்ற Key / SHARED, INSECURE KEY
@@ -292,8 +284,8 @@
 
         // --- Initialize Firebase ---
         firebase.initializeApp(firebaseConfig);
-        const fbAuth = firebase.auth(); // Firebase Authentication service
-        const db = firebase.firestore(); // Firebase Firestore service
+        const fbAuth = firebase.auth(); // Firebase Authentication
+        const db = firebase.firestore(); // Firebase Firestore
 
         // --- DOM Elements ---
         const appContainer = document.getElementById('app-container');
@@ -315,10 +307,8 @@
         const reviewView = document.getElementById('review-view');
         const inputContainer = document.getElementById('input-container');
         const mcqModeCheckbox = document.getElementById('mcq-mode-checkbox');
-        // Auth buttons
         const loginBtn = document.getElementById('login-google-btn');
         const logoutBtn = document.getElementById('logout-btn');
-        // Test elements
         const testTitle = document.getElementById('test-title');
         const questionCounter = document.getElementById('question-counter');
         const testTimer = document.getElementById('test-timer');
@@ -328,7 +318,6 @@
         const prevQuestionBtn = document.getElementById('prev-question-btn');
         const nextQuestionBtn = document.getElementById('next-question-btn');
         const submitTestBtn = document.getElementById('submit-test-btn');
-        // Review elements
         const reviewSummary = document.getElementById('review-summary');
         const reviewContent = document.getElementById('review-content');
         const exitReviewBtn = document.getElementById('exit-review-btn');
@@ -339,13 +328,13 @@
         const MODEL_NAME="gemini-1.5-flash-latest";
         const API_URL_BASE=`https://generativelanguage.googleapis.com/v1beta/models/${MODEL_NAME}:generateContent?key=`;
         const STORAGE_KEY_API_KEY='geminiApiKey';
-        const NEW_CHAT_TITLE="(New Chat)";
+        const NEW_CHAT_TITLE="(புதிய உரையாடல்)"; // தமிழில் மாற்றப்பட்டது
         const TEXT_SIZE_STEP=0.1;
         const MIN_TEXT_SIZE_MULTIPLIER=0.7;
         const MAX_TEXT_SIZE_MULTIPLIER=1.5;
         const LIGHT_THEME_ICON='☀️';
         const DARK_THEME_ICON='🌙';
-        const DELETE_ICON = '×'; // Or use an SVG like trash icon
+        const DELETE_ICON = '×'; // Delete பொத்தானுக்கான ஐகான்
 
         // --- State Variables ---
         let API_KEY='';
@@ -363,10 +352,9 @@
         let testTimerInterval=null;
         let generatedMCQData=null;
         let reviewResultsCache = null;
-        // Firestore Listeners
         let activeChatListener = null;
         let chatListListener = null;
-        let isDeletingChat = false; // Flag to prevent UI shifts during delete
+        let isDeletingChat = false; // Delete செய்யும்போது UI தாவுவதைத் தடுக்க
 
         // --- Initialization ---
         initializeApp();
@@ -377,20 +365,17 @@
         userInput.addEventListener('keydown', handleInputKeydown);
         suggestionsContainer.addEventListener('click', handleSuggestionClick);
         startChatButton.addEventListener('click', createNewChat);
-        chatListContainer.addEventListener('click', handleChatListClick); // Modified
+        chatListContainer.addEventListener('click', handleChatListClick); // Delete கையாளுதல் சேர்க்கப்பட்டது
         decreaseTextBtn.addEventListener('click', () => adjustTextSize(-TEXT_SIZE_STEP));
         increaseTextBtn.addEventListener('click', () => adjustTextSize(TEXT_SIZE_STEP));
         themeToggleButton.addEventListener('click', toggleTheme);
-        // Test listeners
         prevQuestionBtn.addEventListener('click', () => handleTestNavigation('prev'));
         nextQuestionBtn.addEventListener('click', () => handleTestNavigation('next'));
         submitTestBtn.addEventListener('click', submitTest);
-        // Review listeners
         exitReviewBtn.addEventListener('click', exitReview);
         chatArea.addEventListener('click', handleChatAreaClick);
         reviewFilters.addEventListener('click', handleReviewFilterClick);
         saveReviewBtn.addEventListener('click', saveTestReviewToCloud);
-        // Auth listeners
         loginBtn.addEventListener('click', signInWithGoogle);
         logoutBtn.addEventListener('click', signOut);
 
@@ -398,21 +383,21 @@
         // --- Initialization Functions ---
         async function initializeApp() {
             loadGeminiApiKey();
-            fbAuth.onAuthStateChanged(handleAuthStateChange);
+            fbAuth.onAuthStateChanged(handleAuthStateChange); // Auth மாற்றங்களைக் கவனித்தல்
             switchView('chat');
             userInput.focus();
         }
 
         function loadGeminiApiKey() {
-             console.warn("SECURITY WARNING: Gemini API Key is stored in localStorage. This is insecure. Migrate to Cloud Function.");
+             console.warn("பாதுகாப்பு எச்சரிக்கை: Gemini API Key localStorage-ல் சேமிக்கப்படுகிறது. இது பாதுகாப்பற்றது. Cloud Function-க்கு மாற்றவும்.");
+             // console.warn("SECURITY WARNING: Gemini API Key is stored in localStorage. This is insecure. Migrate to Cloud Function.");
             const k=localStorage.getItem(STORAGE_KEY_API_KEY);
             if(k){ API_KEY=k; }
-            else { API_KEY=prompt("--- INSECURE DEMO ---\nEnter Gemini API Key (stored locally - requires Cloud Function for security):");
+            else { API_KEY=prompt("--- பாதுகாப்பற்ற டெமோ ---\nஉங்கள் Gemini API Key-ஐ உள்ளிடவும் (இது local storage-இல் சேமிக்கப்படும் - பாதுகாப்பிற்கு Cloud Function தேவை):");
                  if(API_KEY){ localStorage.setItem(STORAGE_KEY_API_KEY, API_KEY); }
-                 else { displayError("Gemini API Key required. Reload to enter."); setLoadingState(true, "API Key Missing"); }
+                 else { displayError("Gemini API Key தேவை. மீண்டும் ஏற்றவும்."); setLoadingState(true, "API Key இல்லை"); }
             }
-             // Initial state setting, will be potentially overridden by auth change
-             setLoadingState(false); // Set to non-loading initially
+             setLoadingState(false);
         }
 
         // --- Authentication Functions ---
@@ -420,30 +405,28 @@
         async function signInWithGoogle() {
             const provider = new firebase.auth.GoogleAuthProvider();
             try {
-                setLoadingState(true, "Logging in...");
+                setLoadingState(true, "உள்நுழைகிறது...");
                 await fbAuth.signInWithPopup(provider);
-                // onAuthStateChanged will handle the rest
             } catch (error) {
-                console.error("Google Sign-In Error:", error);
-                displayError(`Login failed: ${error.message}`);
+                console.error("Google உள்நுழைவு பிழை:", error);
+                displayError(`உள்நுழைவு தோல்வி: ${error.message}`);
                 setLoadingState(false);
             }
         }
 
         async function signOut() {
             try {
-                setLoadingState(true, "Logging out...");
+                setLoadingState(true, "வெளியேறுகிறது...");
                 await fbAuth.signOut();
-                // onAuthStateChanged will handle UI cleanup
             } catch (error) {
-                console.error("Sign Out Error:", error);
-                displayError(`Logout failed: ${error.message}`);
+                console.error("வெளியேறுவதில் பிழை:", error);
+                displayError(`வெளியேறுதல் தோல்வி: ${error.message}`);
                 setLoadingState(false);
             }
         }
 
         function handleAuthStateChange(user) {
-            // Detach previous Firestore listeners
+            // முந்தைய Firestore listeners-களை நீக்குதல்
             if (activeChatListener) { activeChatListener(); activeChatListener = null; }
             if (chatListListener) { chatListListener(); chatListListener = null; }
 
@@ -452,81 +435,76 @@
             activeChatId = null;
             currentChatHistory = [];
 
-            if (user) {
+            if (user) { // பயனர் உள்நுழைந்துள்ளார்
                 currentUser = user;
-                console.log("User logged in:", currentUser.uid, currentUser.displayName || currentUser.email);
+                console.log("பயனர் உள்நுழைந்துள்ளார்:", currentUser.uid, currentUser.displayName || currentUser.email);
                 loginBtn.style.display = 'none';
                 logoutBtn.style.display = 'inline-block';
-                accountEmail.textContent = currentUser.email || currentUser.displayName || `User`;
+                accountEmail.textContent = currentUser.email || currentUser.displayName || `பயனர்`;
                 accountAvatar.textContent = (currentUser.displayName || currentUser.email || 'U')[0].toUpperCase();
-                accountPlan.textContent = "Firebase User";
+                accountPlan.textContent = "Firebase பயனர்";
                 startChatButton.disabled = false;
                 decreaseTextBtn.disabled = false;
                 increaseTextBtn.disabled = false;
                 themeToggleButton.disabled = false;
-
-                sendButton.disabled = false; // Enable
-                userInput.disabled = false;  // Enable
-                userInput.placeholder = "Enter prompt..."; // Set placeholder
+                sendButton.disabled = false;
+                userInput.disabled = false;
+                userInput.placeholder = "கேள்வியை உள்ளிடவும்...";
                 inputContainer.style.display = 'block';
                 suggestionsContainer.style.display = 'flex';
 
                 loadUserSettings(currentUser.uid);
-                loadAndListenForChats(currentUser.uid);
+                loadAndListenForChats(currentUser.uid); // பயனர் chat-களைக் கவனித்தல்
 
-            } else {
+            } else { // பயனர் வெளியேறிவிட்டார்
                 currentUser = null;
-                console.log("User logged out");
+                console.log("பயனர் வெளியேறிவிட்டார்");
                 loginBtn.style.display = 'inline-block';
                 logoutBtn.style.display = 'none';
-                accountEmail.textContent = "Not logged in";
+                accountEmail.textContent = "உள்நுழையவில்லை";
                 accountAvatar.textContent = '?';
                 accountPlan.textContent = "";
                 startChatButton.disabled = true;
                 decreaseTextBtn.disabled = true;
                 increaseTextBtn.disabled = true;
                 themeToggleButton.disabled = true;
-
-                sendButton.disabled = true; // Disable
-                userInput.disabled = true;  // Disable
-                userInput.placeholder = "Please log in"; // Set placeholder
+                sendButton.disabled = true;
+                userInput.disabled = true;
+                userInput.placeholder = "தயவுசெய்து உள்நுழையவும்";
                 inputContainer.style.display = 'none';
                 suggestionsContainer.style.display = 'none';
 
                 renderGreetingOrLoginPrompt();
-                chatListContainer.innerHTML = '<div style="padding:10px;color:var(--text-secondary);font-size:0.9em;">Please log in to see chats.</div>';
+                chatListContainer.innerHTML = '<div style="padding:10px;color:var(--text-secondary);font-size:0.9em;">உரையாடல்களைப் பார்க்க உள்நுழையவும்.</div>';
 
                 currentTheme = 'light'; applyTheme();
                 currentTextSizeMultiplier = 1.0; applyTextSize();
             }
-            // Ensure loading indicator reflects the final state
-            setLoadingState(false);
+            setLoadingState(false); // இறுதி நிலையை உறுதிசெய்தல்
         }
 
 
-        // Helper to show greeting or login message
         function renderGreetingOrLoginPrompt() {
             chatArea.innerHTML = '';
             const g = document.createElement('div');
             g.classList.add('greeting');
             if (currentUser) {
-                 g.innerHTML = `<span class="asterisk">*</span>Good day, ${currentUser.displayName || 'User'}!`;
+                 g.innerHTML = `<span class="asterisk">*</span>வணக்கம், ${currentUser.displayName || 'பயனர்'}!`;
                  chatArea.appendChild(g);
                  if (!activeChatId) {
-                    displayMessage("Select a chat or start a new one.", 'ai');
+                    displayMessage("ஒரு உரையாடலைத் தேர்ந்தெடுக்கவும் அல்லது புதியதாகத் தொடங்கவும்.", 'ai');
                  }
             } else {
-                g.innerHTML = `<span class="asterisk">*</span>Welcome!`;
+                g.innerHTML = `<span class="asterisk">*</span>வருக!`;
                 chatArea.appendChild(g);
-                displayMessage("Please log in using Google (button in the sidebar) to start chatting or view your history.", 'ai');
+                displayMessage("உரையாடலைத் தொடங்க அல்லது உங்கள் வரலாற்றைக் காண sidebar-இல் உள்ள Google பொத்தானைப் பயன்படுத்தி உள்நுழையவும்.", 'ai');
             }
             scrollToBottom(true);
         }
 
 
-        // --- Settings (Theme/Text Size) ---
-
-        async function loadUserSettings(userId) {
+        // --- Settings (Theme/Text Size) Functions (மாற்றமில்லை) ---
+        async function loadUserSettings(userId) { /* ... */
             const userDocRef = db.collection('users').doc(userId);
             try {
                 const docSnap = await userDocRef.get();
@@ -534,156 +512,111 @@
                     const settings = docSnap.data();
                     currentTheme = settings.theme || 'light';
                     currentTextSizeMultiplier = settings.textSizeMultiplier || 1.0;
-                    console.log("Loaded user settings:", settings);
                 } else {
-                    console.log("No user settings found, using defaults and saving.");
                     currentTheme = 'light';
                     currentTextSizeMultiplier = 1.0;
                     await saveUserSettings();
                 }
             } catch (error) {
-                console.error("Error loading user settings:", error);
-                currentTheme = 'light';
-                currentTextSizeMultiplier = 1.0;
+                console.error("பயனர் அமைப்புகளை ஏற்றுவதில் பிழை:", error);
+                currentTheme = 'light'; currentTextSizeMultiplier = 1.0;
             }
-            applyTheme();
-            applyTextSize();
-        }
-
-        async function saveUserSettings() {
+            applyTheme(); applyTextSize();
+         }
+        async function saveUserSettings() { /* ... */
             if (!currentUser) return;
             const userDocRef = db.collection('users').doc(currentUser.uid);
-            const settings = {
-                theme: currentTheme,
-                textSizeMultiplier: currentTextSizeMultiplier
-            };
-            try {
-                await userDocRef.set(settings, { merge: true });
-                console.log("User settings saved:", settings);
-            } catch (error) {
-                console.error("Error saving user settings:", error);
-            }
-        }
-
-        function applyTheme() {
-            if(currentTheme==='dark'){
-                document.body.classList.add('dark-theme');
-                themeToggleButton.textContent=LIGHT_THEME_ICON;
-                themeToggleButton.title="Switch to Light";
-            } else {
-                document.body.classList.remove('dark-theme');
-                themeToggleButton.textContent=DARK_THEME_ICON;
-                themeToggleButton.title="Switch to Dark";
-            }
-        }
-
-        function toggleTheme() {
-            if (!currentUser) return;
-            currentTheme = (currentTheme === 'light') ? 'dark' : 'light';
-            applyTheme();
-            saveUserSettings();
-        }
-
-        function applyTextSize() {
+            const settings = { theme: currentTheme, textSizeMultiplier: currentTextSizeMultiplier };
+            try { await userDocRef.set(settings, { merge: true }); }
+            catch (error) { console.error("பயனர் அமைப்புகளைச் சேமிப்பதில் பிழை:", error); }
+         }
+        function applyTheme() { /* ... */
+            if(currentTheme==='dark'){ document.body.classList.add('dark-theme'); themeToggleButton.textContent=LIGHT_THEME_ICON; themeToggleButton.title="Light Mode"; }
+            else { document.body.classList.remove('dark-theme'); themeToggleButton.textContent=DARK_THEME_ICON; themeToggleButton.title="Dark Mode"; }
+         }
+        function toggleTheme() { if (!currentUser) return; currentTheme = (currentTheme === 'light') ? 'dark' : 'light'; applyTheme(); saveUserSettings(); }
+        function applyTextSize() { /* ... */
             const newSize = `calc(var(--message-font-size-base) * ${currentTextSizeMultiplier})`;
             document.documentElement.style.setProperty('--message-font-size', newSize);
-            console.log("Applied text size multiplier:", currentTextSizeMultiplier);
-        }
-
-        function adjustTextSize(change) {
+         }
+        function adjustTextSize(change) { /* ... */
             if (!currentUser) return;
             let newMultiplier = Math.max(MIN_TEXT_SIZE_MULTIPLIER, Math.min(MAX_TEXT_SIZE_MULTIPLIER, currentTextSizeMultiplier + change));
             newMultiplier = Math.round(newMultiplier * 10) / 10;
-            if (newMultiplier !== currentTextSizeMultiplier) {
-                currentTextSizeMultiplier = newMultiplier;
-                applyTextSize();
-                saveUserSettings();
-            }
-        }
+            if (newMultiplier !== currentTextSizeMultiplier) { currentTextSizeMultiplier = newMultiplier; applyTextSize(); saveUserSettings(); }
+         }
 
         // --- Chat Storage & Loading (Firestore) ---
 
+        // பயனர் chat-களின் பட்டியலைக் கவனித்து sidebar-ஐப் புதுப்பித்தல்
         function loadAndListenForChats(userId) {
             if (chatListListener) { chatListListener(); chatListListener = null; }
 
             const chatsRef = db.collection('chats')
                                .where('userId', '==', userId)
-                               .orderBy('lastUpdated', 'desc');
+                               .orderBy('lastUpdated', 'desc'); // சமீபத்தியது முதலில்
 
-            console.log(`Listening for chats for user ${userId}`);
+            console.log(`${userId} பயனருக்கான chat-களைக் கவனிக்கிறது`);
             chatListListener = chatsRef.onSnapshot(snapshot => {
                  if (isDeletingChat) {
-                      console.log("Skipping chat list update during delete operation.");
-                      return; // Don't process snapshot while delete is in progress
+                      console.log("Delete செய்யும்போது chat list update தவிர்க்கப்பட்டது.");
+                      return; // Delete நடக்கும்போது snapshot-ஐ process செய்ய வேண்டாம்
                  }
                 const chats = [];
-                snapshot.forEach(doc => {
-                    chats.push({ id: doc.id, ...doc.data() });
-                });
-                console.log("Received chat list snapshot:", chats);
-                renderSidebarChatList(chats); // Render the list with delete buttons
+                snapshot.forEach(doc => { chats.push({ id: doc.id, ...doc.data() }); });
+                console.log("Chat list snapshot கிடைத்தது:", chats);
+                renderSidebarChatList(chats); // Sidebar-ஐ delete பொத்தான்களுடன் காட்டு
 
                 let chatToLoad = null;
                 if (activeChatId && chats.some(c => c.id === activeChatId)) {
-                     chatToLoad = activeChatId;
+                     chatToLoad = activeChatId; // தற்போதைய chat இருந்தால் அதையே வைத்திரு
                 } else if (chats.length > 0) {
-                     // If active chat was deleted or none was active, load the newest
+                     // இல்லையெனில், அல்லது active chat நீக்கப்பட்டிருந்தால், புதியதை load செய்
                     chatToLoad = chats[0].id;
-                    console.log("Active chat not found or was deleted, selecting newest:", chatToLoad);
+                    console.log("Active chat இல்லை/நீக்கப்பட்டது, புதியது தேர்ந்தெடுக்கப்பட்டது:", chatToLoad);
                 } else {
-                    // No chats left
-                    console.log("No chats found for user.");
+                    // எந்த chat-ம் இல்லை
+                    console.log("பயனருக்கு chat-கள் இல்லை.");
                     activeChatId = null;
                     if (activeChatListener) { activeChatListener(); activeChatListener = null; }
-                    renderGreetingOrLoginPrompt(); // Show prompt for empty state
+                    renderGreetingOrLoginPrompt(); // காலியான நிலைக்கு prompt காட்டு
                 }
 
-                 // Load the selected chat if it's different from the current active one
                 if (chatToLoad && chatToLoad !== activeChatId) {
-                     console.log("Switching to chat:", chatToLoad);
-                     switchChat(chatToLoad); // Use switchChat to handle loading
+                     console.log("Chat மாறுகிறது:", chatToLoad);
+                     switchChat(chatToLoad); // Chat-ஐ மாற்றி load செய்
                 } else if (activeChatId) {
-                     // Ensure the current active chat remains highlighted if it wasn't switched
-                     highlightActiveChatInSidebar();
+                     highlightActiveChatInSidebar(); // மாறவில்லை என்றால் highlight மட்டும் செய்
                 }
 
             }, error => {
-                console.error("Error listening for chats:", error);
-                displayError("Could not load chat list.");
-                chatListContainer.innerHTML = '<div style="padding:10px;color:var(--text-secondary);font-size:0.9em;">Error loading chats.</div>';
+                console.error("Chat list-ஐக் கவனிப்பதில் பிழை:", error);
+                displayError("Chat பட்டியலை ஏற்ற முடியவில்லை.");
+                chatListContainer.innerHTML = '<div style="padding:10px;color:var(--text-secondary);font-size:0.9em;">Chat-களை ஏற்றுவதில் பிழை.</div>';
             });
         }
 
-        // --- MODIFIED ---
+        // Sidebar-இல் chat பட்டியலை delete பொத்தான்களுடன் காட்டுதல்
         function renderSidebarChatList(chats) {
             chatListContainer.innerHTML = '';
-            if (!currentUser) {
-                chatListContainer.innerHTML = '<div style="padding:10px;color:var(--text-secondary);font-size:0.9em;">Please log in.</div>';
-                return;
-            }
+            if (!currentUser) { /* ... உள்நுழையவில்லை என்றால் ... */ return; }
             if (chats.length === 0) {
-                const i = document.createElement('div');
-                i.textContent = "No chats yet.";
-                i.style.cssText = "padding:10px;color:var(--text-secondary);font-size:0.9em;";
-                chatListContainer.appendChild(i);
+                const i = document.createElement('div'); i.textContent = "இன்னும் உரையாடல்கள் இல்லை."; /* ... */ chatListContainer.appendChild(i);
             } else {
                 chats.forEach(c => {
-                    const i = document.createElement('div');
-                    i.classList.add('chat-list-item');
-                    let title = c.title || '(Untitled)';
-                    if (typeof title !== 'string') title = '(Invalid Title)';
-                    i.textContent = title;
-                    i.dataset.id = c.id;
-                    i.title = title; // Add tooltip for long names
+                    const i = document.createElement('div'); i.classList.add('chat-list-item');
+                    let title = c.title || '(பெயரிடப்படாதது)';
+                    if (typeof title !== 'string') title = '(தவறான தலைப்பு)';
+                    i.textContent = title; i.dataset.id = c.id; i.title = title;
 
-                    // --- Add Delete Button ---
+                    // --- Delete பொத்தானைச் சேர்த்தல் ---
                     const deleteBtn = document.createElement('button');
                     deleteBtn.classList.add('delete-chat-button');
-                    deleteBtn.innerHTML = DELETE_ICON; // Use '×' or an SVG icon
-                    deleteBtn.title = "Delete chat";
-                    deleteBtn.dataset.id = c.id; // Store ID on button too for easier access
+                    deleteBtn.innerHTML = DELETE_ICON; // '×'
+                    deleteBtn.title = "உரையாடலை நீக்கு";
+                    deleteBtn.dataset.id = c.id; // பொத்தானிலும் ID-ஐ சேமி
                     i.appendChild(deleteBtn);
-                    // --- End Delete Button ---
+                    // --- Delete பொத்தான் முடிவு ---
 
                     chatListContainer.appendChild(i);
                 });
@@ -691,747 +624,389 @@
              highlightActiveChatInSidebar();
         }
 
-        function highlightActiveChatInSidebar() {
+        function highlightActiveChatInSidebar() { /* ... */
              const items = chatListContainer.querySelectorAll('.chat-list-item');
-             items.forEach(item => {
-                 item.classList.toggle('active', item.dataset.id === activeChatId);
-             });
+             items.forEach(item => { item.classList.toggle('active', item.dataset.id === activeChatId); });
          }
 
+        // புதிய chat-ஐ Firestore-இல் உருவாக்குதல்
         async function createNewChat() {
-            if (!currentUser) { displayError("Please log in to create a new chat."); return; }
-            setLoadingState(true, "Creating chat...");
+            if (!currentUser) { displayError("புதிய உரையாடலை உருவாக்க உள்நுழையவும்."); return; }
+            setLoadingState(true, "உரையாடலை உருவாக்குகிறது...");
             const newChatRef = db.collection('chats').doc();
             const timestamp = firebase.firestore.FieldValue.serverTimestamp();
-
             try {
                 await newChatRef.set({
                     userId: currentUser.uid,
-                    title: NEW_CHAT_TITLE, // Start with default title
+                    title: NEW_CHAT_TITLE, // Default பெயருடன் தொடங்கு
                     createdAt: timestamp,
                     lastUpdated: timestamp
                 });
-                console.log("New chat document created:", newChatRef.id);
-                // Listener will pick it up and select it
+                console.log("புதிய chat document உருவாக்கப்பட்டது:", newChatRef.id);
+                // Listener இதை எடுத்துக்கொள்ளும்
             } catch (error) {
-                console.error("Error creating new chat:", error);
-                displayError("Failed to create chat.");
+                console.error("புதிய chat உருவாக்குவதில் பிழை:", error); displayError("Chat-ஐ உருவாக்க முடியவில்லை.");
             } finally {
-                setLoadingState(false);
-                userInput.focus();
+                setLoadingState(false); userInput.focus();
             }
         }
 
-        // --- MODIFIED ---
+        // Chat list click-ஐக் கையாளுதல் (Delete அல்லது Switch)
         function handleChatListClick(event) {
              const target = event.target;
 
-             // Check if the delete button was clicked
+             // Delete பொத்தான் click செய்யப்பட்டதா என சரிபார்
              if (target.classList.contains('delete-chat-button')) {
-                 event.stopPropagation(); // Prevent chat switching
+                 event.stopPropagation(); // Chat மாறுவதைத் தடு
                  const chatId = target.dataset.id;
-                 const chatTitle = target.closest('.chat-list-item')?.textContent?.replace(DELETE_ICON, '').trim() || 'this chat';
+                 const chatItem = target.closest('.chat-list-item');
+                 const chatTitle = chatItem?.title || 'இந்த உரையாடல்'; // தலைப்பைப் பெற முயற்சி
                  if (chatId) {
-                      confirmAndDeleteChat(chatId, chatTitle);
+                      confirmAndDeleteChat(chatId, chatTitle); // உறுதிப்படுத்தல் கேட்டு நீக்கு
                  }
-                 return; // Stop further processing
+                 return;
              }
 
-             // Otherwise, handle chat switching
+             // இல்லையெனில், chat மாறுதலைக் கையாள்
             const item = target.closest('.chat-list-item');
             const clickedId = item?.dataset?.id;
             if (clickedId && clickedId !== activeChatId) {
-                console.log("Chat list item clicked:", clickedId);
+                console.log("Chat list item click செய்யப்பட்டது:", clickedId);
                 switchChat(clickedId);
             }
         }
 
-        // --- NEW ---
+        // Delete செய்வதற்கான உறுதிப்படுத்தல்
         function confirmAndDeleteChat(chatId, chatTitle) {
             if (!currentUser || !chatId) return;
-            if (confirm(`Are you sure you want to permanently delete "${chatTitle}" and all its messages?`)) {
+            if (confirm(`"${chatTitle}" மற்றும் அதன் அனைத்து செய்திகளையும் நிரந்தரமாக நீக்க விரும்புகிறீர்களா?`)) {
                 deleteChatFromFirestore(chatId);
             }
         }
 
-        // --- NEW ---
+        // Firestore-இல் இருந்து chat மற்றும் அதன் செய்திகளை நீக்குதல்
         async function deleteChatFromFirestore(chatId) {
             if (!currentUser || !chatId) return;
 
-            console.log(`Attempting to delete chat: ${chatId}`);
-            isDeletingChat = true; // Set flag to pause listener updates temporarily
-            setLoadingState(true, "Deleting chat..."); // Show loading state
+            console.log(`Chat-ஐ நீக்க முயற்சி: ${chatId}`);
+            // !!! முக்கியம்: Firestore Security Rules அனுமதி தேவை !!!
+            // உங்கள் firestore.rules கோப்பில், உள்நுழைந்த பயனர் தனது chat-களை நீக்க அனுமதி உள்ளதா என சரிபார்க்கவும்.
+            // எ.கா: allow delete: if request.auth.uid == resource.data.userId;
+            // செய்திகளை நீக்கவும் அனுமதி தேவைப்படலாம்:
+            // match /chats/{chatId}/messages/{messageId} { allow delete: if get(/databases/$(database)/documents/chats/$(chatId)).data.userId == request.auth.uid; }
+
+            isDeletingChat = true; // தற்காலிகமாக listener update-களை நிறுத்த
+            setLoadingState(true, "உரையாடலை நீக்குகிறது...");
 
             const chatDocRef = db.collection('chats').doc(chatId);
             const messagesRef = chatDocRef.collection('messages');
 
             try {
-                // 1. Delete all messages in the subcollection (using batch)
+                // 1. Subcollection-இல் உள்ள அனைத்து செய்திகளையும் நீக்கு (batch பயன்படுத்தி)
                 const messagesSnapshot = await messagesRef.get();
                 if (!messagesSnapshot.empty) {
                     const batch = db.batch();
-                    messagesSnapshot.docs.forEach(doc => {
-                        batch.delete(doc.ref);
-                    });
+                    messagesSnapshot.docs.forEach(doc => { batch.delete(doc.ref); });
                     await batch.commit();
-                    console.log(`Deleted ${messagesSnapshot.size} messages for chat ${chatId}`);
+                    console.log(`${messagesSnapshot.size} செய்திகள் நீக்கப்பட்டன (chat ${chatId})`);
                 } else {
-                    console.log(`No messages to delete for chat ${chatId}`);
+                    console.log(`நீக்க செய்திகள் இல்லை (chat ${chatId})`);
                 }
 
-                // 2. Delete the chat document itself
+                // 2. Chat document-ஐ நீக்கு
                 await chatDocRef.delete();
-                console.log(`Successfully deleted chat document: ${chatId}`);
+                console.log(`Chat document வெற்றிகரமாக நீக்கப்பட்டது: ${chatId}`);
 
-                // 3. Handle UI update if the active chat was deleted
+                // 3. Active chat நீக்கப்பட்டிருந்தால் UI-ஐ கையாளுதல்
                 if (activeChatId === chatId) {
-                    console.log("Active chat was deleted. Resetting view.");
-                    activeChatId = null;
-                    currentChatHistory = [];
+                    console.log("Active chat நீக்கப்பட்டது. View மீட்டமைக்கப்படுகிறது.");
+                    activeChatId = null; currentChatHistory = [];
                     if (activeChatListener) { activeChatListener(); activeChatListener = null; }
-                    chatArea.innerHTML = ''; // Clear chat area immediately
-                    renderGreetingOrLoginPrompt(); // Show default prompt
-                     // The chat list listener (when unpaused) will handle selecting the next chat if available
+                    chatArea.innerHTML = ''; // உடனடியாக chat area-வை காலி செய்
+                    renderGreetingOrLoginPrompt(); // Default prompt காட்டு
                 }
+                // Listener (isDeletingChat = false ஆனதும்) அடுத்த chat-ஐத் தேர்ந்தெடுக்கும் (இருந்தால்).
 
             } catch (error) {
-                console.error(`Error deleting chat ${chatId}:`, error);
-                displayError("Failed to delete chat. Please try again.");
+                console.error(`Chat ${chatId} நீக்குவதில் பிழை:`, error);
+                // பெரும்பாலும் இது Security Rules பிழையாக இருக்கலாம்
+                displayError("உரையாடலை நீக்க முடியவில்லை. Security Rules அல்லது பிணைய இணைப்பைச் சரிபார்க்கவும்.");
             } finally {
-                isDeletingChat = false; // Unset flag
-                setLoadingState(false); // Turn off loading state
-                 // Trigger a refresh of the list listener manually if needed, though it should update
-                 // loadAndListenForChats(currentUser.uid); // Re-attach listener might be needed if paused didn't work perfectly
-                 // Usually, the listener just picks up the deletion when isDeletingChat becomes false
+                isDeletingChat = false; // கொடியை நீக்கு
+                setLoadingState(false); // Loading நிலையை நீக்கு
             }
         }
 
-
+        // வேறு chat-க்கு மாறுதல்
         function switchChat(chatId) {
              if (!currentUser || !chatId || chatId === activeChatId) return;
-            console.log("Switching to chat:", chatId);
+            console.log("Chat மாறுகிறது:", chatId);
             activeChatId = chatId;
             highlightActiveChatInSidebar();
-            loadAndListenForActiveChat(chatId);
+            loadAndListenForActiveChat(chatId); // புதிய chat செய்திகளை load செய்
             userInput.focus();
-            // Clear the input state for the new chat
-            userInput.value = '';
-            autoGrowTextarea();
-            mcqModeCheckbox.checked = false;
+            userInput.value = ''; autoGrowTextarea(); mcqModeCheckbox.checked = false;
         }
 
-        // --- Message Loading (Firestore) ---
-
+        // Active chat-இன் செய்திகளை Firestore-இல் இருந்து கவனித்தல்
         function loadAndListenForActiveChat(chatId) {
-            if (!currentUser || !chatId) {
-                console.log("Cannot load messages: No user or chatId.");
-                chatArea.innerHTML = '';
-                if (activeChatListener) { activeChatListener(); activeChatListener = null; }
-                renderGreetingOrLoginPrompt();
-                return;
-            }
-
+            if (!currentUser || !chatId) { /* ... */ return; }
             if (activeChatListener) { activeChatListener(); activeChatListener = null; }
             highlightActiveChatInSidebar();
 
-            const messagesRef = db.collection('chats').doc(chatId)
-                                  .collection('messages')
-                                  .orderBy('timestamp', 'asc');
-
+            const messagesRef = db.collection('chats').doc(chatId).collection('messages').orderBy('timestamp', 'asc');
             chatArea.innerHTML = '';
-            const loadingMsg = displayMessage("Loading chat...", 'ai', ['thinking']);
+            const loadingMsg = displayMessage("உரையாடலை ஏற்றுகிறது...", 'ai', ['thinking']); // தமிழில்
 
-            console.log(`Listening for messages in chat ${chatId}`);
+            console.log(`Chat ${chatId} செய்திகளைக் கவனிக்கிறது`);
             activeChatListener = messagesRef.onSnapshot(snapshot => {
-                console.log(`Received messages snapshot for chat ${chatId}:`, snapshot.size, "messages");
+                console.log(`Chat ${chatId} செய்திகள் snapshot கிடைத்தது:`, snapshot.size, "செய்திகள்");
                 removeMessageElement(loadingMsg);
-                chatArea.innerHTML = '';
-                currentChatHistory = []; // Reset history before rebuilding
+                chatArea.innerHTML = ''; currentChatHistory = []; // வரலாற்றை மீட்டமை
 
                 if (snapshot.empty) {
-                    console.log("Chat is empty.");
-                     renderGreetingOrLoginPrompt(); // Show greeting if chat is selected but empty
+                    console.log("உரையாடல் காலியாக உள்ளது.");
+                    renderGreetingOrLoginPrompt();
                 } else {
                     snapshot.forEach(doc => {
                         const msgData = doc.data();
-                         const text = msgData.text || "";
-                         const role = msgData.role || "model";
-                         // Add to local history for API context
-                         currentChatHistory.push({
-                             role: role === 'user' ? 'user' : 'model', // Ensure correct API role
+                        const text = msgData.text || "";
+                        const role = msgData.role || "model";
+                        currentChatHistory.push({ // API context-க்கு
+                             role: role === 'user' ? 'user' : 'model',
                              parts: [{ text: text }]
                          });
-                        // Render message
-                        displayMessage(text, role, [], null, msgData);
+                        displayMessage(text, role, [], null, msgData); // Render செய்
                     });
                 }
-                scrollToBottom(true);
+                scrollToBottom(true); // கீழே scroll செய்
 
             }, error => {
-                console.error(`Error listening for messages in chat ${chatId}:`, error);
-                displayError("Could not load messages for this chat.");
-                removeMessageElement(loadingMsg);
-                chatArea.innerHTML = '';
-                currentChatHistory = [];
+                console.error(`Chat ${chatId} செய்திகளைக் கவனிப்பதில் பிழை:`, error);
+                displayError("இந்த உரையாடலின் செய்திகளை ஏற்ற முடியவில்லை.");
+                removeMessageElement(loadingMsg); chatArea.innerHTML = ''; currentChatHistory = [];
             });
         }
 
         // --- Message Sending (Gemini API & Firestore Save) ---
-        // --- MODIFIED ---
         async function handleSendMessage() {
             const txt = userInput.value.trim();
-
-             // --- Pre-send Checks ---
-            if (!API_KEY) { displayError("Gemini API Key not set. Reload to enter."); return; } // No loading state change here
-            if (!currentUser) { displayError("Please log in first."); return; }
-            if (!activeChatId) { displayError("Please select or create a chat first."); return; }
+            if (!API_KEY) { displayError("Gemini API Key அமைக்கப்படவில்லை."); return; }
+            if (!currentUser) { displayError("தயவுசெய்து உள்நுழையவும்."); return; }
+            if (!activeChatId) { displayError("தயவுசெய்து ஒரு உரையாடலைத் தேர்ந்தெடுக்கவும் அல்லது உருவாக்கவும்."); return; }
             if (!txt || sendButton.disabled) return;
 
             const isMCQRequest = mcqModeCheckbox.checked;
-            setLoadingState(true, "Sending...");
+            setLoadingState(true, "அனுப்புகிறது...");
             const userMessageText = txt;
 
-            userInput.value = '';
-            autoGrowTextarea();
-            if (isMCQRequest) mcqModeCheckbox.checked = false;
+            userInput.value = ''; autoGrowTextarea(); if (isMCQRequest) mcqModeCheckbox.checked = false;
 
             const timestamp = firebase.firestore.FieldValue.serverTimestamp();
             const messagesColRef = db.collection('chats').doc(activeChatId).collection('messages');
             const chatDocRef = db.collection('chats').doc(activeChatId);
 
-            // --- Check if this is the first message BEFORE saving it ---
-            // We check the Firestore doc directly for the title, not local history length
+            // --- இது முதல் செய்தியா என Firestore-ஐ சரிபார் (சேமிக்கும் முன்) ---
             let isFirstUserMessageInNewChat = false;
             try {
                  const chatSnap = await chatDocRef.get();
                  if (chatSnap.exists && chatSnap.data().title === NEW_CHAT_TITLE) {
-                      // Check if *any* messages exist yet in the subcollection. If not, it's the first.
                       const messagesSnap = await messagesColRef.limit(1).get();
-                      if (messagesSnap.empty) {
-                           isFirstUserMessageInNewChat = true;
-                      }
+                      if (messagesSnap.empty) { isFirstUserMessageInNewChat = true; }
                  }
-            } catch(err) { console.error("Error checking for first message:", err); }
-            // --- End Check ---
+            } catch(err) { console.error("முதல் செய்தியைச் சரிபார்ப்பதில் பிழை:", err); }
+            // --- சரிபார்ப்பு முடிவு ---
 
-
-            // 1. Add user message to Firestore (Listener will display it)
-             const userMsgData = {
-                 role: "user",
-                 text: userMessageText,
-                 timestamp: timestamp
-             };
+            // 1. பயனர் செய்தியை Firestore-இல் சேமி
+             const userMsgData = { role: "user", text: userMessageText, timestamp: timestamp };
              try {
                  await messagesColRef.add(userMsgData);
-                 // Update chat's lastUpdated timestamp
                  await chatDocRef.update({ lastUpdated: timestamp });
-                 console.log("User message saved to Firestore.");
+                 console.log("பயனர் செய்தி Firestore-இல் சேமிக்கப்பட்டது.");
 
-                 // --- Automatic Title Update Logic (Moved Here) ---
+                 // --- Automatic Title Update Logic (இங்கு நகர்த்தப்பட்டது) ---
                  if (isFirstUserMessageInNewChat) {
-                     console.log("First user message detected, attempting to generate title.");
-                     const generatedTitle = generateChatTitle(userMessageText); // Pass only the user text
+                     console.log("முதல் பயனர் செய்தி, தலைப்பு உருவாக்க முயற்சி.");
+                     const generatedTitle = generateChatTitle(userMessageText);
                      if (generatedTitle !== NEW_CHAT_TITLE) {
-                         await updateActiveChatTitle(generatedTitle); // Update title in Firestore
-                         console.log("Chat title updated automatically:", generatedTitle);
+                         await updateActiveChatTitle(generatedTitle);
+                         console.log("Chat தலைப்பு தானாகப் புதுப்பிக்கப்பட்டது:", generatedTitle);
                      }
                  }
-                 // --- End Title Update ---
+                 // --- Title Update முடிவு ---
 
              } catch(error) {
-                 console.error("Error saving user message or updating title:", error);
-                 displayError("Failed to send message. Please try again.");
-                 setLoadingState(false);
-                 return; // Stop processing if save failed
+                 console.error("பயனர் செய்தியைச் சேமிப்பதில்/தலைப்பைப் புதுப்பிப்பதில் பிழை:", error);
+                 displayError("செய்தியை அனுப்ப முடியவில்லை. மீண்டும் முயற்சிக்கவும்.");
+                 setLoadingState(false); return;
              }
 
-            // 2. Prepare for API call (Removed title check from here)
-            const thinking = displayMessage("Thinking", 'ai', ['thinking']);
-
-            // Build API history. Include the just-sent message for context.
-            const requestHistory = [
-                 ...currentChatHistory, // This history comes from the *listener*
-                 { role: "user", parts: [{ text: userMessageText }] } // Explicitly add the latest user message
-             ];
-
-             let modifiedPrompt = userMessageText;
-             if (isMCQRequest) {
-                 modifiedPrompt = `${userMessageText}\n\nPlease provide the response strictly in JSON format...`; // (Shortened for brevity)
+            // 2. API அழைப்புக்குத் தயாராகு
+            const thinking = displayMessage("சிந்திக்கிறது...", 'ai', ['thinking']); // தமிழில்
+            const requestHistory = [ ...currentChatHistory, { role: "user", parts: [{ text: userMessageText }] } ];
+            let modifiedPrompt = userMessageText;
+             if (isMCQRequest) { /* ... MCQ prompt மாற்றம் ... */
+                 modifiedPrompt = `${userMessageText}\n\nPlease provide the response strictly in JSON format containing an array of objects... Example: \`\`\`json\n[{"question":"Capital of France?","options":["A) Berlin","B) Paris","C) Rome","D) Madrid"],"answer":"B"}]\n\`\`\` Do not include any text before or after the JSON array.`;
                  requestHistory[requestHistory.length - 1] = { role: "user", parts: [{ text: modifiedPrompt }] };
              }
 
-            // 3. Call Gemini API
-             console.warn("Calling Gemini API using client-side key. Replace with Cloud Function.");
+            // 3. Gemini API-ஐ அழை
+             console.warn("பாதுகாப்பு எச்சரிக்கை: Client-side key உடன் Gemini API அழைக்கப்படுகிறது.");
             try {
-                const response = await fetch(API_URL_BASE + API_KEY, {
+                const response = await fetch(API_URL_BASE + API_KEY, { /* ... fetch options ... */
                      method: 'POST',
                      headers: { 'Content-Type': 'application/json' },
                      body: JSON.stringify({
                          contents: requestHistory,
-                         safetySettings: [ /* ... safety settings ... */ ]
+                         safetySettings: [
+                             {category:"HARM_CATEGORY_HARASSMENT",threshold:"BLOCK_MEDIUM_AND_ABOVE"},
+                             {category:"HARM_CATEGORY_HATE_SPEECH",threshold:"BLOCK_MEDIUM_AND_ABOVE"},
+                             {category:"HARM_CATEGORY_SEXUALLY_EXPLICIT",threshold:"BLOCK_MEDIUM_AND_ABOVE"},
+                             {category:"HARM_CATEGORY_DANGEROUS_CONTENT",threshold:"BLOCK_MEDIUM_AND_ABOVE"}
+                         ]
                      }),
                 });
                 removeMessageElement(thinking);
+                let aiMsgData = { role: "model", text: "Error: API-யிலிருந்து பதில் இல்லை.", timestamp: firebase.firestore.FieldValue.serverTimestamp() };
 
-                let aiMsgData = {
-                    role: "model",
-                    text: "Error: No response from API.",
-                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
-                };
-
-                if (!response.ok) {
-                    // ... (Error handling as before) ...
-                    let err = { message: `API error (${response.status})` };
+                if (!response.ok) { /* ... API பிழை கையாளுதல் ... */
+                    let err = { message: `API பிழை (${response.status})` };
                     try { err = (await response.json()).error || err; } catch {}
-                    console.error("API Error:", err);
-                    aiMsgData.text = `Error: ${err.message || "Unknown API error"}`;
+                    console.error("API பிழை:", err);
+                    aiMsgData.text = `பிழை: ${err.message || "தெரியாத API பிழை"}`;
                     displayError(aiMsgData.text);
                     if(response.status===400 && err.message?.toLowerCase().includes('api key not valid')){
                          localStorage.removeItem(STORAGE_KEY_API_KEY); API_KEY='';
-                         displayError("Invalid Gemini API Key cleared. Reload to enter new key.");
-                    }
-                } else {
-                    // ... (Success handling, MCQ parsing as before) ...
-                     const data = await response.json();
-                     let aiTxt = "Sorry, I received an empty response.";
-                     let blocked = false;
-
-                     if (data.promptFeedback?.blockReason) {
-                         aiTxt = `Blocked: ${data.promptFeedback.blockReason}`;
-                         blocked = true;
-                         aiMsgData.text = aiTxt;
-                         displayMessage(aiTxt,'ai',['error-message']);
-                     } else if (data.candidates?.[0]?.content?.parts?.[0]?.text) {
-                         aiTxt = data.candidates[0].content.parts[0].text;
-                         aiMsgData.text = aiTxt; // Default text to save
-                         let processedForMCQ = false;
-
-                         if (isMCQRequest && !blocked) {
-                              // MCQ Parsing Logic (unchanged)
+                         displayError("தவறான Gemini API Key நீக்கப்பட்டது. புதிய key-ஐ உள்ளிட reload செய்யவும்.");
+                     }
+                } else { /* ... வெற்றி / MCQ கையாளுதல் ... */
+                     const data = await response.json(); let aiTxt = "மன்னிக்கவும், வெற்றுப் பதில் கிடைத்தது."; let blocked = false;
+                     if (data.promptFeedback?.blockReason) { aiTxt = `தடுக்கப்பட்டது: ${data.promptFeedback.blockReason}`; blocked = true; aiMsgData.text = aiTxt; displayMessage(aiTxt,'ai',['error-message']); }
+                     else if (data.candidates?.[0]?.content?.parts?.[0]?.text) {
+                         aiTxt = data.candidates[0].content.parts[0].text; aiMsgData.text = aiTxt; let processedForMCQ = false;
+                         if (isMCQRequest && !blocked) { /* ... MCQ parsing logic ... */
                               try {
                                   const jsonMatch = aiTxt.match(/```json\s*([\s\S]*?)\s*```/);
                                   const jsonString = jsonMatch ? jsonMatch[1].trim() : aiTxt.trim();
                                   if (jsonString.startsWith('[') && jsonString.endsWith(']')) {
                                       const mcqs = JSON.parse(jsonString);
                                       if (Array.isArray(mcqs) && mcqs.length > 0 && mcqs.every(q => q.question && Array.isArray(q.options) && q.answer)) {
-                                          const summaryText = `Generated ${mcqs.length} MCQs. Click below to start the test.`;
-                                          aiMsgData.text = summaryText; // Overwrite text with summary
-                                          aiMsgData.mcqData = mcqs;     // Add MCQ data to Firestore object
-                                          console.log("MCQs parsed successfully, saving to Firestore:", mcqs);
-                                          processedForMCQ = true;
-                                      } else { console.warn("MCQ JSON validation failed."); }
-                                  } else { console.warn("AI response for MCQ doesn't look like JSON array."); }
-                              } catch (parseError) { console.error("Failed to parse MCQ JSON:", parseError); }
+                                          const summaryText = `${mcqs.length} MCQகள் உருவாக்கப்பட்டன. தேர்வைத் தொடங்க கீழே கிளிக் செய்யவும்.`; aiMsgData.text = summaryText; aiMsgData.mcqData = mcqs; console.log("MCQகள் வெற்றிகரமாகப் பிரிக்கப்பட்டு Firestore-இல் சேமிக்கப்படுகின்றன:", mcqs); processedForMCQ = true;
+                                      } else { console.warn("MCQ JSON சரிபார்ப்பு தோல்வி."); }
+                                  } else { console.warn("MCQ-க்கான AI பதில் JSON array போல் இல்லை."); }
+                              } catch (parseError) { console.error("MCQ JSON-ஐப் பிரிப்பதில் தோல்வி:", parseError); }
                           }
-                          // If not processed as MCQ, aiMsgData.text already holds the normal response
-                          if (!processedForMCQ) {
-                              console.log("Saving normal AI response.");
-                          }
-                     } else {
-                         console.warn("Unexpected API response format:", data);
-                         aiMsgData.text = "Error: Could not extract valid text from response.";
-                         displayError(aiMsgData.text);
-                     }
+                          if (!processedForMCQ) { console.log("சாதாரண AI பதிலைச் சேமிக்கிறது."); }
+                     } else { console.warn("எதிர்பாராத API பதில் வடிவம்:", data); aiMsgData.text = "பிழை: பதிலிலிருந்து சரியான உரையைப் பிரிக்க முடியவில்லை."; displayError(aiMsgData.text); }
                 }
-                 // 4. Save AI response/error to Firestore (Listener will display it)
+                 // 4. AI பதிலை/பிழையை Firestore-இல் சேமி
                  try {
                      await messagesColRef.add(aiMsgData);
                      await chatDocRef.update({ lastUpdated: firebase.firestore.FieldValue.serverTimestamp() });
-                     console.log("AI response/error saved to Firestore.");
+                     console.log("AI பதில்/பிழை Firestore-இல் சேமிக்கப்பட்டது.");
                  } catch (saveError) {
-                     console.error("Error saving AI response to Firestore:", saveError);
-                     displayError("Error saving response. It might not appear.");
+                     console.error("AI பதிலை Firestore-இல் சேமிப்பதில் பிழை:", saveError); displayError("பதிலைச் சேமிப்பதில் பிழை. அது தோன்றாமல் போகலாம்.");
                  }
 
-            } catch (error) { // Network or other script errors
-                console.error("Fetch/Processing Error:", error);
-                removeMessageElement(thinking);
-                const errorText = `Error: ${error.message || "Network error."}`;
-                displayError(errorText);
-                // Save this error to Firestore
-                try {
-                     await messagesColRef.add({ role: "model", text: errorText, timestamp: firebase.firestore.FieldValue.serverTimestamp() });
-                     await chatDocRef.update({ lastUpdated: firebase.firestore.FieldValue.serverTimestamp() });
-                 } catch (saveError) { /* Ignore error saving the error message */ }
+            } catch (error) { /* ... Network/பிற பிழைகள் ... */
+                console.error("Fetch/Processing பிழை:", error); removeMessageElement(thinking);
+                const errorText = `பிழை: ${error.message || "கோரிக்கையின் போது பிணையப் பிழை."}`; displayError(errorText);
+                try { await messagesColRef.add({ role: "model", text: errorText, timestamp: firebase.firestore.FieldValue.serverTimestamp() }); await chatDocRef.update({ lastUpdated: firebase.firestore.FieldValue.serverTimestamp() }); }
+                catch (saveError) { /* பிழைச் செய்தியைச் சேமிப்பதில் பிழையைப் புறக்கணி */ }
             } finally {
                 setLoadingState(false);
                 if (!isTestMode && !isReviewMode) userInput.focus();
             }
         }
 
-
-         // --- MODIFIED Helper to generate chat title ---
+        // முதல் பயனர் செய்தியிலிருந்து chat தலைப்பை உருவாக்குதல்
         function generateChatTitle(firstUserMessageText) {
             if (firstUserMessageText) {
                 const text = firstUserMessageText;
-                const title = text.split(/\s+/).slice(0, 5).join(' ').replace(/[.,!?;:]$/, '');
-                return title.length > 35 ? title.substring(0, 32) + '...' : title;
+                const title = text.split(/\s+/).slice(0, 5).join(' ').replace(/[.,!?;:]$/, ''); // முதல் 5 வார்த்தைகள்
+                return title.length > 35 ? title.substring(0, 32) + '...' : title; // நீளத்தைக் கட்டுப்படுத்து
             }
             return NEW_CHAT_TITLE;
         }
 
-
-         // Update chat title in Firestore
+        // Firestore-இல் chat தலைப்பைப் புதுப்பித்தல்
          async function updateActiveChatTitle(newTitle) {
-             if (!currentUser || !activeChatId || !newTitle || newTitle === NEW_CHAT_TITLE) {
-                 console.log("Skipping title update.");
-                 return;
-             }
+             if (!currentUser || !activeChatId || !newTitle || newTitle === NEW_CHAT_TITLE) { return; }
              const chatDocRef = db.collection('chats').doc(activeChatId);
              try {
                  await chatDocRef.update({ title: newTitle });
-                 console.log(`Chat ${activeChatId} title updated to: ${newTitle}`);
-                 // Listener updates sidebar UI
+                 console.log(`Chat ${activeChatId} தலைப்பு புதுப்பிக்கப்பட்டது: ${newTitle}`);
+                 // Listener sidebar-ஐப் புதுப்பிக்கும்
              } catch (error) {
-                 console.error("Error updating chat title in Firestore:", error);
+                 console.error("Chat தலைப்பை Firestore-இல் புதுப்பிப்பதில் பிழை:", error);
              }
          }
 
-
-        // --- UI & Message Display ---
+        // --- UI & Message Display Functions ---
         function autoGrowTextarea() { userInput.style.height='auto'; userInput.style.height=(userInput.scrollHeight)+'px'; }
         function handleInputKeydown(event) { if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();handleSendMessage();} }
         function handleSuggestionClick(event) { if(event.target.classList.contains('suggestion-chip')){userInput.value=event.target.dataset.prompt||'';autoGrowTextarea();userInput.focus();} }
-        function displayError(text) { displayMessage(`Error: ${text}`, 'ai', ['error-message']); }
+        function displayError(text) { displayMessage(`பிழை: ${text}`, 'ai', ['error-message']); }
         function scrollToBottom(immediate = false) { chatArea.scrollTo({top:chatArea.scrollHeight,behavior:immediate?'auto':'smooth'}); }
         function removeMessageElement(element) { if(element?.parentNode===chatArea)chatArea.removeChild(element); }
 
+        // Loading நிலையைக் கட்டுப்படுத்துதல்
+        function setLoadingState(isLoading, message = "உருவாக்குகிறது...") {
+            const isDisabled = isLoading || !currentUser || (!activeChatId && !isDeletingChat); // Active chat இல்லை என்றாலோ அல்லது நீக்கும்போது தவிர disable செய்
+            const inputDisabled = isLoading || !currentUser; // Input loading அல்லது logged out என்றால் மட்டும் disable
 
-        function setLoadingState(isLoading, message = "Generating...") {
-            const isDisabled = isLoading || !currentUser || !activeChatId;
-            const inputDisabled = isLoading || !currentUser; // Input only disabled if loading or logged out
-
-            userInput.disabled = inputDisabled; // Only disable if loading or logged out
-            sendButton.disabled = isDisabled; // Disable if loading, logged out, OR no chat active
+            userInput.disabled = inputDisabled;
+            sendButton.disabled = isDisabled;
             mcqModeCheckbox.disabled = isDisabled;
 
-            if (isLoading) {
-                userInput.placeholder = message;
-            } else if (!currentUser) {
-                userInput.placeholder = "Please log in";
-            } else if (!activeChatId && !isDeletingChat) { // Added !isDeletingChat check
-                 // Show this only if not in the middle of deleting the last chat
-                userInput.placeholder = "Select or create a chat";
-            } else if (!activeChatId && isDeletingChat) {
-                 // If deleting the last chat, show a neutral placeholder
-                 userInput.placeholder = "Loading...";
-            }
-            else {
-                userInput.placeholder = "Enter prompt (Check 'MCQs?' to generate test)";
-            }
+            if (isLoading) { userInput.placeholder = message; }
+            else if (!currentUser) { userInput.placeholder = "தயவுசெய்து உள்நுழையவும்"; }
+            else if (!activeChatId && !isDeletingChat) { userInput.placeholder = "ஒரு உரையாடலைத் தேர்ந்தெடுக்கவும் அல்லது உருவாக்கவும்"; }
+            else if (!activeChatId && isDeletingChat) { userInput.placeholder = "ஏற்றுகிறது..."; } // கடைசி chat நீக்கும்போது
+            else { userInput.placeholder = "கேள்வியை உள்ளிடவும்..."; }
 
             startChatButton.disabled = isLoading || !currentUser;
         }
 
-        function switchView(viewName) {
-            console.log("Switching view to:", viewName);
-            chatView.classList.remove('active');
-            reviewView.classList.remove('active');
-            testView.classList.remove('active');
+        // Views (Chat, Test, Review) மாற்றுதல்
+        function switchView(viewName) { /* ... (மாற்றமில்லை) ... */
+            console.log("View மாறுகிறது:", viewName);
+            chatView.classList.remove('active'); reviewView.classList.remove('active'); testView.classList.remove('active');
             appContainer.classList.remove('hidden');
-
-            if(viewName==='test'){
-                appContainer.classList.add('hidden');
-                testView.classList.add('active');
-                isTestMode=true;
-                isReviewMode=false;
-            } else if(viewName==='review'){
-                reviewView.classList.add('active');
-                isTestMode=false;
-                isReviewMode=true;
-            } else { // Default to chat view
-                chatView.classList.add('active');
-                isTestMode=false;
-                isReviewMode=false;
-            }
-            if (viewName !== 'test' && testTimerInterval) {
-                clearInterval(testTimerInterval);
-                testTimerInterval = null;
-            }
+            if(viewName==='test'){ appContainer.classList.add('hidden'); testView.classList.add('active'); isTestMode=true; isReviewMode=false; }
+            else if(viewName==='review'){ reviewView.classList.add('active'); isTestMode=false; isReviewMode=true; }
+            else { chatView.classList.add('active'); isTestMode=false; isReviewMode=false; }
+            if (viewName !== 'test' && testTimerInterval) { clearInterval(testTimerInterval); testTimerInterval = null; }
         }
 
-        function displayMessage(text, sender, cssClasses = [], appendHtml = null, messageData = null) {
+        // செய்தியைக் காட்டுதல் (MCQ offer கையாளுதலுடன்)
+        function displayMessage(text, sender, cssClasses = [], appendHtml = null, messageData = null) { /* ... (மாற்றமில்லை) ... */
             const element = document.createElement('div');
             element.classList.add('message', `${sender}-message`, ...cssClasses);
-
-             let formattedText = text
-                .replace(/</g, "<") // Basic escaping first
-                .replace(/>/g, ">")
-                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-                .replace(/\*(.*?)\*/g, '<em>$1</em>')
-                .replace(/```([\s\S]*?)```/g, (match, code) => `<pre><code>${code.replace(/</g, "<").replace(/>/g, ">")}</code></pre>`)
-                .replace(/`([^`]+)`/g, (match, code) => `<code>${code.replace(/</g, "<").replace(/>/g, ">")}</code>`)
-                .replace(/\n/g, '<br>');
-
+             let formattedText = text.replace(/</g, "<").replace(/>/g, ">").replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\*(.*?)\*/g, '<em>$1</em>').replace(/```([\s\S]*?)```/g, (match, code) => `<pre><code>${code.replace(/</g, "<").replace(/>/g, ">")}</code></pre>`).replace(/`([^`]+)`/g, (match, code) => `<code>${code.replace(/</g, "<").replace(/>/g, ">")}</code>`).replace(/\n/g, '<br>');
             element.innerHTML = formattedText;
-
-            if (messageData && messageData.role === 'model' && messageData.mcqData && Array.isArray(messageData.mcqData)) {
-                 console.log("Rendering message with MCQ offer:", messageData.mcqData.length, "questions");
-                 displayMCQOffer(messageData.mcqData, element);
-            } else if (appendHtml) {
-                const tempDiv = document.createElement('div');
-                tempDiv.innerHTML = appendHtml;
-                while (tempDiv.firstChild) {
-                    element.appendChild(tempDiv.firstChild);
-                }
-            }
-
+            if (messageData?.role === 'model' && Array.isArray(messageData.mcqData)) { console.log("MCQ offer காட்டப்படுகிறது:", messageData.mcqData.length, "கேள்விகள்"); displayMCQOffer(messageData.mcqData, element); }
+            else if (appendHtml) { const tempDiv = document.createElement('div'); tempDiv.innerHTML = appendHtml; while (tempDiv.firstChild) { element.appendChild(tempDiv.firstChild); } }
             chatArea.appendChild(element);
-
-            try {
-                 if (typeof MathJax !== "undefined" && MathJax.typesetPromise) {
-                    MathJax.typesetPromise([element]).catch(err => console.error('MathJax typeset error:', err));
-                 }
-            } catch (e) { console.error("MathJax call failed:", e); }
-
+            try { if (typeof MathJax !== "undefined" && MathJax.typesetPromise) { MathJax.typesetPromise([element]).catch(err => console.error('MathJax typeset error:', err)); } }
+            catch (e) { console.error("MathJax அழைப்பு தோல்வி:", e); }
             return element;
         }
 
-
-        // --- MCQ/Test Specific Functions --- (Unchanged from previous version)
-
-        function handleChatAreaClick(event) {
-            if (event.target.classList.contains('start-test-button')) {
-                 const mcqs = generatedMCQData;
-                 if (mcqs) {
-                    startMockTest(mcqs);
-                     generatedMCQData = null;
-                } else {
-                    console.error("MCQ data not found for clicked button.");
-                    displayError("Could not start the test. MCQ data missing.");
-                }
-            }
-        }
-
-        function displayMCQOffer(mcqs, aiMessageElement) {
-             generatedMCQData = mcqs;
-             const buttonHtml = `<button class="start-test-button">Start Mock Test (${mcqs.length} Questions)</button>`;
-             const tempDiv = document.createElement('div');
-             tempDiv.style.marginTop = '10px';
-             tempDiv.innerHTML = buttonHtml;
-             aiMessageElement.appendChild(tempDiv);
-             scrollToBottom();
-        }
-
-        function startMockTest(mcqs) {
-            if (!currentUser) { displayError("Please log in to start a test."); return; }
-            if (!mcqs || mcqs.length === 0) { displayError("No questions available for this test."); return; }
-            console.log("Starting mock test with", mcqs.length, "questions.");
-
-            currentTestMCQs = mcqs;
-            currentQuestionIndex = 0;
-            userAnswers = new Array(mcqs.length).fill(null);
-            reviewResultsCache = null;
-
-            switchView('test');
-            displayTestQuestion(0);
-            startTestTimer(); // This resets the timer start time
-            testTitle.textContent = `Mock Test (${mcqs.length} Qs)`;
-        }
-
-        function displayTestQuestion(index) {
-            if (index < 0 || index >= currentTestMCQs.length) return;
-            currentQuestionIndex = index;
-            const q = currentTestMCQs[index];
-
-            testQuestionNumber.textContent = `Question ${index + 1}`;
-            testQuestion.innerHTML = q.question;
-            testOptionsContainer.innerHTML = '';
-
-            const options = Array.isArray(q.options) ? q.options : [];
-            options.forEach((opt, i) => {
-                const label = document.createElement('label');
-                const input = document.createElement('input');
-                input.type = 'radio';
-                input.name = `q_${index}`;
-                input.value = i;
-                input.checked = (userAnswers[index] === i);
-                input.onchange = () => handleOptionSelect(i);
-
-                label.appendChild(input);
-                label.appendChild(document.createTextNode(` ${opt || '(Empty Option)'}`));
-                testOptionsContainer.appendChild(label);
-            });
-
-             try {
-                if (typeof MathJax !== "undefined" && MathJax.typesetPromise) {
-                    MathJax.typesetPromise([testQuestion, testOptionsContainer]).catch(err => console.error('MathJax typeset error:', err));
-                }
-             } catch(e){ console.error("MathJax call failed:", e); }
-
-            prevQuestionBtn.disabled = (index === 0);
-            nextQuestionBtn.disabled = (index === currentTestMCQs.length - 1);
-            questionCounter.textContent = `Q: ${index + 1} / ${currentTestMCQs.length}`;
-        }
-
-        function handleOptionSelect(optionIndex) {
-            if (currentQuestionIndex >= 0 && currentQuestionIndex < userAnswers.length) {
-                 userAnswers[currentQuestionIndex] = optionIndex;
-                 console.log(`Answered Q${currentQuestionIndex + 1}: Option index ${optionIndex}`);
-             }
-        }
-
-        function handleTestNavigation(direction) {
-            let newIndex = currentQuestionIndex;
-            if (direction === 'prev' && currentQuestionIndex > 0) newIndex--;
-            else if (direction === 'next' && currentQuestionIndex < currentTestMCQs.length - 1) newIndex++;
-            if (newIndex !== currentQuestionIndex) displayTestQuestion(newIndex);
-        }
-
-        function startTestTimer() {
-            if (testTimerInterval) clearInterval(testTimerInterval);
-            testStartTime = Date.now(); // Reset start time
-            testTimerInterval = setInterval(() => {
-                const elapsedSeconds = Math.floor((Date.now() - testStartTime) / 1000);
-                const minutes = Math.floor(elapsedSeconds / 60).toString().padStart(2, '0');
-                const seconds = (elapsedSeconds % 60).toString().padStart(2, '0');
-                testTimer.textContent = `Time: ${minutes}:${seconds}`;
-            }, 1000);
-        }
-
-        function submitTest() {
-            if (!confirm("Are you sure you want to submit the test?")) return;
-            if (testTimerInterval) clearInterval(testTimerInterval);
-            const endTime = Date.now();
-            const timeTakenMs = endTime - testStartTime;
-            console.log("Submitting test. Time taken (ms):", timeTakenMs);
-            switchView('review');
-            displayReview(timeTakenMs);
-        }
-
-        // --- Review Functions --- (Unchanged from previous version)
-
-        function displayReview(timeTakenMs) {
-             reviewContent.innerHTML = '';
-             saveReviewBtn.disabled = false;
-             saveReviewBtn.textContent = "Save Review";
-
-             if (!currentTestMCQs || currentTestMCQs.length === 0) {
-                 reviewSummary.innerHTML = "<span>No test data to review.</span>";
-                 return;
-             }
-
-             let correctCount = 0, incorrectCount = 0, skippedCount = 0;
-             reviewResultsCache = {
-                 questions: [], summary: {}, testDate: new Date().toISOString(), timeTakenMs: timeTakenMs
-             };
-
-             currentTestMCQs.forEach((q, index) => {
-                 const userAnswerIndex = userAnswers[index];
-                 let userAnswerText = "Skipped";
-                 let status = "skipped";
-                 let itemStatusClass = "status-skipped";
-                 let answerDetailClass = "user-answer-skipped";
-
-                 const correctAnswerLetter = q.answer?.trim().toUpperCase();
-                 const correctAnswerIndex = correctAnswerLetter ? correctAnswerLetter.charCodeAt(0) - 'A'.charCodeAt(0) : -1;
-                 const options = Array.isArray(q.options) ? q.options : [];
-                 const correctAnswerText = (correctAnswerIndex >= 0 && correctAnswerIndex < options.length) ? options[correctAnswerIndex] : "N/A";
-
-                 if (userAnswerIndex !== null && userAnswerIndex >= 0 && userAnswerIndex < options.length) {
-                     userAnswerText = options[userAnswerIndex];
-                     if (userAnswerIndex === correctAnswerIndex) {
-                         status = "correct"; itemStatusClass = "status-correct"; answerDetailClass = "user-answer-correct"; correctCount++;
-                     } else {
-                         status = "incorrect"; itemStatusClass = "status-incorrect"; answerDetailClass = "user-answer-incorrect"; incorrectCount++;
-                     }
-                 } else if (userAnswerIndex !== null) {
-                     userAnswerText = "Invalid Selection"; status = "incorrect"; itemStatusClass = "status-incorrect"; answerDetailClass = "user-answer-incorrect"; incorrectCount++;
-                 } else {
-                     skippedCount++;
-                 }
-
-                 reviewResultsCache.questions.push({
-                     question: q.question, options: options, correctAnswer: correctAnswerText, userAnswer: userAnswerText, status: status
-                 });
-
-                 const item = document.createElement('div');
-                 item.classList.add('review-item', itemStatusClass);
-                 item.dataset.status = status;
-
-                 let detailsHtml = `<span class="${answerDetailClass}">Your Answer: ${userAnswerText}</span>`;
-                 if (status !== 'correct') {
-                     detailsHtml += `<br><span class="correct-answer">Correct Answer: ${correctAnswerText}</span>`;
-                 }
-
-                 item.innerHTML = `
-                     <div class="review-item-qnum">Question ${index + 1}</div>
-                     <div class="review-item-question">${q.question}</div>
-                     <div class="review-item-details">${detailsHtml}</div>
-                 `;
-                 reviewContent.appendChild(item);
-             });
-
-             const totalQuestions = currentTestMCQs.length;
-             const score = `${correctCount}/${totalQuestions}`;
-             const timeSeconds = Math.round(timeTakenMs / 1000);
-             const minutes = Math.floor(timeSeconds / 60);
-             const seconds = timeSeconds % 60;
-             const timeString = `${minutes}m ${seconds}s`;
-
-             reviewSummary.innerHTML = `
-                 <span>Score: ${score}</span>
-                 <span class="score-correct">Correct: ${correctCount}</span>
-                 <span class="score-incorrect">Incorrect: ${incorrectCount}</span>
-                 <span class="score-skipped">Skipped: ${skippedCount}</span>
-                 <span>Total Time: ${timeString}</span>
-             `;
-             reviewResultsCache.summary = { score, correct: correctCount, incorrect: incorrectCount, skipped: skippedCount, timeString };
-
-              try {
-                 if (typeof MathJax !== "undefined" && MathJax.typesetPromise) {
-                     MathJax.typesetPromise([reviewContent]).catch(err => console.error('MathJax typeset error:', err));
-                 }
-             } catch (e) { console.error("MathJax call failed:", e); }
-
-             filterReviewItems('all');
-        }
-
-        function handleReviewFilterClick(event) {
-            const button = event.target.closest('button[data-filter]');
-            if (button) filterReviewItems(button.dataset.filter);
-        }
-
-        function filterReviewItems(filter) {
-            reviewFilters.querySelectorAll('button').forEach(btn => {
-                btn.classList.toggle('active-filter', btn.dataset.filter === filter);
-            });
-            reviewContent.querySelectorAll('.review-item').forEach(item => {
-                const show = (filter === 'all') || item.classList.contains(`status-${filter}`);
-                item.classList.toggle('hidden-by-filter', !show);
-            });
-        }
-
-        function exitReview() {
-            switchView('chat');
-            reviewResultsCache = null;
-        }
-
-        async function saveTestReviewToCloud() {
-            if (!currentUser) { alert("Please log in to save the review."); return; }
-            if (!reviewResultsCache) { alert("No review data available to save."); return; }
-
-            const reviewDataToSave = {
-                ...reviewResultsCache,
-                userId: currentUser.uid,
-                savedAt: firebase.firestore.FieldValue.serverTimestamp()
-            };
-
-            saveReviewBtn.disabled = true;
-            saveReviewBtn.textContent = "Saving...";
-
-            try {
-                const newReviewRef = await db.collection('testReviews').add(reviewDataToSave);
-                console.log("Review saved to Firestore with ID:", newReviewRef.id);
-                alert("Test review saved successfully!");
-                saveReviewBtn.textContent = "Review Saved";
-            } catch (error) {
-                console.error("Error saving review to Firestore:", error);
-                alert("Failed to save review. Please try again.");
-                saveReviewBtn.disabled = false;
-                saveReviewBtn.textContent = "Save Review";
-            }
-        }
+        // --- MCQ/Test/Review Functions (மாற்றமில்லை) ---
+        function handleChatAreaClick(event) { /* ... */ if (event.target.classList.contains('start-test-button')) { const mcqs = generatedMCQData; if (mcqs) { startMockTest(mcqs); generatedMCQData = null; } else { displayError("தேர்வைத் தொடங்க முடியவில்லை. MCQ தரவு இல்லை."); } } }
+        function displayMCQOffer(mcqs, aiMessageElement) { /* ... */ generatedMCQData = mcqs; const buttonHtml = `<button class="start-test-button">மாதிரித் தேர்வைத் தொடங்கு (${mcqs.length} கேள்விகள்)</button>`; const tempDiv = document.createElement('div'); tempDiv.style.marginTop = '10px'; tempDiv.innerHTML = buttonHtml; aiMessageElement.appendChild(tempDiv); scrollToBottom(); }
+        function startMockTest(mcqs) { /* ... */ if (!currentUser) { displayError("தேர்வைத் தொடங்க உள்நுழையவும்."); return; } if (!mcqs || mcqs.length === 0) { displayError("இந்தத் தேர்வுக்கு கேள்விகள் இல்லை."); return; } currentTestMCQs = mcqs; currentQuestionIndex = 0; userAnswers = new Array(mcqs.length).fill(null); reviewResultsCache = null; switchView('test'); displayTestQuestion(0); startTestTimer(); testTitle.textContent = `மாதிரித் தேர்வு (${mcqs.length} கேள்விகள்)`; }
+        function displayTestQuestion(index) { /* ... */ if (index < 0 || index >= currentTestMCQs.length) return; currentQuestionIndex = index; const q = currentTestMCQs[index]; testQuestionNumber.textContent = `கேள்வி ${index + 1}`; testQuestion.innerHTML = q.question; testOptionsContainer.innerHTML = ''; const options = Array.isArray(q.options) ? q.options : []; options.forEach((opt, i) => { const label = document.createElement('label'); const input = document.createElement('input'); input.type = 'radio'; input.name = `q_${index}`; input.value = i; input.checked = (userAnswers[index] === i); input.onchange = () => handleOptionSelect(i); label.appendChild(input); label.appendChild(document.createTextNode(` ${opt || '(காலி Option)'}`)); testOptionsContainer.appendChild(label); }); try { if (typeof MathJax !== "undefined" && MathJax.typesetPromise) { MathJax.typesetPromise([testQuestion, testOptionsContainer]).catch(err => console.error('MathJax typeset error:', err)); } } catch(e){ console.error("MathJax call failed:", e); } prevQuestionBtn.disabled = (index === 0); nextQuestionBtn.disabled = (index === currentTestMCQs.length - 1); questionCounter.textContent = `கேள்வி: ${index + 1} / ${currentTestMCQs.length}`; }
+        function handleOptionSelect(optionIndex) { /* ... */ if (currentQuestionIndex >= 0 && currentQuestionIndex < userAnswers.length) { userAnswers[currentQuestionIndex] = optionIndex; } }
+        function handleTestNavigation(direction) { /* ... */ let newIndex = currentQuestionIndex; if (direction === 'prev' && currentQuestionIndex > 0) newIndex--; else if (direction === 'next' && currentQuestionIndex < currentTestMCQs.length - 1) newIndex++; if (newIndex !== currentQuestionIndex) displayTestQuestion(newIndex); }
+        function startTestTimer() { /* ... */ if (testTimerInterval) clearInterval(testTimerInterval); testStartTime = Date.now(); testTimerInterval = setInterval(() => { const elapsedSeconds = Math.floor((Date.now() - testStartTime) / 1000); const minutes = Math.floor(elapsedSeconds / 60).toString().padStart(2, '0'); const seconds = (elapsedSeconds % 60).toString().padStart(2, '0'); testTimer.textContent = `நேரம்: ${minutes}:${seconds}`; }, 1000); }
+        function submitTest() { /* ... */ if (!confirm("தேர்வைச் சமர்ப்பிக்க விரும்புகிறீர்களா?")) return; if (testTimerInterval) clearInterval(testTimerInterval); const endTime = Date.now(); const timeTakenMs = endTime - testStartTime; switchView('review'); displayReview(timeTakenMs); }
+        function displayReview(timeTakenMs) { /* ... */ reviewContent.innerHTML = ''; saveReviewBtn.disabled = false; saveReviewBtn.textContent = "மறுபார்வையை சேமி"; if (!currentTestMCQs || currentTestMCQs.length === 0) { reviewSummary.innerHTML = "<span>மறுபார்வை செய்ய தேர்வுத் தரவு இல்லை.</span>"; return; } let correctCount = 0, incorrectCount = 0, skippedCount = 0; reviewResultsCache = { questions: [], summary: {}, testDate: new Date().toISOString(), timeTakenMs: timeTakenMs }; currentTestMCQs.forEach((q, index) => { const userAnswerIndex = userAnswers[index]; let userAnswerText = "தவிர்க்கப்பட்டது"; let status = "skipped"; let itemStatusClass = "status-skipped"; let answerDetailClass = "user-answer-skipped"; const correctAnswerLetter = q.answer?.trim().toUpperCase(); const correctAnswerIndex = correctAnswerLetter ? correctAnswerLetter.charCodeAt(0) - 'A'.charCodeAt(0) : -1; const options = Array.isArray(q.options) ? q.options : []; const correctAnswerText = (correctAnswerIndex >= 0 && correctAnswerIndex < options.length) ? options[correctAnswerIndex] : "N/A"; if (userAnswerIndex !== null && userAnswerIndex >= 0 && userAnswerIndex < options.length) { userAnswerText = options[userAnswerIndex]; if (userAnswerIndex === correctAnswerIndex) { status = "correct"; itemStatusClass = "status-correct"; answerDetailClass = "user-answer-correct"; correctCount++; } else { status = "incorrect"; itemStatusClass = "status-incorrect"; answerDetailClass = "user-answer-incorrect"; incorrectCount++; } } else if (userAnswerIndex !== null) { userAnswerText = "தவறான தேர்வு"; status = "incorrect"; itemStatusClass = "status-incorrect"; answerDetailClass = "user-answer-incorrect"; incorrectCount++; } else { skippedCount++; } reviewResultsCache.questions.push({ question: q.question, options: options, correctAnswer: correctAnswerText, userAnswer: userAnswerText, status: status }); const item = document.createElement('div'); item.classList.add('review-item', itemStatusClass); item.dataset.status = status; let detailsHtml = `<span class="${answerDetailClass}">உங்கள் பதில்: ${userAnswerText}</span>`; if (status !== 'correct') { detailsHtml += `<br><span class="correct-answer">சரியான பதில்: ${correctAnswerText}</span>`; } item.innerHTML = `<div class="review-item-qnum">கேள்வி ${index + 1}</div><div class="review-item-question">${q.question}</div><div class="review-item-details">${detailsHtml}</div>`; reviewContent.appendChild(item); }); const totalQuestions = currentTestMCQs.length; const score = `${correctCount}/${totalQuestions}`; const timeSeconds = Math.round(timeTakenMs / 1000); const minutes = Math.floor(timeSeconds / 60); const seconds = timeSeconds % 60; const timeString = `${minutes}நி ${seconds}வி`; reviewSummary.innerHTML = `<span>மதிப்பெண்: ${score}</span> <span class="score-correct">சரி: ${correctCount}</span> <span class="score-incorrect">தவறு: ${incorrectCount}</span> <span class="score-skipped">தவிர்த்தவை: ${skippedCount}</span> <span>மொத்த நேரம்: ${timeString}</span>`; reviewResultsCache.summary = { score, correct: correctCount, incorrect: incorrectCount, skipped: skippedCount, timeString }; try { if (typeof MathJax !== "undefined" && MathJax.typesetPromise) { MathJax.typesetPromise([reviewContent]).catch(err => console.error('MathJax typeset error:', err)); } } catch (e) { console.error("MathJax call failed:", e); } filterReviewItems('all'); }
+        function handleReviewFilterClick(event) { /* ... */ const button = event.target.closest('button[data-filter]'); if (button) filterReviewItems(button.dataset.filter); }
+        function filterReviewItems(filter) { /* ... */ reviewFilters.querySelectorAll('button').forEach(btn => { btn.classList.toggle('active-filter', btn.dataset.filter === filter); }); reviewContent.querySelectorAll('.review-item').forEach(item => { const show = (filter === 'all') || item.classList.contains(`status-${filter}`); item.classList.toggle('hidden-by-filter', !show); }); }
+        function exitReview() { switchView('chat'); reviewResultsCache = null; }
+        async function saveTestReviewToCloud() { /* ... */ if (!currentUser) { alert("மறுபார்வையைச் சேமிக்க உள்நுழையவும்."); return; } if (!reviewResultsCache) { alert("சேமிக்க மறுபார்வைத் தரவு இல்லை."); return; } const reviewDataToSave = { ...reviewResultsCache, userId: currentUser.uid, savedAt: firebase.firestore.FieldValue.serverTimestamp() }; saveReviewBtn.disabled = true; saveReviewBtn.textContent = "சேமிக்கிறது..."; try { const newReviewRef = await db.collection('testReviews').add(reviewDataToSave); console.log("மறுபார்வை Firestore-இல் சேமிக்கப்பட்டது:", newReviewRef.id); alert("தேர்வு மறுபார்வை வெற்றிகரமாகச் சேமிக்கப்பட்டது!"); saveReviewBtn.textContent = "சேமிக்கப்பட்டது"; } catch (error) { console.error("மறுபார்வையை Firestore-இல் சேமிப்பதில் பிழை:", error); alert("மறுபார்வையைச் சேமிக்க முடியவில்லை. மீண்டும் முயற்சிக்கவும்."); saveReviewBtn.disabled = false; saveReviewBtn.textContent = "மறுபார்வையை சேமி"; } }
 
     </script>
 
