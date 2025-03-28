@@ -3,7 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gemini Chat + Mock Test (v8.4 - Full Update)</title> <script> window.MathJax={tex:{inlineMath:[['$','$'],['\\(','\\)']],displayMath:[['$$','$$'],['\\[','\\]']]},svg:{fontCache:'global'},options:{skipHtmlTags:['script','noscript','style','textarea','pre','code']}}; </script>
+    <!-- தலைப்பை மாற்றலாம் -->
+    <title>Gemini Chat + Mock Test (v9.0 - Bilingual & Edit)</title>
+    <script>
+        window.MathJax = {
+            tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$'], ['\\[', '\\]']] },
+            svg: { fontCache: 'global' },
+            options: { skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code'] }
+        };
+    </script>
     <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
 
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
@@ -11,7 +19,7 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
 
     <style>
-        /* --- Styles (v8.4 - Consistent) --- */
+        /* --- Styles (v9.0 - Bilingual & Edit Included) --- */
         :root { /* ... Theme Variables ... */
              --font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; --sidebar-width: 260px; --message-font-size-base: 1rem;
             /* LIGHT */ --sidebar-bg: #f7f7f7; --main-bg: #ffffff; --input-bg: #ffffff; --border-color: #e0e0e0; --text-primary: #2c2c2c; --text-secondary: #5f5f5f; --text-placeholder: #999999; --accent-color: #d97a7a; --user-message-bg: #cce0ff; --user-message-text: #1c1c1c; --ai-message-bg: #f0f0f0; --ai-message-text: #2c2c2c; --button-bg: #f0f0f0; --button-hover-bg: #e0e0e0; --active-item-bg: #e0e0e0; --code-bg: #e8e8e8; --scrollbar-thumb: #ccc; --scrollbar-thumb-hover: #bbb; --app-outer-bg: #e8e8e8; --send-button-bg: var(--accent-color); --send-button-hover-bg: #c76b6b; --send-button-text: #ffffff; --error-bg: #ffebee; --error-text: #c62828; --error-border: #ef9a9a; --message-font-size: var(--message-font-size-base); --delete-button-color: #aaa; --delete-button-hover-color: #dc3545; --input-border-color: var(--border-color); --input-focus-border-color: var(--accent-color);
@@ -21,7 +29,7 @@
 
         /* --- Layout & Structure --- */
         .app-container { display: flex; height: 100vh; width: 100vw; overflow: hidden; } .app-container.hidden { display: none; }
-        .sidebar { width: var(--sidebar-width); background-color: var(--sidebar-bg); border-right: 1px solid var(--border-color); display: flex; flex-direction: column; padding: 15px 0; box-sizing: border-box; flex-shrink: 0; transition: background-color 0.3s ease, border-color 0.3s ease; }
+        .sidebar { width: var(--sidebar-width); background-color: var(--sidebar-bg); border-right: 1px solid var(--border-color); display: flex; flex-direction: column; padding: 15px 0; box-sizing: border-box; flex-shrink: 0; transition: background-color 0.3s ease, border-color 0.3s ease, width 0.3s ease; }
         .main-container { flex-grow: 1; display: flex; flex-direction: column; height: 100vh; overflow: hidden; position: relative; }
         .main-content, .review-view { display: none; flex-direction: column; background-color: var(--main-bg); height: 100%; width: 100%; overflow: hidden; transition: background-color 0.3s ease; }
         .main-content.active, .review-view.active { display: flex; }
@@ -30,168 +38,64 @@
 
         /* --- Sidebar Elements --- */
          .sidebar-header { padding: 10px 20px; font-size: 1.1em; font-weight: 600; color: var(--text-primary); }
-         .sidebar-section { /* Wrapper for All Tests and Chats */
-            flex-grow: 1;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden; /* Prevent content overflow */
-            margin-top: 10px;
-         }
+         .sidebar-section { flex-grow: 1; display: flex; flex-direction: column; overflow: hidden; margin-top: 10px; }
          .sidebar-section-title { padding: 5px 20px; font-size: 0.85em; font-weight: 600; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px; flex-shrink: 0; }
+
          /* --- All Tests Section Styles --- */
-         #all-tests-section {
-             border-bottom: 1px solid var(--border-color); /* Separator */
-             margin-bottom: 10px;
-             padding-bottom: 10px;
-             flex-shrink: 0; /* Prevent shrinking initially */
-             display: flex; /* Use flexbox for children */
-             flex-direction: column;
-             max-height: 40%; /* Limit height, adjust as needed */
-             display: none; /* Initially hidden */
-         }
-         #all-tests-section.visible {
-             display: flex; /* Show when logged in */
-         }
-         #test-search-input {
-             width: calc(100% - 40px); /* Adjust width accounting for padding */
-             padding: 8px 10px;
-             margin: 5px 15px 10px 15px; /* Consistent with chat list padding */
-             border: 1px solid var(--input-border-color);
-             background-color: var(--input-bg);
-             color: var(--text-primary);
-             border-radius: 6px;
-             font-size: 0.9em;
-             box-sizing: border-box;
-         }
-         #test-search-input:focus {
-             outline: none;
-             border-color: var(--input-focus-border-color);
-         }
-         #all-tests-list {
-             overflow-y: auto;
-             padding: 0 15px; /* Match chat list padding */
-             flex-grow: 1; /* Allow list to take remaining space */
-         }
-         #all-tests-list::-webkit-scrollbar { width: 6px; }
-         #all-tests-list::-webkit-scrollbar-thumb { background: var(--scrollbar-thumb); border-radius: 3px;}
-         #all-tests-list::-webkit-scrollbar-thumb:hover { background: var(--scrollbar-thumb-hover); }
-         .test-list-item {
-             padding: 8px 10px;
-             margin-bottom: 5px;
-             border-radius: 6px;
-             background-color: var(--button-bg); /* Slightly different background */
-             cursor: default; /* Default cursor, actions are on buttons */
-             transition: background-color 0.2s ease;
-             display: flex; /* Use flex for layout */
-             flex-direction: column; /* Stack info and actions */
-             gap: 5px; /* Space between info and actions */
-             border: 1px solid var(--border-color);
-         }
-          .test-list-item.hidden-by-search { display: none; }
-          .test-list-item .no-search-results { /* Style for no results message inside list */
-             padding:10px;color:var(--text-secondary);font-size:0.9em;
-          }
-         .test-item-info {
-             font-size: 0.9em;
-             color: var(--text-primary);
-         }
-         .test-item-title {
-             font-weight: 500;
-             white-space: nowrap;
-             overflow: hidden;
-             text-overflow: ellipsis;
-             display: block; /* Ensure it takes full width */
-         }
-         .test-item-details {
-             font-size: 0.8em;
-             color: var(--text-secondary);
-         }
-         .test-item-actions {
-             display: flex;
-             justify-content: flex-start; /* Align buttons to the left */
-             gap: 8px; /* Space between buttons */
-         }
-         .test-item-actions button, .test-item-actions select {
-             background-color: var(--main-bg); /* Match chat button */
-             border: 1px solid var(--border-color);
-             color: var(--text-secondary);
-             border-radius: 4px;
-             padding: 4px 8px;
-             font-size: 0.8em;
-             cursor: pointer;
-             transition: background-color 0.2s ease, color 0.2s ease;
-         }
-         .test-item-actions button:hover, .test-item-actions select:hover {
-             background-color: var(--button-hover-bg);
-             color: var(--text-primary);
-         }
-          .test-item-actions select:disabled {
-               opacity: 0.6;
-               cursor: not-allowed;
-          }
+         #all-tests-section { border-bottom: 1px solid var(--border-color); margin-bottom: 10px; padding-bottom: 10px; flex-shrink: 0; display: flex; flex-direction: column; max-height: 40%; display: none; }
+         #all-tests-section.visible { display: flex; }
+         #test-search-input { width: calc(100% - 40px); padding: 8px 10px; margin: 5px 15px 10px 15px; border: 1px solid var(--input-border-color); background-color: var(--input-bg); color: var(--text-primary); border-radius: 6px; font-size: 0.9em; box-sizing: border-box; }
+         #test-search-input:focus { outline: none; border-color: var(--input-focus-border-color); }
+         #all-tests-list { overflow-y: auto; padding: 0 15px; flex-grow: 1; }
+         #all-tests-list::-webkit-scrollbar { width: 6px; } #all-tests-list::-webkit-scrollbar-thumb { background: var(--scrollbar-thumb); border-radius: 3px;} #all-tests-list::-webkit-scrollbar-thumb:hover { background: var(--scrollbar-thumb-hover); }
+         .test-list-item { padding: 8px 10px; margin-bottom: 5px; border-radius: 6px; background-color: var(--button-bg); cursor: default; transition: background-color 0.2s ease; display: flex; flex-direction: column; gap: 5px; border: 1px solid var(--border-color); }
+         .test-list-item.hidden-by-search { display: none; }
+         .test-list-item .no-search-results { padding:10px;color:var(--text-secondary);font-size:0.9em; }
+         .test-item-info { font-size: 0.9em; color: var(--text-primary); position: relative; padding-right: 50px; /* Space for icons */ }
+         .test-item-title { font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; }
+         .test-item-details { font-size: 0.8em; color: var(--text-secondary); }
+         .test-item-actions { display: flex; justify-content: flex-start; gap: 8px; }
+         .test-item-actions button, .test-item-actions select { background-color: var(--main-bg); border: 1px solid var(--border-color); color: var(--text-secondary); border-radius: 4px; padding: 4px 8px; font-size: 0.8em; cursor: pointer; transition: background-color 0.2s ease, color 0.2s ease; }
+         .test-item-actions button:hover, .test-item-actions select:hover { background-color: var(--button-hover-bg); color: var(--text-primary); }
+         .test-item-actions select:disabled { opacity: 0.6; cursor: not-allowed; }
+        /* --- Styles for Edit/Delete Test Icons --- */
+        .test-item-controls { position: absolute; right: 5px; top: 0; display: flex; gap: 5px; }
+        .test-item-controls button { background: none; border: none; color: var(--delete-button-color); cursor: pointer; font-size: 1.1em; padding: 0 3px; line-height: 1; opacity: 0.7; transition: color 0.2s ease, opacity 0.2s ease; }
+        .test-item-controls button:hover { opacity: 1; color: var(--delete-button-hover-color); }
+        .test-item-edit-mode { display: flex; align-items: center; } /* Container for input + buttons */
+        .test-item-edit-mode input[type="text"] { flex-grow: 1; padding: 2px 4px; margin-right: 5px; border: 1px solid var(--input-focus-border-color); background-color: var(--input-bg); color: var(--text-primary); border-radius: 3px; font-size: 0.95em; }
+        .test-item-edit-mode button { font-size: 0.9em; padding: 2px 5px; background-color: var(--button-bg); border: 1px solid var(--border-color); color: var(--text-primary); border-radius: 3px; cursor: pointer; margin-left: 3px; }
+        .test-item-edit-mode button:hover { background-color: var(--button-hover-bg); }
          /* --- End All Tests Section Styles --- */
 
-         .start-chat-button { display: flex; align-items: center; gap: 8px; background-color: var(--main-bg); border: 1px solid var(--border-color); color: var(--text-primary); border-radius: 8px; padding: 10px 15px; margin: 0 15px 10px 15px; /* Adjusted margins */ font-size: 0.95em; font-weight: 500; cursor: pointer; text-align: left; transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease; flex-shrink: 0; /* Prevent shrinking */ }
+         .start-chat-button { display: flex; align-items: center; gap: 8px; background-color: var(--main-bg); border: 1px solid var(--border-color); color: var(--text-primary); border-radius: 8px; padding: 10px 15px; margin: 0 15px 10px 15px; font-size: 0.95em; font-weight: 500; cursor: pointer; text-align: left; transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease; flex-shrink: 0; }
          .start-chat-button:hover { background-color: var(--button-hover-bg); } .start-chat-button svg { fill: currentColor; width: 16px; height: 16px; }
-         .start-chat-button:disabled { opacity: 0.6; cursor: not-allowed; } /* Disabled style for logged out */
+         .start-chat-button:disabled { opacity: 0.6; cursor: not-allowed; }
 
-         .chat-list {
-             overflow-y: auto;
-             padding: 0 15px;
-             margin-bottom: 10px;
-             flex-grow: 1; /* Let chat list take remaining space in its section */
-         }
+         .chat-list { overflow-y: auto; padding: 0 15px; margin-bottom: 10px; flex-grow: 1; }
          .chat-list::-webkit-scrollbar { width: 6px; } .chat-list::-webkit-scrollbar-thumb { background: var(--scrollbar-thumb); border-radius: 3px;} .chat-list::-webkit-scrollbar-thumb:hover { background: var(--scrollbar-thumb-hover); }
-         .chat-list-item {
-             padding: 8px 30px 8px 10px; /* Increased right padding for delete btn */
-             margin-bottom: 4px; border-radius: 6px; font-size: 0.9em;
-             cursor: pointer; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-             color: var(--text-secondary); transition: background-color 0.2s ease, color 0.2s ease;
-             position: relative; /* Needed for absolute positioning of delete button */
-         }
+         .chat-list-item { padding: 8px 30px 8px 10px; margin-bottom: 4px; border-radius: 6px; font-size: 0.9em; cursor: pointer; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--text-secondary); transition: background-color 0.2s ease, color 0.2s ease; position: relative; }
          .chat-list-item:hover { background-color: var(--button-hover-bg); color: var(--text-primary); }
          .chat-list-item.active { background-color: var(--active-item-bg); color: var(--text-primary); font-weight: 500; }
-         .delete-chat-button {
-             position: absolute;
-             right: 6px;
-             top: 50%;
-             transform: translateY(-50%);
-             width: 18px;
-             height: 18px;
-             background: none;
-             border: none;
-             color: var(--delete-button-color);
-             cursor: pointer;
-             font-size: 1.3em; /* Adjust size */
-             line-height: 1;
-             padding: 0;
-             display: none; /* Hidden by default */
-             opacity: 0.7;
-             transition: color 0.2s ease, opacity 0.2s ease;
-         }
-         .chat-list-item:hover .delete-chat-button {
-             display: block; /* Show on hover */
-         }
-         .delete-chat-button:hover {
-             color: var(--delete-button-hover-color);
-             opacity: 1;
-         }
-         .sidebar-footer { border-top: 1px solid var(--border-color); padding: 10px 15px; transition: border-color 0.3s ease; flex-shrink: 0; /* Prevent shrinking */}
+         .delete-chat-button { position: absolute; right: 6px; top: 50%; transform: translateY(-50%); width: 18px; height: 18px; background: none; border: none; color: var(--delete-button-color); cursor: pointer; font-size: 1.3em; line-height: 1; padding: 0; display: none; opacity: 0.7; transition: color 0.2s ease, opacity 0.2s ease; }
+         .chat-list-item:hover .delete-chat-button { display: block; }
+         .delete-chat-button:hover { color: var(--delete-button-hover-color); opacity: 1; }
+
+         .sidebar-footer { border-top: 1px solid var(--border-color); padding: 10px 15px; transition: border-color 0.3s ease; flex-shrink: 0; }
          .sidebar-controls { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
          .text-size-controls span, .theme-toggle span { font-size: 0.85em; color: var(--text-secondary); }
          .text-size-buttons button, .theme-toggle button { background: var(--button-bg); border: 1px solid var(--border-color); color: var(--text-secondary); border-radius: 4px; padding: 2px 8px; margin-left: 5px; cursor: pointer; font-size: 1.1em; line-height: 1; transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease; }
          .text-size-buttons button:hover, .theme-toggle button:hover { background-color: var(--button-hover-bg); color: var(--text-primary); }
-         .text-size-buttons button:disabled, .theme-toggle button:disabled { opacity: 0.6; cursor: not-allowed; } /* Disabled style for logged out */
-         .account-info { display: flex; align-items: center; gap: 10px; font-size: 0.9em; margin-top: 10px; /* Added margin */ }
+         .text-size-buttons button:disabled, .theme-toggle button:disabled { opacity: 0.6; cursor: not-allowed; }
+         .account-info { display: flex; align-items: center; gap: 10px; font-size: 0.9em; margin-top: 10px; }
          .account-avatar { width: 30px; height: 30px; border-radius: 50%; background-color: #6c757d; color: white; display: flex; align-items: center; justify-content: center; font-weight: 600; }
          .account-details { overflow: hidden; }
          .account-email { font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--text-primary); }
          .account-plan { font-size: 0.85em; color: var(--text-secondary); }
-         #auth-controls { margin-top: 15px; text-align: center; } /* Auth buttons container */
+         #auth-controls { margin-top: 15px; text-align: center; }
          #auth-controls button { background-color: var(--button-bg); color: var(--text-primary); border: 1px solid var(--border-color); border-radius: 6px; padding: 8px 15px; cursor: pointer; font-size: 0.9em; transition: background-color 0.2s ease; }
          #auth-controls button:hover { background-color: var(--button-hover-bg); }
-         #logout-btn { display: none; /* Initially hidden */ }
-
+         #logout-btn { display: none; }
 
         /* --- Chat Area Elements --- */
         .greeting { font-size: 1.8em; font-weight: 600; margin-bottom: 40px; color: var(--text-primary); } .greeting .asterisk { color: var(--accent-color); font-size: 1.2em; margin-right: 5px; display: inline-block; vertical-align: middle; }
@@ -208,7 +112,7 @@
         .message mjx-container { color: inherit !important; font-size: inherit !important; }
 
         /* --- Input Area Elements --- */
-        .suggestions { display: none; gap: 10px; margin-bottom: 15px; flex-wrap: wrap; } /* Initially hidden */
+        .suggestions { display: none; gap: 10px; margin-bottom: 15px; flex-wrap: wrap; }
         .suggestion-chip { background-color: var(--button-bg); border: 1px solid var(--border-color); color: var(--text-secondary); border-radius: 16px; padding: 8px 15px; font-size: 0.9em; cursor: pointer; transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease; }
         .suggestion-chip:hover { background-color: var(--button-hover-bg); color: var(--text-primary); }
         .input-box { display: flex; align-items: flex-end; background-color: var(--main-bg); border: 1px solid var(--input-border-color); border-radius: 12px; padding: 5px 5px 5px 15px; position: relative; transition: background-color 0.3s ease, border-color 0.3s ease; }
@@ -232,7 +136,18 @@
         .mock-test-view.active { display: flex; }
         .test-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-bottom: 10px; border-bottom: 1px solid var(--border-color); flex-shrink: 0; }
         .test-header h2 { margin: 0; font-size: 1.3em; color: var(--text-primary); }
+        .test-info { display: flex; align-items: center; } /* Align items horizontally */
         .test-info span { margin-left: 15px; font-size: 0.95em; color: var(--text-secondary); }
+        /* Style for language toggle button */
+        #test-language-toggle, #review-language-toggle {
+            margin-left: 15px; padding: 3px 8px; font-size: 0.8em; cursor: pointer;
+            background-color: var(--button-bg); border: 1px solid var(--border-color);
+            color: var(--text-secondary); border-radius: 4px;
+            transition: background-color 0.2s ease, color 0.2s ease;
+        }
+        #test-language-toggle:hover, #review-language-toggle:hover {
+             background-color: var(--button-hover-bg); color: var(--text-primary);
+        }
         .test-content { flex-grow: 1; overflow-y: auto; padding: 10px 20px; }
         .test-question-container { margin-bottom: 25px; }
         .test-question-number { font-weight: bold; margin-bottom: 8px; color: var(--text-secondary); }
@@ -251,9 +166,10 @@
         .review-view { padding: 20px; box-sizing: border-box; background-color: var(--main-bg); }
         .review-header { margin-bottom: 15px; padding-bottom: 15px; border-bottom: 1px solid var(--border-color); }
         .review-header h2 { margin: 0 0 10px 0; font-size: 1.3em; color: var(--text-primary); }
+        .review-summary { display: inline; } /* Allow toggle button next to it */
         .review-summary span { margin-right: 20px; font-size: 1em; color: var(--text-primary); }
         .review-summary .score-correct { color: #28a745; font-weight: bold;} .review-summary .score-incorrect { color: #dc3545; font-weight: bold;} .review-summary .score-skipped { color: #fd7e14; font-weight: bold;}
-        .review-filters { margin-bottom: 15px; }
+        .review-filters { margin-top: 10px; /* Add space above filters */ margin-bottom: 15px; }
         .review-filters button { background-color: var(--button-bg); color: var(--text-primary); border: 1px solid var(--border-color); border-radius: 6px; padding: 5px 12px; margin-right: 8px; cursor: pointer; font-size: 0.9em; transition: background-color 0.2s ease, border-color 0.2s ease; }
         .review-filters button:hover { background-color: var(--button-hover-bg); }
         .review-filters button.active-filter { background-color: var(--accent-color); color: var(--send-button-text); border-color: var(--accent-color);}
@@ -265,19 +181,62 @@
         .review-item-details span { display: block; margin-bottom: 5px; font-size: 0.95em; color: var(--text-primary); }
         .review-item-details .correct-answer { color: #28a745; font-weight: bold; }
         .review-item-details .user-answer-correct { color: #28a745; } .review-item-details .user-answer-incorrect { color: #dc3545; text-decoration: line-through; } .review-item-details .user-answer-skipped { color: #fd7e14; font-style: italic; }
-        .review-footer { text-align: center; padding-top: 20px; border-top: 1px solid var(--border-color); margin-top: auto; flex-shrink: 0; display: flex; justify-content: center; gap: 15px; /* Space between buttons */ }
-        #exit-review-btn, #save-review-btn { /* Style both buttons */
-             background-color: var(--accent-color); color: var(--send-button-text); border: none;
-             border-radius: 6px; padding: 10px 25px; cursor: pointer; font-size: 1em;
-             transition: background-color 0.2s ease;
-             display: none; /* Hide initially, show based on context */
-        }
+        /* Style for explanation in review */
+        .review-item-explanation { margin-top: 8px; font-size: 0.9em; color: var(--text-secondary); border-left: 3px solid var(--border-color); padding-left: 8px; line-height: 1.4; }
+        .review-footer { text-align: center; padding-top: 20px; border-top: 1px solid var(--border-color); margin-top: auto; flex-shrink: 0; display: flex; justify-content: center; gap: 15px; }
+        #exit-review-btn, #save-review-btn { background-color: var(--accent-color); color: var(--send-button-text); border: none; border-radius: 6px; padding: 10px 25px; cursor: pointer; font-size: 1em; transition: background-color 0.2s ease; display: none; }
         #exit-review-btn:hover, #save-review-btn:hover:not(:disabled) { background-color: var(--send-button-hover-bg); }
-        #save-review-btn { /* Secondary button style (optional) */
-             background-color: var(--button-bg); color: var(--text-primary); border: 1px solid var(--border-color);
-        }
+        #save-review-btn { background-color: var(--button-bg); color: var(--text-primary); border: 1px solid var(--border-color); }
         #save-review-btn:hover:not(:disabled) { background-color: var(--button-hover-bg); }
-        #save-review-btn:disabled { opacity: 0.6; cursor: not-allowed; background-color: #cccccc; border-color: #aaaaaa; } /* Disabled style */
+        #save-review-btn:disabled { opacity: 0.6; cursor: not-allowed; background-color: #cccccc; border-color: #aaaaaa; }
+
+        /* --- Responsive Design (Mobile) --- */
+        @media (max-width: 768px) {
+            :root { --sidebar-width: 200px; }
+            .sidebar { padding: 10px 0; /* Adjusted */ }
+            .main-container { /* Adjusted */ }
+            .chat-area, .input-container { width: 95%; padding-left: 2.5%; padding-right: 2.5%; max-width: none; }
+            .chat-area { padding-top: 15px; padding-bottom: 10px; }
+            .input-container { padding-top: 10px; padding-bottom: 10px; }
+            .message { max-width: 90%; font-size: calc(var(--message-font-size) * 0.95); }
+            .greeting { font-size: 1.5em; margin-bottom: 20px; }
+            .suggestions { gap: 5px; margin-bottom: 10px; }
+            .suggestion-chip { padding: 6px 10px; font-size: 0.85em; }
+            .input-box { padding: 5px 5px 5px 10px; }
+            #user-input { min-height: 40px; font-size: 0.95rem; }
+            #send-button { width: 32px; height: 32px; }
+            .mcq-mode-control label { font-size: 0.8em; }
+            /* Sidebar elements adjustments */
+            .sidebar-header { font-size: 1em; padding: 8px 15px; }
+            .sidebar-section-title { padding: 5px 15px; font-size: 0.8em;}
+            #test-search-input { margin: 5px 10px 8px 10px; width: calc(100% - 20px); }
+            #all-tests-list, .chat-list { padding: 0 10px; }
+            .test-list-item, .chat-list-item { padding: 6px 8px; font-size: 0.85em;}
+            .chat-list-item { padding-right: 25px; }
+            .start-chat-button { padding: 8px 12px; margin: 0 10px 8px 10px; font-size: 0.9em; }
+            .sidebar-footer { padding: 8px 10px;}
+            .text-size-buttons button, .theme-toggle button { padding: 1px 6px; font-size: 1em;}
+            .account-info { font-size: 0.85em; gap: 8px;}
+            .account-avatar { width: 25px; height: 25px;}
+            .test-item-info { padding-right: 45px; } /* Adjust space for icons on mobile */
+            .test-item-controls button { font-size: 1em; }
+            .test-item-edit-mode input[type="text"] { font-size: 0.9em; }
+            .test-item-edit-mode button { font-size: 0.85em; }
+            /* Test/Review View Adjustments */
+            .mock-test-view, .review-view { padding: 10px; }
+            .test-header, .review-header { margin-bottom: 15px; padding-bottom: 8px; flex-direction: column; align-items: flex-start; }
+            .test-header h2, .review-header h2 { font-size: 1.1em; margin-bottom: 5px;}
+            .test-info, .review-summary { margin-bottom: 5px; } /* Space below info/summary */
+            .test-info span, .review-summary span { margin-left: 0; margin-right: 10px; font-size: 0.9em; display: inline-block; margin-bottom: 3px;}
+            #test-language-toggle, #review-language-toggle { margin-left: 0; margin-top: 5px; font-size: 0.75em;} /* Adjust toggle on mobile */
+            .test-content, .review-content { padding: 5px; }
+            .test-question, .review-item-question { font-size: 1em; }
+            .test-options label, .review-item { padding: 10px; font-size: 0.95em;}
+            .review-filters { margin-top: 5px; } /* Adjust filter margin */
+            .review-filters button { padding: 4px 8px; font-size: 0.85em; margin-right: 5px;}
+            .test-navigation, .review-footer { padding-top: 10px; }
+            .test-navigation button, #exit-review-btn, #save-review-btn { padding: 8px 15px; font-size: 0.9em; }
+        }
 
     </style>
 </head>
@@ -297,7 +256,7 @@
             </div>
             <!-- == End "All Tests" Section == -->
 
-            <!-- Existing sections wrapped for better layout control -->
+            <!-- Existing sections wrapped -->
             <div class="sidebar-section">
                 <button class="start-chat-button" id="start-chat" disabled> <svg viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"></path></svg>
                      Start new chat
@@ -353,9 +312,13 @@
             </div>
             <div class="review-view" id="review-view">
                  <div class="review-header">
-                     <h2 id="review-title">Test Review</h2> <!-- Added ID for title -->
-                     <div class="review-summary" id="review-summary"></div>
-                     <div class="review-filters" id="review-filters" style="display: none;"> <!-- Hide initially -->
+                     <h2 id="review-title">Test Review</h2>
+                     <div> <!-- Wrapper for summary and toggle -->
+                         <div class="review-summary" id="review-summary"></div>
+                         <!-- Add Language Toggle Button -->
+                         <button id="review-language-toggle" style="margin-left: 15px; padding: 3px 8px; font-size: 0.8em; vertical-align: middle;">தமிழ்</button>
+                     </div>
+                     <div class="review-filters" id="review-filters" style="display: none;">
                          <button data-filter="all" class="active-filter">All</button>
                          <button data-filter="incorrect">Incorrect</button>
                          <button data-filter="skipped">Skipped</button>
@@ -364,16 +327,34 @@
                  <div class="review-content" id="review-content"></div>
                  <div class="review-footer">
                      <button id="save-review-btn">Save Review</button>
-                     <button id="exit-review-btn">Back</button> <!-- Default text, updated by switchView -->
+                     <button id="exit-review-btn">Back</button>
                  </div>
               </div>
         </div>
     </div>
 
     <div class="mock-test-view" id="mock-test-view">
-         <div class="test-header"> <h2 id="test-title">Mock Test</h2> <div class="test-info"> <span id="question-counter">Q: 1 / N</span> <span id="test-timer">Time: 00:00</span> </div> </div>
-         <div class="test-content"> <div class="test-question-container"> <div class="test-question-number" id="test-question-number"></div> <div class="test-question" id="test-question"></div> <div class="test-options" id="test-options"></div> </div> </div>
-         <div class="test-navigation"> <button id="prev-question-btn" disabled>Previous</button> <button id="next-question-btn">Next</button> <button id="submit-test-btn">Submit Test</button> </div>
+         <div class="test-header">
+            <h2 id="test-title">Mock Test</h2>
+            <div class="test-info">
+                <span id="question-counter">Q: 1 / N</span>
+                <span id="test-timer">Time: 00:00</span>
+                <!-- Add Language Toggle Button -->
+                <button id="test-language-toggle" style="margin-left: 15px; padding: 3px 8px; font-size: 0.8em;">தமிழ்</button>
+            </div>
+         </div>
+         <div class="test-content">
+            <div class="test-question-container">
+                <div class="test-question-number" id="test-question-number"></div>
+                <div class="test-question" id="test-question"></div>
+                <div class="test-options" id="test-options"></div>
+            </div>
+         </div>
+         <div class="test-navigation">
+            <button id="prev-question-btn" disabled>Previous</button>
+            <button id="next-question-btn">Next</button>
+            <button id="submit-test-btn">Submit Test</button>
+         </div>
     </div>
 
 
@@ -385,6 +366,10 @@
         // After testing, delete/restrict this API key in Firebase Console and use a new one here.
         // DO NOT DEPLOY WITH THIS SHARED KEY. USE A SERVER-SIDE SOLUTION (e.g., Cloud Functions)
         // TO HIDE YOUR API KEY AND MAKE API CALLS SECURELY.
+        // இந்த firebaseConfig (குறிப்பாக apiKey) பகிரப்பட்டதால் பாதுகாப்பற்றது.
+        // சோதனைக்குப் பிறகு, Firebase Console-ல் இந்த API key-ஐ நீக்கவும்/கட்டுப்படுத்தவும் மற்றும் இங்கே புதியதைப் பயன்படுத்தவும்.
+        // இந்த பகிரப்பட்ட KEY உடன் DEPLOY செய்ய வேண்டாம். உங்கள் API KEY-ஐ மறைக்க மற்றும் API அழைப்புகளைப்
+        // பாதுகாப்பாகச் செய்ய SERVER-SIDE SOLUTION-ஐ (எ.கா., Cloud Functions) பயன்படுத்தவும்.
         // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         const firebaseConfig = {
           apiKey: "AIzaSyDgw604fe5jnNu4kTOv1cQ-3n7PL8gcN58", // <- பகிரப்பட்ட, பாதுகாப்பற்ற Key / SHARED, INSECURE KEY - REPLACE ME
@@ -398,8 +383,8 @@
 
         // --- Initialize Firebase ---
         firebase.initializeApp(firebaseConfig);
-        const fbAuth = firebase.auth(); // Firebase Authentication service
-        const db = firebase.firestore(); // Firebase Firestore service
+        const fbAuth = firebase.auth();
+        const db = firebase.firestore();
 
         // --- DOM Elements ---
         const appContainer = document.getElementById('app-container');
@@ -437,6 +422,7 @@
         const prevQuestionBtn = document.getElementById('prev-question-btn');
         const nextQuestionBtn = document.getElementById('next-question-btn');
         const submitTestBtn = document.getElementById('submit-test-btn');
+        const testLanguageToggle = document.getElementById('test-language-toggle'); // New
         // Review elements
         const reviewTitle = document.getElementById('review-title');
         const reviewSummary = document.getElementById('review-summary');
@@ -444,18 +430,21 @@
         const exitReviewBtn = document.getElementById('exit-review-btn');
         const reviewFilters = document.getElementById('review-filters');
         const saveReviewBtn = document.getElementById('save-review-btn');
+        const reviewLanguageToggle = document.getElementById('review-language-toggle'); // New
 
         // --- Config & Constants ---
         const MODEL_NAME="gemini-1.5-flash-latest";
         const API_URL_BASE=`https://generativelanguage.googleapis.com/v1beta/models/${MODEL_NAME}:generateContent?key=`;
-        const STORAGE_KEY_API_KEY='geminiApiKey_insecureDemo';
+        const STORAGE_KEY_API_KEY='geminiApiKey_insecureDemo'; // மீண்டும், இது பாதுகாப்பற்றது
         const NEW_CHAT_TITLE="(New Chat)";
         const TEXT_SIZE_STEP=0.1;
         const MIN_TEXT_SIZE_MULTIPLIER=0.7;
         const MAX_TEXT_SIZE_MULTIPLIER=1.5;
         const LIGHT_THEME_ICON='☀️';
         const DARK_THEME_ICON='🌙';
-        const DELETE_ICON = '×';
+        const DELETE_ICON = '×'; // Chat delete icon
+        const EDIT_TEST_ICON = '✏️';
+        const DELETE_TEST_ICON = '🗑️';
 
         // --- State Variables ---
         let API_KEY='';
@@ -466,20 +455,20 @@
         let currentTheme='light';
         let isTestMode=false;
         let isReviewMode=false;
-        let currentTestMCQs=[]; // Holds questions for the CURRENT active test/reattempt
+        let currentTestMCQs=[];
         let currentQuestionIndex=0;
         let userAnswers=[];
         let testStartTime=null;
         let testTimerInterval=null;
-        // let generatedMCQData=null; // No longer needed globally
-        let reviewResultsCache = null; // Stores results for CURRENT review display or saving
+        let reviewResultsCache = null;
         let cameFromAllTestsList = false;
-        // Firestore Listeners
         let activeChatListener = null;
         let chatListListener = null;
         let testListListener = null;
         let isDeletingChat = false;
-        let allSavedTestsData = []; // Cache for ALL saved test review data fetched from Firestore
+        let allSavedTestsData = [];
+        let currentTestLanguage = 'en'; // 'en' or 'ta' - for active test
+        let currentReviewLanguage = 'en'; // 'en' or 'ta' - for review view
 
         // --- Initialization ---
         initializeApp();
@@ -491,8 +480,7 @@
         suggestionsContainer.addEventListener('click', handleSuggestionClick);
         startChatButton.addEventListener('click', createNewChat);
         chatListContainer.addEventListener('click', handleChatListClick);
-        allTestsListContainer.addEventListener('click', handleAllTestsListClick); // Handles View Details btn
-        // Note: Reattempt 'select' change listener is added directly in renderAllTestsList
+        allTestsListContainer.addEventListener('click', handleAllTestsListClick); // Handles View, Edit, Delete test
         testSearchInput.addEventListener('input', filterTestsInSidebar);
         decreaseTextBtn.addEventListener('click', () => adjustTextSize(-TEXT_SIZE_STEP));
         increaseTextBtn.addEventListener('click', () => adjustTextSize(TEXT_SIZE_STEP));
@@ -501,11 +489,13 @@
         prevQuestionBtn.addEventListener('click', () => handleTestNavigation('prev'));
         nextQuestionBtn.addEventListener('click', () => handleTestNavigation('next'));
         submitTestBtn.addEventListener('click', submitTest);
+        testLanguageToggle.addEventListener('click', toggleTestLanguage); // New
         // Review listeners
         exitReviewBtn.addEventListener('click', exitReview);
-        chatArea.addEventListener('click', handleChatAreaClick); // For the "Start Mock Test" button in chat
+        chatArea.addEventListener('click', handleChatAreaClick);
         reviewFilters.addEventListener('click', handleReviewFilterClick);
         saveReviewBtn.addEventListener('click', saveTestReviewToCloud);
+        reviewLanguageToggle.addEventListener('click', toggleReviewLanguage); // New
         // Auth listeners
         loginBtn.addEventListener('click', signInWithGoogle);
         logoutBtn.addEventListener('click', signOut);
@@ -513,39 +503,41 @@
 
         // --- Initialization Functions ---
         async function initializeApp() {
-            loadGeminiApiKey();
-            fbAuth.onAuthStateChanged(handleAuthStateChange);
-            switchView('chat');
+            loadGeminiApiKey(); // Load insecurely stored key
+            fbAuth.onAuthStateChanged(handleAuthStateChange); // Listen for login/logout
+            switchView('chat'); // Start in chat view
             userInput.focus();
         }
 
         function loadGeminiApiKey() {
-             console.warn("!!! SECURITY WARNING !!! Gemini API Key is stored in localStorage. This is highly insecure and only for demonstration. Use a server-side solution (like Cloud Functions) to protect your key in production.");
-             API_KEY = localStorage.getItem(STORAGE_KEY_API_KEY); // Use let for potential re-assignment
+             console.warn("!!! SECURITY WARNING / பாதுகாப்பு எச்சரிக்கை !!! Gemini API Key is stored in localStorage. This is highly insecure and only for demonstration. Use a server-side solution (like Cloud Functions) to protect your key in production. / Gemini API Key localStorage-ல் சேமிக்கப்படுகிறது. இது மிகவும் பாதுகாப்பற்றது மற்றும் டெமோவுக்கு மட்டுமே. Production-ல் உங்கள் key-ஐப் பாதுகாக்க server-side solution-ஐ (Cloud Functions போன்றவை) பயன்படுத்தவும்.");
+             API_KEY = localStorage.getItem(STORAGE_KEY_API_KEY);
              if(API_KEY){
                  console.log("Loaded insecure API Key from localStorage.");
              }
              else {
-                 API_KEY=prompt("--- INSECURE DEMO --- Please enter your Gemini API Key.\nIt will be stored *insecurely* in your browser's localStorage.\nDo NOT use this method in production!");
+                 // Use prompt only if key is missing - less annoying
+                 API_KEY=prompt("--- INSECURE DEMO / பாதுகாப்பற்ற டெமோ ---\nPlease enter your Gemini API Key.\nIt will be stored *insecurely* in your browser's localStorage.\nDo NOT use this method in production!\n\nஉங்கள் Gemini API Key-ஐ உள்ளிடவும்.\nஇது உங்கள் உலாவியின் localStorage-ல் *பாதுகாப்பற்ற முறையில்* சேமிக்கப்படும்.\nProduction-ல் இந்த முறையைப் பயன்படுத்த வேண்டாம்!");
                  if(API_KEY){
                      localStorage.setItem(STORAGE_KEY_API_KEY, API_KEY);
                      console.log("Saved insecure API Key to localStorage.");
                  }
                  else {
-                     displayError("Gemini API Key is required for this demo. Reload the page to enter it.");
+                     displayError("Gemini API Key is required for this demo. Reload the page to enter it. / இந்த டெமோவிற்கு Gemini API Key தேவை. அதை உள்ளிட பக்கத்தை மீண்டும் ஏற்றவும்.");
                      setLoadingState(true, "API Key Missing");
                  }
              }
-             setLoadingState(false);
+             // Enable input/send only if API key is present
+             setLoadingState(!API_KEY);
         }
 
         // --- Authentication Functions ---
-
         async function signInWithGoogle() {
             const provider = new firebase.auth.GoogleAuthProvider();
             try {
                 setLoadingState(true, "Logging in...");
                 await fbAuth.signInWithPopup(provider);
+                // handleAuthStateChange will take over
             } catch (error) {
                 console.error("Google Sign-In Error:", error);
                 displayError(`Login failed: ${error.message || 'Unknown error'}`);
@@ -557,6 +549,7 @@
             try {
                 setLoadingState(true, "Logging out...");
                 await fbAuth.signOut();
+                // handleAuthStateChange will take over
             } catch (error) {
                 console.error("Sign Out Error:", error);
                 displayError(`Logout failed: ${error.message || 'Unknown error'}`);
@@ -571,8 +564,8 @@
             if (testListListener) { testListListener(); testListListener = null; }
 
             chatArea.innerHTML = '';
-            chatListContainer.innerHTML = '';
-            allTestsListContainer.innerHTML = '<div style="padding:10px;color:var(--text-secondary);font-size:0.9em;">Login to see saved tests.</div>';
+            chatListContainer.innerHTML = '<div style="padding:10px;color:var(--text-secondary);font-size:0.9em;">Please log in to see chats.</div>'; // Default message
+            allTestsListContainer.innerHTML = '<div style="padding:10px;color:var(--text-secondary);font-size:0.9em;">Login to see saved tests.</div>'; // Default message
             allTestsSection.classList.remove('visible');
             testSearchInput.value = '';
             testSearchInput.disabled = true;
@@ -590,26 +583,28 @@
                 logoutBtn.style.display = 'inline-block';
                 accountEmail.textContent = currentUser.email || currentUser.displayName || `User`;
                 accountAvatar.textContent = (currentUser.displayName || currentUser.email || 'U')[0].toUpperCase();
-                accountPlan.textContent = "Firebase User";
+                accountPlan.textContent = "Firebase User"; // Placeholder
 
+                // Enable controls
                 startChatButton.disabled = false;
                 decreaseTextBtn.disabled = false;
                 increaseTextBtn.disabled = false;
                 themeToggleButton.disabled = false;
                 testSearchInput.disabled = false;
-
-                sendButton.disabled = true;
                 userInput.disabled = false;
+                sendButton.disabled = true; // Disabled until a chat is selected/created
+                mcqModeCheckbox.disabled = true; // Disabled until a chat is selected/created
                 userInput.placeholder = "Select or create a chat";
                 inputContainer.style.display = 'block';
                 suggestionsContainer.style.display = 'flex';
-
-                loadUserSettings(currentUser.uid);
-                loadAndListenForChats(currentUser.uid);
-                loadAndListenForTests(currentUser.uid);
                 allTestsSection.classList.add('visible');
 
-                setLoadingState(false);
+
+                loadUserSettings(currentUser.uid);
+                loadAndListenForChats(currentUser.uid); // Will select/load a chat or show prompt
+                loadAndListenForTests(currentUser.uid);
+
+                setLoadingState(false); // Reset loading state after setup
 
             } else {
                 // User is logged OUT
@@ -622,22 +617,23 @@
                 accountAvatar.textContent = '?';
                 accountPlan.textContent = "";
 
+                // Disable controls
                 startChatButton.disabled = true;
                 decreaseTextBtn.disabled = true;
                 increaseTextBtn.disabled = true;
                 themeToggleButton.disabled = true;
                 testSearchInput.disabled = true;
-
-                sendButton.disabled = true;
                 userInput.disabled = true;
+                sendButton.disabled = true;
+                mcqModeCheckbox.disabled = true;
                 userInput.placeholder = "Please log in";
                 inputContainer.style.display = 'none';
                 suggestionsContainer.style.display = 'none';
+                allTestsSection.classList.remove('visible');
 
-                renderGreetingOrLoginPrompt();
-                chatListContainer.innerHTML = '<div style="padding:10px;color:var(--text-secondary);font-size:0.9em;">Please log in to see chats.</div>';
-                allTestsListContainer.innerHTML = '<div style="padding:10px;color:var(--text-secondary);font-size:0.9em;">Login to see saved tests.</div>';
+                renderGreetingOrLoginPrompt(); // Show login prompt in chat area
 
+                // Reset theme/text size to defaults
                 currentTheme = 'light'; applyTheme();
                 currentTextSizeMultiplier = 1.0; applyTextSize();
 
@@ -665,9 +661,8 @@
 
 
         // --- Settings (Theme/Text Size) ---
-
-        async function loadUserSettings(userId) {
-            const userDocRef = db.collection('users').doc(userId);
+        async function loadUserSettings(userId) { /* ... (same as before) ... */
+             const userDocRef = db.collection('users').doc(userId);
             try {
                 const docSnap = await userDocRef.get();
                 if (docSnap.exists) {
@@ -688,10 +683,9 @@
             }
             applyTheme();
             applyTextSize();
-        }
-
-        async function saveUserSettings() {
-            if (!currentUser) return;
+         }
+        async function saveUserSettings() { /* ... (same as before) ... */
+             if (!currentUser) return;
             const userDocRef = db.collection('users').doc(currentUser.uid);
             const settings = {
                 theme: currentTheme,
@@ -703,10 +697,9 @@
             } catch (error) {
                 console.error("Error saving user settings:", error);
             }
-        }
-
-        function applyTheme() {
-            if(currentTheme==='dark'){
+         }
+        function applyTheme() { /* ... (same as before) ... */
+             if(currentTheme==='dark'){
                 document.body.classList.add('dark-theme');
                 themeToggleButton.textContent=LIGHT_THEME_ICON;
                 themeToggleButton.title="Switch to Light Theme";
@@ -715,25 +708,22 @@
                 themeToggleButton.textContent=DARK_THEME_ICON;
                 themeToggleButton.title="Switch to Dark Theme";
             }
-        }
-
-        function toggleTheme() {
+         }
+        function toggleTheme() { /* ... (same as before) ... */
             if (!currentUser) return;
             currentTheme = (currentTheme === 'light') ? 'dark' : 'light';
             applyTheme();
             saveUserSettings();
         }
-
-        function applyTextSize() {
+        function applyTextSize() { /* ... (same as before) ... */
             const newSize = `calc(var(--message-font-size-base) * ${currentTextSizeMultiplier})`;
             document.documentElement.style.setProperty('--message-font-size', newSize);
             decreaseTextBtn.disabled = !currentUser || currentTextSizeMultiplier <= MIN_TEXT_SIZE_MULTIPLIER;
             increaseTextBtn.disabled = !currentUser || currentTextSizeMultiplier >= MAX_TEXT_SIZE_MULTIPLIER;
             console.log("Applied text size multiplier:", currentTextSizeMultiplier);
         }
-
-        function adjustTextSize(change) {
-            if (!currentUser) return;
+        function adjustTextSize(change) { /* ... (same as before) ... */
+             if (!currentUser) return;
             let newMultiplier = Math.max(MIN_TEXT_SIZE_MULTIPLIER, Math.min(MAX_TEXT_SIZE_MULTIPLIER, currentTextSizeMultiplier + change));
             newMultiplier = Math.round(newMultiplier * 10) / 10;
             if (newMultiplier !== currentTextSizeMultiplier) {
@@ -741,11 +731,10 @@
                 applyTextSize();
                 saveUserSettings();
             }
-        }
+         }
 
         // --- Chat Storage & Loading (Firestore) ---
-
-        function loadAndListenForChats(userId) {
+        function loadAndListenForChats(userId) { /* ... (same as before, handles selection/loading) ... */
             if (chatListListener) { chatListListener(); chatListListener = null; }
 
             const chatsRef = db.collection('chats')
@@ -765,41 +754,51 @@
                     chats.push({ id: doc.id, ...doc.data() });
                 });
                 console.log("Received chat list snapshot:", chats.length, "chats");
-                renderSidebarChatList(chats);
+                renderSidebarChatList(chats); // Update UI
 
                 let chatToLoad = null;
                 if (activeChatId && chats.some(c => c.id === activeChatId)) {
-                    chatToLoad = activeChatId;
+                    chatToLoad = activeChatId; // Keep current if it still exists
                 } else if (chats.length > 0) {
-                    chatToLoad = chats[0].id;
+                    chatToLoad = chats[0].id; // Select newest if current is gone or none was active
                     console.log("Active chat not found or was deleted, selecting newest:", chatToLoad);
                 } else {
+                    // No chats exist
                     console.log("No chats found for user.");
                     activeChatId = null;
                     if (activeChatListener) { activeChatListener(); activeChatListener = null; }
-                    renderGreetingOrLoginPrompt();
+                    renderGreetingOrLoginPrompt(); // Show greeting/prompt
                     setLoadingState(false);
+                    sendButton.disabled = true; // Ensure send is disabled
+                    mcqModeCheckbox.disabled = true;
+                    userInput.placeholder = "Create a new chat to start";
                 }
 
+                 // Switch only if the target chat is different from the current active one
                  if (chatToLoad && chatToLoad !== activeChatId) {
                      console.log("Switching to chat:", chatToLoad);
-                     switchChat(chatToLoad);
+                     switchChat(chatToLoad); // This handles loading state and focusing
                  } else if (activeChatId) {
-                      highlightActiveChatInSidebar();
-                      setLoadingState(false);
+                      // Already on the correct chat or no chat to load
+                      highlightActiveChatInSidebar(); // Ensure highlight is correct
+                      setLoadingState(false); // Ensure loading is off
+                      // Enable send if a chat is active
+                      sendButton.disabled = !API_KEY;
+                      mcqModeCheckbox.disabled = !API_KEY;
                  } else {
+                     // No chat selected/available
                      setLoadingState(false);
                  }
 
             }, error => {
                 console.error("Error listening for chats:", error);
                 displayError("Could not load your chat list. Please check your connection or try again later.");
-                chatListContainer.innerHTML = '<div style="padding:10px;color:var(--text-secondary);font-size:0.9em;">Error loading chats.</div>';
+                chatListContainer.innerHTML = '<div style="padding:10px;color:var(--error-text);font-size:0.9em;">Error loading chats.</div>';
                 setLoadingState(false);
             });
         }
 
-        function renderSidebarChatList(chats) {
+        function renderSidebarChatList(chats) { /* ... (same as before - renders list items with delete button) ... */
             chatListContainer.innerHTML = '';
             if (!currentUser) {
                 chatListContainer.innerHTML = '<div style="padding:10px;color:var(--text-secondary);font-size:0.9em;">Please log in.</div>';
@@ -827,9 +826,9 @@
 
                     const deleteBtn = document.createElement('button');
                     deleteBtn.classList.add('delete-chat-button');
-                    deleteBtn.innerHTML = DELETE_ICON;
+                    deleteBtn.innerHTML = DELETE_ICON; // Use '×'
                     deleteBtn.title = "Delete chat";
-                    deleteBtn.dataset.id = chatData.id;
+                    deleteBtn.dataset.id = chatData.id; // Store ID on button
                     itemElement.appendChild(deleteBtn);
 
                     chatListContainer.appendChild(itemElement);
@@ -838,15 +837,16 @@
             highlightActiveChatInSidebar();
         }
 
-        function highlightActiveChatInSidebar() {
+        function highlightActiveChatInSidebar() { /* ... (same as before) ... */
              const items = chatListContainer.querySelectorAll('.chat-list-item');
              items.forEach(item => {
                  item.classList.toggle('active', item.dataset.id === activeChatId);
              });
-             setLoadingState(false);
+             // Update loading state based on whether a chat is active
+             // setLoadingState(!activeChatId && currentUser); // Maybe too aggressive
         }
 
-        async function createNewChat() {
+        async function createNewChat() { /* ... (same as before) ... */
             if (!currentUser) { displayError("Please log in to create a new chat."); return; }
             setLoadingState(true, "Creating chat...");
             const newChatRef = db.collection('chats').doc();
@@ -855,38 +855,42 @@
             try {
                 await newChatRef.set({
                     userId: currentUser.uid,
-                    title: NEW_CHAT_TITLE,
+                    title: NEW_CHAT_TITLE, // Start with default title
                     createdAt: timestamp,
                     lastUpdated: timestamp
                 });
                 console.log("New chat document created:", newChatRef.id);
-                // Listener handles selection and loading state reset
+                // The chat list listener will detect the new chat and select it
+                // switchChat(newChatRef.id); // Let the listener handle selection
             } catch (error) {
                 console.error("Error creating new chat:", error);
                 displayError("Failed to create the chat. Please try again.");
                 setLoadingState(false);
             } finally {
-                if (!isTestMode && !isReviewMode) userInput.focus();
+                // Focus might be handled better after listener updates UI
+                // if (!isTestMode && !isReviewMode) userInput.focus();
             }
         }
 
-        function handleChatListClick(event) {
+        function handleChatListClick(event) { /* ... (same as before - handles item click and delete button click) ... */
              const target = event.target;
              const deleteButton = target.closest('.delete-chat-button');
              if (deleteButton) {
-                 event.stopPropagation();
+                 event.stopPropagation(); // Prevent chat selection when deleting
                  const chatId = deleteButton.dataset.id;
                  const chatListItem = deleteButton.closest('.chat-list-item');
-                 const chatTitle = chatListItem?.textContent?.replace(DELETE_ICON, '').trim() || 'this chat';
+                 // Extract title carefully, removing the delete icon text
+                 const chatTitle = chatListItem?.textContent?.replace(deleteButton.textContent, '').trim() || 'this chat';
                  if (chatId) {
                      console.log(`Delete button clicked for chat: ${chatId}, Title: "${chatTitle}"`);
                      confirmAndDeleteChat(chatId, chatTitle);
                  } else {
                      console.warn("Delete button clicked, but couldn't find chat ID.");
                  }
-                 return;
+                 return; // Stop further processing
              }
 
+             // Handle chat selection
              const item = target.closest('.chat-list-item');
              const clickedId = item?.dataset?.id;
              if (item && clickedId && clickedId !== activeChatId) {
@@ -897,8 +901,9 @@
              }
         }
 
-        function confirmAndDeleteChat(chatId, chatTitle) {
+        function confirmAndDeleteChat(chatId, chatTitle) { /* ... (same as before) ... */
             if (!currentUser || !chatId) return;
+            // Use template literal for cleaner string formatting
             if (confirm(`Are you sure you want to permanently delete the chat "${chatTitle}" and all its messages? This cannot be undone.`)) {
                 deleteChatFromFirestore(chatId);
             } else {
@@ -906,12 +911,12 @@
             }
         }
 
-        async function deleteChatFromFirestore(chatId) {
+        async function deleteChatFromFirestore(chatId) { /* ... (same as before - deletes chat doc and messages subcollection) ... */
             if (!currentUser || !chatId) {
                 console.log("Delete chat aborted: Missing user or chatId.");
                 return;
             }
-            isDeletingChat = true;
+            isDeletingChat = true; // Flag to prevent listener race conditions
             console.log(`[Delete Start] Deleting chat: ${chatId}. isDeletingChat = ${isDeletingChat}`);
             setLoadingState(true, "Deleting chat...");
 
@@ -919,6 +924,7 @@
             const messagesRef = chatDocRef.collection('messages');
 
             try {
+                // Delete all messages in the subcollection (using batch for efficiency)
                 console.log(`[Delete Progress] Fetching messages for chat ${chatId}`);
                 const messagesSnapshot = await messagesRef.get();
                 if (!messagesSnapshot.empty) {
@@ -933,10 +939,12 @@
                     console.log(`[Delete Progress] No messages found to delete for chat ${chatId}`);
                 }
 
+                // Delete the main chat document
                 console.log(`[Delete Progress] Deleting chat document ${chatId}`);
                 await chatDocRef.delete();
                 console.log(`[Delete Success] Successfully deleted chat document: ${chatId}`);
 
+                // If the deleted chat was the active one, reset the UI state
                 if (activeChatId === chatId) {
                     console.log("[Delete Progress] Active chat was deleted. Resetting UI.");
                     activeChatId = null;
@@ -945,138 +953,170 @@
                         console.log("[Delete Progress] Detaching active chat listener.");
                         activeChatListener(); activeChatListener = null;
                     }
-                    chatArea.innerHTML = '';
-                    renderGreetingOrLoginPrompt();
+                    chatArea.innerHTML = ''; // Clear chat area
+                    renderGreetingOrLoginPrompt(); // Show prompt/greeting
                     userInput.placeholder = "Select or create a chat";
-                    sendButton.disabled = true;
+                    sendButton.disabled = true; // Disable send
+                    mcqModeCheckbox.disabled = true;
                 } else {
                      console.log(`[Delete Progress] Deleted chat ${chatId} was not the active chat (${activeChatId}). UI state should update via listener.`);
+                     // No immediate UI reset needed here, listener will refresh sidebar
                 }
 
             } catch (error) {
                 console.error(`[Delete Error] Error deleting chat ${chatId}:`, error);
-                displayError(`Failed to delete the chat "${chatId}". Please try again.`);
-                setLoadingState(false);
+                displayError(`Failed to delete the chat "${chatTitle || chatId}". Please try again.`);
+                setLoadingState(false); // Ensure loading state is reset on error
             } finally {
-                isDeletingChat = false;
+                isDeletingChat = false; // Reset flag after operation completes
                 console.log(`[Delete End] Finished delete attempt for chat ${chatId}. isDeletingChat = ${isDeletingChat}`);
-                // Listener handles UI update
+                // Let the chatListListener handle the final sidebar update and potential selection of a new chat
+                // No need to manually call setLoadingState(false) here if the listener handles it
             }
         }
 
-
-        function switchChat(chatId) {
-             if (!currentUser || !chatId || chatId === activeChatId) return;
+        function switchChat(chatId) { /* ... (same as before) ... */
+             if (!currentUser || !chatId || chatId === activeChatId) {
+                 console.log("Switch chat condition not met or already active.");
+                 return;
+             }
 
              console.log("Switching to chat:", chatId);
              setLoadingState(true, "Loading chat...");
              activeChatId = chatId;
 
-             highlightActiveChatInSidebar();
+             highlightActiveChatInSidebar(); // Update sidebar highlight
 
+             // Clear input and reset MCQ mode
              userInput.value = '';
              autoGrowTextarea();
              mcqModeCheckbox.checked = false;
+             userInput.placeholder = "Loading messages..."; // Placeholder while loading
 
+             // Load messages for the new chat (listener will handle UI updates)
              loadAndListenForActiveChat(chatId);
 
-             if (!isTestMode && !isReviewMode) userInput.focus();
+             // Focus might be better handled after messages load
+             // if (!isTestMode && !isReviewMode) userInput.focus();
         }
 
         // --- Message Loading (Firestore) ---
-
-        function loadAndListenForActiveChat(chatId) {
+        function loadAndListenForActiveChat(chatId) { /* ... (same as before, but enables send button on load) ... */
             if (!currentUser || !chatId) {
                 console.log("Cannot load messages: Missing user or chatId.");
                 chatArea.innerHTML = '';
                 if (activeChatListener) { activeChatListener(); activeChatListener = null; }
                 renderGreetingOrLoginPrompt();
                 setLoadingState(false);
+                sendButton.disabled = true;
+                mcqModeCheckbox.disabled = true;
                 return;
             }
 
+            // Detach previous listener if exists
             if (activeChatListener) { activeChatListener(); activeChatListener = null; }
 
             const messagesRef = db.collection('chats').doc(chatId)
                                   .collection('messages')
                                   .orderBy('timestamp', 'asc');
 
-            chatArea.innerHTML = '';
+            chatArea.innerHTML = ''; // Clear area
             const loadingMsg = displayMessage("Loading chat history...", 'ai', ['thinking']);
             scrollToBottom(true);
 
             console.log(`Listening for messages in chat ${chatId}`);
             activeChatListener = messagesRef.onSnapshot(snapshot => {
                 console.log(`Received messages snapshot for chat ${chatId}:`, snapshot.size, "messages");
-                removeMessageElement(loadingMsg);
-                chatArea.innerHTML = '';
-                currentChatHistory = [];
+                removeMessageElement(loadingMsg); // Remove "Loading..." message
+                chatArea.innerHTML = ''; // Clear again before rendering new messages
+                currentChatHistory = []; // Reset history array
 
                 if (snapshot.empty && activeChatId === chatId) {
+                    // Chat exists but has no messages
                     console.log("Chat is empty or newly created.");
                     const chatListItem = chatListContainer.querySelector(`.chat-list-item[data-id="${chatId}"]`);
                     const chatTitle = chatListItem?.textContent?.replace(DELETE_ICON, '').trim() || '';
+                    // Display appropriate prompt based on title
                     if (chatTitle && chatTitle !== NEW_CHAT_TITLE) {
                          displayMessage("This chat is empty. Send a message to start!", 'ai');
                     } else {
-                         renderGreetingOrLoginPrompt();
+                         renderGreetingOrLoginPrompt(); // Show generic greeting if it's untitled/new
                     }
 
                 } else {
+                    // Render messages
                     snapshot.forEach(doc => {
                         const msgData = doc.data();
-                         const text = msgData.text || "";
-                         const role = msgData.role === 'user' ? 'user' : 'model';
-                         currentChatHistory.push({
+                        // Ensure text exists, provide default if not
+                        const text = typeof msgData.text === 'string' ? msgData.text : "";
+                        const role = msgData.role === 'user' ? 'user' : 'model'; // 'model' for AI
+
+                        // Add to local history cache (simple format for API context)
+                        currentChatHistory.push({
                              role: role,
-                             parts: [{ text: text }] // Assume simple text parts for history context
-                         });
-                         // Pass full msgData to handle MCQ button rendering correctly
-                         displayMessage(text, role, [], null, msgData);
+                             parts: [{ text: text }]
+                        });
+
+                        // Display the message, passing full data for potential MCQ button rendering
+                        displayMessage(text, role, [], null, msgData);
                     });
                 }
-                scrollToBottom(true);
-                setLoadingState(false);
+                scrollToBottom(true); // Scroll after rendering
+                setLoadingState(false); // Turn off loading indicator
+
+                // Enable input/send now that chat is loaded
+                sendButton.disabled = !API_KEY; // Enable if API key exists
+                mcqModeCheckbox.disabled = !API_KEY;
+                userInput.placeholder = "Enter prompt (Check 'MCQs?' to generate test)";
+                if (!isTestMode && !isReviewMode) userInput.focus(); // Focus input
+
 
             }, error => {
                 console.error(`Error listening for messages in chat ${chatId}:`, error);
                 displayError("Could not load messages for this chat. Please check your connection.");
                 removeMessageElement(loadingMsg);
-                chatArea.innerHTML = '';
-                currentChatHistory = [];
-                setLoadingState(false);
+                chatArea.innerHTML = ''; // Clear area on error
+                currentChatHistory = []; // Reset history
+                setLoadingState(false); // Turn off loading
+                sendButton.disabled = true; // Disable send on error
+                mcqModeCheckbox.disabled = true;
+                userInput.placeholder = "Error loading chat";
             });
         }
 
         // --- Message Sending (Gemini API & Firestore Save) ---
-
         async function handleSendMessage() {
             const userMessageText = userInput.value.trim();
 
-            if (!API_KEY) { displayError("Gemini API Key not set. Reload to enter."); return; }
-            if (!currentUser) { displayError("Please log in first."); return; }
-            if (!activeChatId) { displayError("Please select or create a chat first."); return; }
-            if (!userMessageText || sendButton.disabled) return;
+            if (!API_KEY) { displayError("Gemini API Key not set. Reload to enter. / Gemini API Key அமைக்கப்படவில்லை. உள்ளிட மீண்டும் ஏற்றவும்."); return; }
+            if (!currentUser) { displayError("Please log in first. / முதலில் உள்நுழையவும்."); return; }
+            if (!activeChatId) { displayError("Please select or create a chat first. / முதலில் ஒரு உரையாடலைத் தேர்ந்தெடுக்கவும் அல்லது உருவாக்கவும்."); return; }
+            if (!userMessageText || sendButton.disabled) return; // Don't send empty or while disabled
 
             const isMCQRequest = mcqModeCheckbox.checked;
-            setLoadingState(true, "Sending...");
+            setLoadingState(true, "Sending..."); // Disable inputs, show thinking
 
+            // Clear input immediately
             userInput.value = '';
             autoGrowTextarea();
-            if (isMCQRequest) mcqModeCheckbox.checked = false;
+            if (isMCQRequest) mcqModeCheckbox.checked = false; // Uncheck MCQ box
 
             const timestamp = firebase.firestore.FieldValue.serverTimestamp();
             const messagesColRef = db.collection('chats').doc(activeChatId).collection('messages');
             const chatDocRef = db.collection('chats').doc(activeChatId);
 
             let isFirstUserMessageInNewChat = false;
+            let potentialTestTitle = null; // For auto-generated test title
 
+            // Prepare user message data for Firestore
              const userMsgData = {
                  role: "user",
                  text: userMessageText,
                  timestamp: timestamp
              };
+
              try {
+                 // Check if it's the first message in an untitled chat to trigger title generation
                  const chatSnap = await chatDocRef.get();
                  if (chatSnap.exists && chatSnap.data().title === NEW_CHAT_TITLE) {
                      const messagesSnap = await messagesColRef.limit(1).get();
@@ -1084,18 +1124,22 @@
                          isFirstUserMessageInNewChat = true;
                      }
                  }
+
+                 // Save user message
                  await messagesColRef.add(userMsgData);
+                 // Update chat's lastUpdated timestamp
                  await chatDocRef.update({ lastUpdated: timestamp });
                  console.log("User message saved to Firestore.");
 
+                 // If first message, generate and update chat title
                  if (isFirstUserMessageInNewChat) {
-                     console.log("First user message detected, attempting to generate title.");
+                     console.log("First user message detected, attempting to generate chat title.");
                      const generatedTitle = generateChatTitle(userMessageText);
                      if (generatedTitle && generatedTitle !== NEW_CHAT_TITLE) {
                          await updateActiveChatTitle(generatedTitle);
                          console.log("Chat title updated automatically:", generatedTitle);
                      } else {
-                         console.log("Generated title was empty or same as default, not updating.");
+                         console.log("Generated chat title was empty or same as default, not updating.");
                      }
                  }
 
@@ -1103,41 +1147,56 @@
                  console.error("Error saving user message or updating title:", error);
                  displayError("Failed to send message. Please check connection and try again.");
                  setLoadingState(false);
-                 return;
+                 return; // Stop processing if user message save failed
              }
 
+             // Display "Thinking..." message (will be removed later)
             const thinking = displayMessage("Thinking...", 'ai', ['thinking']);
-            scrollToBottom();
+            scrollToBottom(); // Scroll to show thinking message
 
-            const requestHistory = [
-                 ...currentChatHistory, // Includes the user message just added by listener
-                 // The actual API call includes the LATEST user message,
-                 // so currentChatHistory should be up-to-date from the listener
-             ];
+            // Prepare history for API call (use the up-to-date local cache)
+            const requestHistory = [ ...currentChatHistory ]; // Listener should have added the user message
 
-             let promptForAPI = userMessageText; // Use the original text for the last part
-             let apiHistoryForCall = [...requestHistory]; // Copy history
+            // Modify prompt and prepare API history copy if MCQ requested
+            let promptForAPI = userMessageText;
+            let apiHistoryForCall = [...requestHistory]; // Create a copy to potentially modify
 
-             if (isMCQRequest) {
-                 promptForAPI = `${userMessageText}\n\nPlease generate multiple choice questions based on the above text or topic. Provide the response *only* as a valid JSON array string, enclosed within \`\`\`json ... \`\`\`. Each object in the array must have these exact keys: "question" (string), "options" (array of 4 strings), and "answer" (string, representing the correct option letter 'A', 'B', 'C', or 'D'). Do not include any text outside the JSON structure.`;
-                 // Modify the LAST user message in the history copy for the API call
-                 if (apiHistoryForCall.length > 0 && apiHistoryForCall[apiHistoryForCall.length - 1].role === 'user') {
-                     apiHistoryForCall[apiHistoryForCall.length - 1] = { role: "user", parts: [{ text: promptForAPI }] };
-                 } else {
-                     // Should not happen if listener added user message, but fallback
-                     apiHistoryForCall.push({ role: "user", parts: [{ text: promptForAPI }] });
-                 }
-                 console.log("MCQ mode: Modified prompt for API.");
-             }
+            if (isMCQRequest) {
+                // Generate a potential title from the user's prompt
+                potentialTestTitle = generateChatTitle(userMessageText);
+                if (potentialTestTitle === NEW_CHAT_TITLE || !potentialTestTitle) {
+                    potentialTestTitle = "Generated Test"; // Fallback title
+                }
+                potentialTestTitle += ` (${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })})`; // Add time for uniqueness
 
-             console.warn("Calling Gemini API using client-side key. Replace with a secure Cloud Function.");
+                // *** BILINGUAL MCQ Prompt ***
+                promptForAPI = `${userMessageText}\n\nPlease generate multiple choice questions based on the above text or topic. Provide the response *only* as a valid JSON array string, enclosed within \`\`\`json ... \`\`\`.
+Each object in the array must have these exact keys:
+1.  "question": An object with "en" (English question) and "ta" (Tamil question) string properties.
+2.  "options": An array of 4 objects. Each object must have "en" (English option) and "ta" (Tamil option) string properties.
+3.  "answer": A string representing the correct option letter ('A', 'B', 'C', or 'D'). This should NOT be bilingual.
+4.  "explanation": An object with "en" (English explanation) and "ta" (Tamil explanation) string properties.
+
+Provide accurate Tamil translations. Do not include any text outside the JSON structure.`;
+
+                // Modify the *last* user message in the history *copy* for the API call
+                if (apiHistoryForCall.length > 0 && apiHistoryForCall[apiHistoryForCall.length - 1].role === 'user') {
+                    apiHistoryForCall[apiHistoryForCall.length - 1] = { role: "user", parts: [{ text: promptForAPI }] };
+                } else {
+                    // Fallback: Add modified prompt if history is unexpectedly empty or last wasn't user
+                    apiHistoryForCall.push({ role: "user", parts: [{ text: promptForAPI }] });
+                }
+                console.log("MCQ mode: Modified prompt for BILINGUAL API, potential title:", potentialTestTitle);
+            }
+
+             console.warn("Calling Gemini API using client-side key. Replace with a secure Cloud Function. / கிளையன்ட் பக்க விசை மூலம் Gemini API ஐ அழைக்கப்படுகிறது. பாதுகாப்பான Cloud Function உடன் மாற்றவும்.");
              try {
                  const response = await fetch(API_URL_BASE + API_KEY, {
                      method: 'POST',
                      headers: { 'Content-Type': 'application/json' },
                      body: JSON.stringify({
-                         contents: apiHistoryForCall, // Use the potentially modified history
-                         safetySettings: [
+                         contents: apiHistoryForCall, // Use the potentially modified history for API
+                         safetySettings: [ // Standard safety settings
                             { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_MEDIUM_AND_ABOVE" },
                             { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_MEDIUM_AND_ABOVE" },
                             { category: "HARM_CATEGORY_SEXUALLY_EXPLICIT", threshold: "BLOCK_MEDIUM_AND_ABOVE" },
@@ -1145,101 +1204,142 @@
                          ]
                      }),
                  });
-                 removeMessageElement(thinking);
 
+                 removeMessageElement(thinking); // Remove "Thinking..."
+
+                 // Prepare default AI response structure for Firestore
                  let aiMsgData = {
                      role: "model",
                      text: "Error: No valid response received from API.",
                      timestamp: firebase.firestore.FieldValue.serverTimestamp(),
-                     mcqData: null // Initialize mcqData field
+                     mcqData: null, // For storing parsed MCQ JSON
+                     mcqTitle: null // For storing auto-generated test title
                  };
-                 let displayAsError = true;
+                 let displayAsError = true; // Flag to use error styling if needed
 
                  if (!response.ok) {
+                     // Handle API errors (like 4xx, 5xx)
                      let errorDetails = `API error (${response.status})`;
                      try { const errorJson = await response.json(); errorDetails = errorJson.error?.message || errorDetails; } catch {}
                      console.error("API Error:", response.status, errorDetails);
                      aiMsgData.text = `Error: ${errorDetails}`;
+                     // Specific check for invalid API key
                      if (response.status === 400 && errorDetails.toLowerCase().includes('api key not valid')) {
-                          localStorage.removeItem(STORAGE_KEY_API_KEY); API_KEY='';
-                          aiMsgData.text += " Your API Key seems invalid and has been cleared. Reload the page to enter a new key.";
+                          localStorage.removeItem(STORAGE_KEY_API_KEY); API_KEY=''; // Clear invalid key
+                          aiMsgData.text += " Your API Key seems invalid and has been cleared. Reload the page to enter a new key. / உங்கள் API விசை தவறானது போல் தெரிகிறது மற்றும் அழிக்கப்பட்டுள்ளது. புதிய விசையை உள்ளிட பக்கத்தை மீண்டும் ஏற்றவும்.";
                      }
                  } else {
+                     // Handle successful API response (200 OK)
                      const data = await response.json();
                      let rawAiText = "";
                      let blocked = false;
-                     displayAsError = false;
+                     displayAsError = false; // Assume success initially
 
+                     // Check for safety blocks (prompt or response)
                      if (data.promptFeedback?.blockReason) {
-                         aiMsgData.text = `Blocked: Your prompt was blocked due to safety concerns (${data.promptFeedback.blockReason}).`;
+                         aiMsgData.text = `Blocked: Your prompt was blocked due to safety concerns (${data.promptFeedback.blockReason}). / தடுக்கப்பட்டது: பாதுகாப்பு காரணங்களுக்காக உங்கள் தூண்டுதல் தடுக்கப்பட்டது (${data.promptFeedback.blockReason}).`;
                          blocked = true; displayAsError = true; console.warn("Prompt blocked:", data.promptFeedback.blockReason);
                      } else if (data.candidates?.[0]?.finishReason === 'SAFETY') {
-                          aiMsgData.text = `Blocked: The response was blocked due to safety concerns.`;
+                          aiMsgData.text = `Blocked: The response was blocked due to safety concerns. / தடுக்கப்பட்டது: பாதுகாப்பு காரணங்களுக்காக பதில் தடுக்கப்பட்டது.`;
                           blocked = true; displayAsError = true; console.warn("Response blocked due to safety.");
                      } else if (data.candidates?.[0]?.content?.parts?.[0]?.text) {
+                         // Valid text response received
                          rawAiText = data.candidates[0].content.parts[0].text;
-                         aiMsgData.text = rawAiText; // Default text
+                         aiMsgData.text = rawAiText; // Store raw text by default
 
+                         // If MCQ was requested and not blocked, try parsing JSON
                          if (isMCQRequest && !blocked) {
-                              console.log("Attempting to parse MCQ JSON from response...");
+                              console.log("Attempting to parse BILINGUAL MCQ JSON from response...");
                               try {
+                                  // Extract JSON block (allows text before/after ```json ... ```)
                                   const jsonMatch = rawAiText.match(/```json\s*([\s\S]*?)\s*```/);
+                                  // Use extracted JSON or assume entire response is JSON
                                   const jsonString = jsonMatch ? jsonMatch[1].trim() : rawAiText.trim();
 
+                                  // Basic check if it looks like a JSON array
                                   if (jsonString.startsWith('[') && jsonString.endsWith(']')) {
                                       const mcqs = JSON.parse(jsonString);
-                                      if (Array.isArray(mcqs) && mcqs.length > 0 &&
-                                          mcqs.every(q => q && typeof q.question === 'string' && Array.isArray(q.options) && q.options.length === 4 && typeof q.answer === 'string' && ['A','B','C','D'].includes(q.answer.toUpperCase())))
-                                      {
-                                          const summaryText = `Successfully generated ${mcqs.length} multiple choice questions based on your prompt. Click the button below to start the test.`;
-                                          aiMsgData.text = summaryText; // Save user-friendly summary
-                                          aiMsgData.mcqData = mcqs;    // Save parsed data separately
-                                          console.log("MCQs parsed successfully, saving summary text and mcqData:", mcqs.length, "questions");
+
+                                      // *** Detailed BILINGUAL Validation ***
+                                      const isValidMCQArray = Array.isArray(mcqs) && mcqs.length > 0 &&
+                                          mcqs.every(q =>
+                                              q &&
+                                              q.question && typeof q.question.en === 'string' && typeof q.question.ta === 'string' &&
+                                              Array.isArray(q.options) && q.options.length === 4 &&
+                                              q.options.every(opt => opt && typeof opt.en === 'string' && typeof opt.ta === 'string') &&
+                                              typeof q.answer === 'string' && ['A','B','C','D'].includes(q.answer.toUpperCase()) &&
+                                              q.explanation && typeof q.explanation.en === 'string' && typeof q.explanation.ta === 'string'
+                                          );
+
+                                      if (isValidMCQArray) {
+                                          // Success! Store parsed data and summary text
+                                          const summaryText = `Successfully generated ${mcqs.length} multiple choice questions (with explanations) based on your prompt. Click the button below to start the test. / உங்கள் தூண்டுதலின் அடிப்படையில் ${mcqs.length} பல தேர்வு கேள்விகள் (விளக்கங்களுடன்) வெற்றிகரமாக உருவாக்கப்பட்டுள்ளன. சோதனையைத் தொடங்க கீழே உள்ள பொத்தானைக் கிளிக் செய்யவும்.`;
+                                          aiMsgData.text = summaryText; // User-friendly summary for chat display
+                                          aiMsgData.mcqData = mcqs;    // Parsed bilingual JSON data
+                                          aiMsgData.mcqTitle = potentialTestTitle; // Store the generated title
+                                          console.log("BILINGUAL MCQs parsed successfully:", mcqs.length, "questions. Title:", potentialTestTitle);
+                                          displayAsError = false;
                                       } else {
-                                           console.warn("MCQ JSON validation failed.", mcqs);
-                                           aiMsgData.text = "Received MCQ data, but it wasn't in the expected format.\n\n" + rawAiText;
-                                           displayAsError = true;
-                                           aiMsgData.mcqData = null;
+                                          // JSON parsed, but structure is wrong
+                                           console.warn("BILINGUAL MCQ JSON validation failed (missing fields or incorrect structure).", mcqs);
+                                           aiMsgData.text = "Received MCQ data, but it wasn't in the expected bilingual format (check 'en'/'ta' keys for question, options, explanation).\n\n" + rawAiText;
+                                           displayAsError = true; // Show as error
+                                           aiMsgData.mcqData = null; // Don't store invalid data
+                                           aiMsgData.mcqTitle = null;
                                       }
                                   } else {
+                                      // Response didn't look like a JSON array string
                                        console.warn("AI response for MCQ request didn't look like a JSON array string.");
                                        aiMsgData.text = "Expected MCQs in JSON format, but didn't receive it correctly.\n\n" + rawAiText;
                                        displayAsError = true;
                                        aiMsgData.mcqData = null;
+                                       aiMsgData.mcqTitle = null;
                                   }
                               } catch (parseError) {
+                                   // JSON parsing itself failed
                                    console.error("Failed to parse MCQ JSON:", parseError, "\nResponse Text:", rawAiText);
                                    aiMsgData.text = "Error parsing the generated MCQ JSON data.\n\n" + rawAiText;
                                    displayAsError = true;
                                    aiMsgData.mcqData = null;
+                                   aiMsgData.mcqTitle = null;
                               }
                           } // End MCQ parsing block
 
                      } else {
-                         console.warn("Unexpected API response format:", data);
-                         aiMsgData.text = "Sorry, I received an unexpected response format from the API.";
+                         // No valid text content found in response
+                         console.warn("Unexpected API response format or empty content:", data);
+                         aiMsgData.text = "Sorry, I received an unexpected response format from the API. / மன்னிக்கவும், API இலிருந்து எதிர்பாராத பதில் வடிவத்தைப் பெற்றேன்.";
                          displayAsError = true;
-                         aiMsgData.mcqData = null;
+                         aiMsgData.mcqData = null; // Ensure null
+                         aiMsgData.mcqTitle = null; // Ensure null
                      }
                  }
 
+                 // Save the AI response (or error message) to Firestore
                  try {
-                      await messagesColRef.add(aiMsgData); // Save the AI response/error
+                      await messagesColRef.add(aiMsgData);
                       await chatDocRef.update({ lastUpdated: firebase.firestore.FieldValue.serverTimestamp() });
                       console.log("AI response/error saved to Firestore.", aiMsgData);
+                      // The message listener will automatically display the saved message
+                      // No need to call displayMessage here, but handle error display case if needed
                       if (displayAsError) {
                           console.log("AI response handled as an error state, listener will display.");
+                          // Optionally, add specific styling or handling for errors if listener doesn't suffice
                       }
                  } catch (saveError) {
                       console.error("Error saving AI response to Firestore:", saveError);
+                      // Display error in UI if saving failed, as listener won't pick it up
                       displayError(`Received response, but failed to save it: ${aiMsgData.text}`);
                  }
 
-             } catch (error) {
-                 console.error("Fetch/Processing Error:", error);
-                 removeMessageElement(thinking);
-                 const errorText = `Error communicating with the API: ${error.message || "Check network connection."}`;
-                 displayError(errorText);
+             } catch (fetchError) {
+                 // Handle errors during the fetch call itself (network issues, etc.)
+                 console.error("Fetch/Processing Error:", fetchError);
+                 removeMessageElement(thinking); // Ensure thinking message is removed
+                 const errorText = `Error communicating with the API: ${fetchError.message || "Check network connection."} / API உடன் தொடர்புகொள்வதில் பிழை: ${fetchError.message || "நெட்வொர்க் இணைப்பைச் சரிபார்க்கவும்."}`;
+                 displayError(errorText); // Show error in chat
+
+                 // Attempt to save the fetch error to history for context
                  try {
                      await messagesColRef.add({ role: "model", text: errorText, timestamp: firebase.firestore.FieldValue.serverTimestamp() });
                      await chatDocRef.update({ lastUpdated: firebase.firestore.FieldValue.serverTimestamp() });
@@ -1247,24 +1347,26 @@
                       console.error("Failed to save fetch/processing error to history:", saveError);
                  }
              } finally {
-                 setLoadingState(false);
-                 if (!isTestMode && !isReviewMode) userInput.focus();
+                 setLoadingState(false); // Re-enable inputs
+                 if (!isTestMode && !isReviewMode && activeChatId) { // Focus only if in chat view and a chat is active
+                      userInput.focus();
+                 }
              }
-        }
+        } // End of handleSendMessage
 
-
-         function generateChatTitle(firstUserMessageText) {
+        // --- Chat Title Generation/Update ---
+        function generateChatTitle(firstUserMessageText) { /* ... (same as before) ... */
              if (!firstUserMessageText || typeof firstUserMessageText !== 'string') return NEW_CHAT_TITLE;
              const text = firstUserMessageText.trim();
              if (!text) return NEW_CHAT_TITLE;
+             // Take first 5 words, remove trailing punctuation
              const title = text.split(/\s+/).slice(0, 5).join(' ').replace(/[.,!?;:]+$/, '');
+             // Limit length
              return title.length > 35 ? title.substring(0, 32) + '...' : title;
-         }
-
-
-         async function updateActiveChatTitle(newTitle) {
+        }
+        async function updateActiveChatTitle(newTitle) { /* ... (same as before) ... */
               if (!currentUser || !activeChatId || !newTitle || typeof newTitle !== 'string' || !newTitle.trim() || newTitle.trim() === NEW_CHAT_TITLE) {
-                  console.log("Skipping title update.");
+                  console.log("Skipping chat title update (invalid conditions).");
                   return;
               }
               const finalTitle = newTitle.trim();
@@ -1272,60 +1374,62 @@
               try {
                   await chatDocRef.update({ title: finalTitle });
                   console.log(`Chat ${activeChatId} title updated to: "${finalTitle}"`);
+                  // Listener will update the sidebar UI
               } catch (error) {
                   console.error("Error updating chat title in Firestore:", error);
               }
          }
 
-
         // --- UI & Message Display Helpers ---
-        function autoGrowTextarea() { userInput.style.height='auto'; userInput.style.height=(userInput.scrollHeight)+'px'; }
-        function handleInputKeydown(event) { if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();handleSendMessage();} }
-        function handleSuggestionClick(event) { if(event.target.classList.contains('suggestion-chip')){userInput.value=event.target.dataset.prompt||'';autoGrowTextarea();userInput.focus();} }
+        function autoGrowTextarea() { /* ... (same as before) ... */ userInput.style.height='auto'; userInput.style.height=(userInput.scrollHeight)+'px'; }
+        function handleInputKeydown(event) { /* ... (same as before) ... */ if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();handleSendMessage();} }
+        function handleSuggestionClick(event) { /* ... (same as before) ... */ if(event.target.classList.contains('suggestion-chip')){userInput.value=event.target.dataset.prompt||'';autoGrowTextarea();userInput.focus();} }
 
-        function displayError(text) {
+        function displayError(text) { /* ... (same as before) ... */
             console.error("Displaying Error:", text);
             displayMessage(`Error: ${text}`, 'ai', ['error-message']);
             scrollToBottom();
         }
+        function scrollToBottom(immediate = false) { /* ... (same as before) ... */ chatArea.scrollTo({top:chatArea.scrollHeight,behavior:immediate?'auto':'smooth'}); }
+        function removeMessageElement(element) { /* ... (same as before) ... */ if(element && element.parentNode === chatArea) { chatArea.removeChild(element); } }
 
-        function scrollToBottom(immediate = false) { chatArea.scrollTo({top:chatArea.scrollHeight,behavior:immediate?'auto':'smooth'}); }
-        function removeMessageElement(element) { if(element && element.parentNode === chatArea) { chatArea.removeChild(element); } }
+        function setLoadingState(isLoading, message = "Generating...") { /* ... (updated logic) ... */
+             // Determine disabled state based on loading OR auth/chat state
+             const isDisabledOverall = isLoading || !currentUser || !API_KEY; // General disable condition
+             const isSendDisabled = isDisabledOverall || !activeChatId; // Send requires an active chat
 
+             userInput.disabled = isDisabledOverall;
+             sendButton.disabled = isSendDisabled;
+             mcqModeCheckbox.disabled = isSendDisabled; // MCQ tied to send button
 
-        function setLoadingState(isLoading, message = "Generating...") {
-            const isInputDisabled = isLoading || !currentUser;
-            const isSendDisabled = isLoading || !currentUser || !activeChatId;
-            const isControlsDisabled = isLoading || !currentUser;
+             // Sidebar controls depend on user login, not active chat
+             const isControlDisabled = isLoading || !currentUser;
+             startChatButton.disabled = isControlDisabled;
+             testSearchInput.disabled = isControlDisabled;
+             decreaseTextBtn.disabled = isControlDisabled || (currentUser && currentTextSizeMultiplier <= MIN_TEXT_SIZE_MULTIPLIER);
+             increaseTextBtn.disabled = isControlDisabled || (currentUser && currentTextSizeMultiplier >= MAX_TEXT_SIZE_MULTIPLIER);
+             themeToggleButton.disabled = isControlDisabled;
 
-            userInput.disabled = isInputDisabled;
-            sendButton.disabled = isSendDisabled;
-            mcqModeCheckbox.disabled = isSendDisabled;
-            startChatButton.disabled = isControlsDisabled;
-            testSearchInput.disabled = isControlsDisabled;
-            decreaseTextBtn.disabled = isControlsDisabled || (currentUser && currentTextSizeMultiplier <= MIN_TEXT_SIZE_MULTIPLIER);
-            increaseTextBtn.disabled = isControlsDisabled || (currentUser && currentTextSizeMultiplier >= MAX_TEXT_SIZE_MULTIPLIER);
-            themeToggleButton.disabled = isControlsDisabled;
+             // Update placeholder based on state
+             if (isLoading) {
+                 userInput.placeholder = message;
+             } else if (!currentUser) {
+                 userInput.placeholder = "Please log in";
+             } else if (!activeChatId) {
+                 userInput.placeholder = "Select or create a chat";
+             } else if (!API_KEY) {
+                 userInput.placeholder = "API Key missing. Reload page.";
+             } else {
+                 userInput.placeholder = "Enter prompt (Check 'MCQs?' to generate test)";
+             }
+         }
 
-            if (isLoading) {
-                userInput.placeholder = message;
-            } else if (!currentUser) {
-                userInput.placeholder = "Please log in";
-            } else if (!activeChatId && isDeletingChat) {
-                 userInput.placeholder = "Loading...";
-            } else if (!activeChatId) {
-                userInput.placeholder = "Select or create a chat";
-            } else {
-                userInput.placeholder = "Enter prompt (Check 'MCQs?' to generate test)";
-            }
-        }
-
-        function switchView(viewName, cameFromTests = false) {
+        function switchView(viewName, cameFromTests = false) { /* ... (same as before) ... */
             console.log("Switching view to:", viewName, "Came from tests:", cameFromTests);
             chatView.classList.remove('active');
             reviewView.classList.remove('active');
             testView.classList.remove('active');
-            appContainer.classList.remove('hidden');
+            appContainer.classList.remove('hidden'); // Ensure main app is visible unless test view
 
             isTestMode = false;
             isReviewMode = false;
@@ -1336,7 +1440,7 @@
             exitReviewBtn.style.display = 'none';
 
             if(viewName==='test'){
-                appContainer.classList.add('hidden');
+                appContainer.classList.add('hidden'); // Hide main app container for focused test view
                 testView.classList.add('active');
                 isTestMode=true;
             } else if(viewName==='review'){
@@ -1345,14 +1449,16 @@
                 // Show exit button in review view
                 exitReviewBtn.style.display = 'inline-block';
                 exitReviewBtn.textContent = cameFromAllTestsList ? "Back to All Tests" : "Back to Chat";
-                // Save button visibility is handled within displayReview
+                // Save button visibility handled by displayReview
             } else { // Default to chat view
                 chatView.classList.add('active');
-                if (currentUser && activeChatId) {
+                // Focus input only if logged in, chat active, and API key present
+                if (currentUser && activeChatId && API_KEY) {
                     userInput.focus();
                 }
             }
 
+            // Clear test timer if switching away from test view
             if (viewName !== 'test' && testTimerInterval) {
                 clearInterval(testTimerInterval);
                 testTimerInterval = null;
@@ -1360,20 +1466,23 @@
             }
         }
 
-        // Displays a message in the chat area (MODIFIED for button data)
-        function displayMessage(text, sender, cssClasses = [], appendHtml = null, messageData = null) {
+        // Displays a message in the chat area (MODIFIED for MCQ button data)
+        function displayMessage(text, sender, cssClasses = [], appendHtml = null, messageData = null) { /* ... (updated for mcqTitle) ... */
             const messageElement = document.createElement('div');
             messageElement.classList.add('message', `${sender}-message`);
             if (cssClasses && cssClasses.length > 0) {
                 messageElement.classList.add(...cssClasses);
             }
 
+             // Sanitize and format text (Markdown-like)
              const tempDiv = document.createElement('div');
-             tempDiv.innerText = text || "";
-             let formattedText = tempDiv.innerHTML;
+             tempDiv.innerText = text || ""; // Use innerText to prevent script injection
+             let formattedText = tempDiv.innerHTML; // Get HTML-escaped text
 
+             // Apply formatting (Bold, Italic, Code Blocks, Inline Code)
              formattedText = formattedText
                 .replace(/```([\s\S]*?)```/g, (match, code) => {
+                    // Double escape for pre/code blocks
                     const escapedCode = code.replace(/</g, "&lt;").replace(/>/g, "&gt;");
                     return `<pre><code>${escapedCode}</code></pre>`;
                 })
@@ -1381,18 +1490,19 @@
                     const escapedCode = code.replace(/</g, "&lt;").replace(/>/g, "&gt;");
                     return `<code>${escapedCode}</code>`;
                 })
-                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-                .replace(/(?<!\*)\*(?!\*)(.*?)(?<!\*)\*(?!\*)/g, '<em>$1</em>')
-                .replace(/\n/g, '<br>');
+                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>') // Bold
+                .replace(/(?<!\*)\*(?!\*)(.*?)(?<!\*)\*(?!\*)/g, '<em>$1</em>') // Italic (ensure not part of bold)
+                .replace(/\n/g, '<br>'); // Newlines
 
             messageElement.innerHTML = formattedText;
 
-            // Handle MCQ Offer (Uses mcqData from Firestore document)
+            // Handle MCQ Offer (Uses mcqData and mcqTitle from Firestore document)
             if (messageData && messageData.role === 'model' && messageData.mcqData && Array.isArray(messageData.mcqData) && messageData.mcqData.length > 0) {
-                 console.log("Rendering message with MCQ offer:", messageData.mcqData.length, "questions");
-                 displayMCQOffer(messageData.mcqData, messageElement); // Pass the actual data
+                 console.log("Rendering message with MCQ offer:", messageData.mcqData.length, "questions. Title:", messageData.mcqTitle);
+                 // Pass mcqData AND mcqTitle to the function
+                 displayMCQOffer(messageData.mcqData, messageData.mcqTitle, messageElement);
             }
-            else if (appendHtml) {
+            else if (appendHtml) { // Append extra HTML if provided (less common now)
                 const appendDiv = document.createElement('div');
                 appendDiv.innerHTML = appendHtml;
                 while (appendDiv.firstChild) {
@@ -1402,29 +1512,31 @@
 
             chatArea.appendChild(messageElement);
 
+             // Try to render MathJax if available
              try {
                  if (typeof MathJax !== "undefined" && MathJax.typesetPromise) {
                      MathJax.typesetPromise([messageElement]).catch(err => console.error('MathJax typeset error on message:', err));
                  }
              } catch (e) { console.error("MathJax call failed:", e); }
 
-            return messageElement;
+            return messageElement; // Return the created element
         }
 
 
         // --- MCQ/Test Specific Functions ---
 
-        // Handles clicks on the "Start Mock Test" button within a chat message (MODIFIED)
-        function handleChatAreaClick(event) {
+        // Handles clicks on the "Start Mock Test" button within a chat message
+        function handleChatAreaClick(event) { /* ... (updated for mcqTitle) ... */
             const startButton = event.target.closest('.start-test-button');
             if (startButton) {
-                 // Get data directly from the button's attribute
+                 // Get data and title directly from the button's attributes
                  const mcqDataString = startButton.dataset.mcq;
+                 const titleFromButton = startButton.dataset.mcqTitle; // Get the stored title
                  let mcqs = null;
 
                  if (mcqDataString) {
                     try {
-                        mcqs = JSON.parse(mcqDataString);
+                        mcqs = JSON.parse(mcqDataString); // Parse the MCQ data
                     } catch (e) {
                         console.error("Failed to parse MCQ data from button attribute:", e);
                         displayError("Could not start the test. Failed to read question data.");
@@ -1433,8 +1545,9 @@
                  }
 
                  if (mcqs && Array.isArray(mcqs) && mcqs.length > 0) {
-                     console.log("Start Test button clicked, initiating test with data from button...");
-                     startMockTest(mcqs); // Pass the data parsed from the button
+                     console.log("Start Test button clicked, initiating test with data and title from button...");
+                     // Pass the parsed MCQs AND the title to startMockTest
+                     startMockTest(mcqs, titleFromButton || null); // Use title or null if absent
                  } else {
                      console.error("MCQ data not found or invalid in button attribute when 'Start Test' button clicked.");
                      displayError("Could not start the test. MCQ data seems missing or invalid.");
@@ -1442,113 +1555,148 @@
             }
         }
 
-        // Appends the "Start Mock Test" button to an AI message element (MODIFIED)
-        function displayMCQOffer(mcqData, aiMessageElement) {
-             if (aiMessageElement.querySelector('.start-test-button')) return;
+        // Appends the "Start Mock Test" button to an AI message element
+        function displayMCQOffer(mcqData, mcqTitle, aiMessageElement) { /* ... (updated for mcqTitle) ... */
+             if (aiMessageElement.querySelector('.start-test-button')) return; // Don't add if already exists
 
              const questionCount = mcqData.length;
              const button = document.createElement('button');
              button.classList.add('start-test-button');
              button.textContent = `Start Mock Test (${questionCount} Questions)`;
+             button.title = mcqTitle || `Start a test with ${questionCount} questions`; // Tooltip
 
-             // Store the data ON the button as a JSON string
+             // Store the data AND title ON the button
              try {
-                button.dataset.mcq = JSON.stringify(mcqData);
+                button.dataset.mcq = JSON.stringify(mcqData); // Store MCQs as JSON string
+                // Store the title directly as another data attribute if it exists
+                if (mcqTitle) {
+                    button.dataset.mcqTitle = mcqTitle;
+                }
              } catch (e) {
-                 console.error("Failed to stringify MCQ data for button attribute:", e);
+                 console.error("Failed to stringify MCQ data or set title for button attribute:", e);
                  return; // Don't add button if data can't be stored
              }
 
              const buttonContainer = document.createElement('div');
-             buttonContainer.style.marginTop = '10px';
+             buttonContainer.style.marginTop = '10px'; // Space above button
              buttonContainer.appendChild(button);
-             aiMessageElement.appendChild(buttonContainer);
+             aiMessageElement.appendChild(buttonContainer); // Add to the AI message bubble
         }
 
+        // --- NEW Function: Toggle Test Language ---
+        function toggleTestLanguage() {
+            currentTestLanguage = (currentTestLanguage === 'en') ? 'ta' : 'en'; // Switch language state
+            testLanguageToggle.textContent = (currentTestLanguage === 'en') ? 'தமிழ்' : 'English'; // Update button text
+            // Re-display the current question in the new language
+            displayTestQuestion(currentQuestionIndex);
+            console.log("Switched test language to:", currentTestLanguage);
+        }
+
+        // --- MODIFIED startMockTest function ---
         function startMockTest(mcqs, title = null) {
-            if (!currentUser) { displayError("Please log in to start a test."); return; }
+            if (!currentUser) { displayError("Please log in to start a test. / சோதனையைத் தொடங்க உள்நுழையவும்."); return; }
             if (!mcqs || mcqs.length === 0) {
-                 displayError("No questions available for this test.");
-                 if (cameFromAllTestsList) { switchView('chat'); }
+                 displayError("No questions available for this test. / இந்த சோதனைக்கு கேள்விகள் இல்லை.");
+                 if (cameFromAllTestsList) { switchView('chat'); } // Go back if came from list and no questions
                  return;
             }
-            console.log("Starting mock test with", mcqs.length, "questions.");
+            console.log("Starting mock test with", mcqs.length, "questions. Provided Title:", title);
 
-            currentTestMCQs = mcqs; // Use the passed questions
+            currentTestMCQs = mcqs; // Store the questions for this test session
             currentQuestionIndex = 0;
-            userAnswers = new Array(mcqs.length).fill(null);
-            reviewResultsCache = null; // Clear any previous review
+            userAnswers = new Array(mcqs.length).fill(null); // Reset user answers
+            reviewResultsCache = null; // Clear any previous review cache
 
-            switchView('test'); // Switch view AFTER setting up state
+            // Reset language to English when starting a new test
+            currentTestLanguage = 'en';
+            testLanguageToggle.textContent = 'தமிழ்'; // Reset button text
 
-            displayTestQuestion(0);
-            startTestTimer();
-            testTitle.textContent = title || `Mock Test (${mcqs.length} Questions)`;
+            switchView('test'); // Switch to the test view interface
+
+            displayTestQuestion(0); // Display the first question
+            startTestTimer(); // Start the timer
+
+            // Use the passed title, provide a default if null/empty
+            const finalTitle = (title && title.trim()) ? title.trim() : `Mock Test (${mcqs.length} Questions)`;
+            testTitle.textContent = finalTitle;
         }
 
+        // --- MODIFIED displayTestQuestion function (Bilingual) ---
         function displayTestQuestion(index) {
             if (index < 0 || index >= currentTestMCQs.length) return;
 
             currentQuestionIndex = index;
             const questionData = currentTestMCQs[index];
 
-            testQuestionNumber.textContent = `Question ${index + 1}`;
-            testQuestion.innerHTML = questionData.question || "(Question text missing)";
+            // *** Get text based on currentTestLanguage ***
+            const lang = currentTestLanguage; // 'en' or 'ta'
 
-            testOptionsContainer.innerHTML = '';
+            // Get question text, fallback to English if Tamil is missing or object structure is wrong
+            const questionText = questionData.question?.[lang] || questionData.question?.en || "(Question text missing)";
+            testQuestionNumber.textContent = `Question ${index + 1}`; // Keep number in English
+            testQuestion.innerHTML = questionText; // Use innerHTML for potential formatting
+
+            testOptionsContainer.innerHTML = ''; // Clear previous options
 
             const options = Array.isArray(questionData.options) ? questionData.options : [];
-            const optionLetters = ['A', 'B', 'C', 'D'];
-            options.forEach((optionText, optionIndex) => {
-                 if (optionIndex >= optionLetters.length) return;
+            const optionLetters = ['A', 'B', 'C', 'D']; // Standard option letters
+
+            options.forEach((optionObj, optionIndex) => {
+                 if (optionIndex >= optionLetters.length) return; // Only handle A, B, C, D
+
+                 // *** Get option text based on currentTestLanguage, fallback to English ***
+                 const optionText = optionObj?.[lang] || optionObj?.en || '(Empty Option)';
 
                  const label = document.createElement('label');
                  const input = document.createElement('input');
                  input.type = 'radio';
-                 input.name = `q_${index}`;
-                 input.value = optionIndex;
-                 input.checked = (userAnswers[index] === optionIndex);
-                 input.onchange = () => handleOptionSelect(optionIndex);
+                 input.name = `q_${index}`; // Group radio buttons for the same question
+                 input.value = optionIndex; // Store the index (0-3) as the value
+                 input.checked = (userAnswers[index] === optionIndex); // Check if this was the user's previous answer
+                 input.onchange = () => handleOptionSelect(optionIndex); // Update answer on change
 
                  label.appendChild(input);
-                 label.appendChild(document.createTextNode(` ${optionLetters[optionIndex]}. ${optionText || '(Empty Option)'}`));
+                 label.appendChild(document.createTextNode(` ${optionLetters[optionIndex]}. ${optionText}`)); // Display letter and text
                  testOptionsContainer.appendChild(label);
             });
 
+            // Re-render MathJax for the new question/options
              try {
                  if (typeof MathJax !== "undefined" && MathJax.typesetPromise) {
                      MathJax.typesetPromise([testQuestion, testOptionsContainer]).catch(err => console.error('MathJax typeset error on test question:', err));
                  }
              } catch(e){ console.error("MathJax call failed:", e); }
 
+            // Update navigation button states
             prevQuestionBtn.disabled = (index === 0);
             nextQuestionBtn.disabled = (index === currentTestMCQs.length - 1);
+            // Update question counter display
             questionCounter.textContent = `Q: ${index + 1} / ${currentTestMCQs.length}`;
         }
 
-        function handleOptionSelect(optionIndex) {
+        function handleOptionSelect(optionIndex) { /* ... (same as before) ... */
             if (currentQuestionIndex >= 0 && currentQuestionIndex < userAnswers.length) {
-                userAnswers[currentQuestionIndex] = optionIndex;
+                userAnswers[currentQuestionIndex] = optionIndex; // Store the selected option index (0-3)
                 console.log(`Answered Q${currentQuestionIndex + 1}: Option index ${optionIndex}`);
             }
         }
-
-        function handleTestNavigation(direction) {
+        function handleTestNavigation(direction) { /* ... (same as before) ... */
             let newIndex = currentQuestionIndex;
             if (direction === 'prev' && currentQuestionIndex > 0) {
                 newIndex--;
             } else if (direction === 'next' && currentQuestionIndex < currentTestMCQs.length - 1) {
                 newIndex++;
             }
+            // Only update display if the index actually changed
             if (newIndex !== currentQuestionIndex) {
                 displayTestQuestion(newIndex);
             }
         }
-
-        function startTestTimer() {
-            if (testTimerInterval) clearInterval(testTimerInterval);
-            testStartTime = Date.now();
-            testTimer.textContent = `Time: 00:00`;
+        function startTestTimer() { /* ... (same as before) ... */
+            if (testTimerInterval) clearInterval(testTimerInterval); // Clear existing timer
+            testStartTime = Date.now(); // Record start time
+            testTimer.textContent = `Time: 00:00`; // Reset display
+            // Update timer every second
             testTimerInterval = setInterval(() => {
                 const elapsedSeconds = Math.floor((Date.now() - testStartTime) / 1000);
                 const minutes = Math.floor(elapsedSeconds / 60).toString().padStart(2, '0');
@@ -1556,59 +1704,81 @@
                 testTimer.textContent = `Time: ${minutes}:${seconds}`;
             }, 1000);
         }
+        function submitTest() { /* ... (same as before) ... */
+            if (!confirm("Are you sure you want to submit the test? / சோதனையைச் சமர்ப்பிக்க உறுதியாக இருக்கிறீர்களா?")) return;
 
-        function submitTest() {
-            if (!confirm("Are you sure you want to submit the test?")) return;
-
-            if (testTimerInterval) clearInterval(testTimerInterval);
+            if (testTimerInterval) clearInterval(testTimerInterval); // Stop the timer
             const endTime = Date.now();
             const timeTakenMs = testStartTime ? endTime - testStartTime : 0;
             console.log("Submitting test. Time taken (ms):", timeTakenMs);
 
-            // Calculate results using the CURRENT test's questions (currentTestMCQs)
+            // Calculate results using the questions from the CURRENT test session
             const results = calculateResults(currentTestMCQs, userAnswers, timeTakenMs);
-            reviewResultsCache = results; // Cache the results for potential saving
+            reviewResultsCache = results; // Cache results for review display and potential saving
 
             // Switch to review view, indicating it's NOT from the "All Tests" list
             switchView('review', false);
-            displayReview(results); // Display the calculated review data
+            displayReview(results); // Display the results
         }
 
         // --- Review Functions ---
 
+        // --- NEW Function: Toggle Review Language ---
+        function toggleReviewLanguage() {
+            currentReviewLanguage = (currentReviewLanguage === 'en') ? 'ta' : 'en'; // Switch language state
+            reviewLanguageToggle.textContent = (currentReviewLanguage === 'en') ? 'தமிழ்' : 'English'; // Update button text
+            // Re-display the review in the new language (using the cached data)
+            if (reviewResultsCache) {
+                displayReview(reviewResultsCache); // Re-render the review
+            }
+            console.log("Switched review language to:", currentReviewLanguage);
+        }
+
+        // MODIFIED calculateResults (Ensure originalMCQs included - already done)
         function calculateResults(mcqs, answers, timeMs) {
              let correctCount = 0, incorrectCount = 0, skippedCount = 0;
              const reviewQuestions = []; // Data specifically for displaying the review
 
              mcqs.forEach((qData, index) => {
-                 const userAnswerIndex = answers[index];
+                 // Safely access properties with fallbacks
+                 const userAnswerIndex = answers[index]; // User's selected index (0-3) or null
                  const options = Array.isArray(qData.options) ? qData.options : [];
-                 const correctAnswerLetter = qData.answer?.trim().toUpperCase();
-                 const correctAnswerIndex = correctAnswerLetter ? correctAnswerLetter.charCodeAt(0) - 'A'.charCodeAt(0) : -1;
-                 const correctAnswerText = (correctAnswerIndex >= 0 && correctAnswerIndex < options.length)
-                                           ? options[correctAnswerIndex] : "N/A";
+                 const correctAnswerLetter = qData.answer?.trim().toUpperCase(); // A, B, C, D
+                 const correctAnswerIndex = correctAnswerLetter ? correctAnswerLetter.charCodeAt(0) - 'A'.charCodeAt(0) : -1; // 0-3 or -1
 
-                 let userAnswerText = "Skipped";
+                 // Determine correct answer text (use English as primary fallback for summary)
+                 const correctAnswerTextEn = (correctAnswerIndex >= 0 && correctAnswerIndex < options.length)
+                                           ? (options[correctAnswerIndex]?.en || '(Missing Correct Option Text)') : "N/A";
+
+                 let userAnswerTextEn = "Skipped"; // Default status text
                  let status = "skipped";
 
                  if (userAnswerIndex !== null && userAnswerIndex >= 0 && userAnswerIndex < options.length) {
-                     userAnswerText = options[userAnswerIndex];
+                     // User selected a valid option index
+                     userAnswerTextEn = options[userAnswerIndex]?.en || '(Missing User Option Text)'; // Get English text for the selected option
                      if (userAnswerIndex === correctAnswerIndex) {
                          status = "correct"; correctCount++;
                      } else {
                          status = "incorrect"; incorrectCount++;
                      }
                  } else if (userAnswerIndex !== null) {
-                      userAnswerText = "Invalid Selection"; status = "incorrect"; incorrectCount++;
+                     // User selected something invalid (shouldn't happen with radio buttons)
+                      userAnswerTextEn = "Invalid Selection"; status = "incorrect"; incorrectCount++;
                  } else {
+                     // User didn't select anything (null)
                      skippedCount++;
                  }
 
+                 // Store data needed *for review display*. Bilingual text comes from originalMCQs later.
                  reviewQuestions.push({
-                     question: qData.question,
-                     correctAnswer: correctAnswerText,
-                     userAnswer: userAnswerText,
-                     status: status
+                     // Store English versions here for simpler structure, bilingual lookup happens in displayReview
+                     question: qData.question?.en || '(Question missing)',
+                     correctAnswer: correctAnswerTextEn,
+                     userAnswer: userAnswerTextEn, // Store the English text of the user's answer or status
+                     status: status,
+                     explanation: qData.explanation?.en || "No explanation provided." // Store English explanation
+                     // Note: We don't store the bilingual text *here* to avoid duplication.
+                     // We rely on having originalMCQs available when displaying the review.
                  });
              });
 
@@ -1620,29 +1790,39 @@
              const timeString = `${minutes}m ${seconds}s`;
 
              return {
-                 questions: reviewQuestions, // Review display data
+                 questions: reviewQuestions, // Review display summary data (mostly English)
                  summary: { score, correct: correctCount, incorrect: incorrectCount, skipped: skippedCount, timeString },
                  testDate: new Date().toISOString(),
                  timeTakenMs: timeMs,
-                 sourceChatId: activeChatId, // Can be null if chat was deleted
+                 sourceChatId: activeChatId,
                  testTitle: testTitle.textContent, // Title shown during THIS test
-                 originalMCQs: mcqs // *** Include the actual questions used in THIS test ***
+                 // *** CRUCIAL: Include the original MCQs with bilingual data ***
+                 originalMCQs: mcqs
              };
         }
 
+        // --- MODIFIED displayReview function (Bilingual & Explanation) ---
         function displayReview(reviewData) {
-             reviewContent.innerHTML = '';
-             reviewSummary.innerHTML = ''; // Clear summary too
+             reviewContent.innerHTML = ''; // Clear previous review items
+             reviewSummary.innerHTML = ''; // Clear summary
              reviewFilters.style.display = 'none'; // Hide filters initially
 
-             if (!reviewData || !reviewData.questions || reviewData.questions.length === 0 || !reviewData.summary) {
-                 reviewSummary.innerHTML = "<span>No valid review data available.</span>";
+             if (!reviewData || !reviewData.questions || reviewData.questions.length === 0 || !reviewData.summary || !reviewData.originalMCQs) { // Check for originalMCQs
+                 reviewSummary.innerHTML = "<span>No valid review data available (might be missing original questions).</span>";
                  reviewContent.innerHTML = "<p>It seems the review data is missing or incomplete.</p>";
                  saveReviewBtn.style.display = 'none';
                  return;
              }
 
-             // Display Summary
+             // Reset review language to 'en' only if it's a fresh display (not a toggle)
+             // Check if the button text reflects the current state. If not, reset.
+             const expectedButtonText = (currentReviewLanguage === 'en') ? 'தமிழ்' : 'English';
+             if (!reviewLanguageToggle || reviewLanguageToggle.textContent !== expectedButtonText) { // Add check for button existence
+                  currentReviewLanguage = 'en'; // Default to English for new review display
+                  if (reviewLanguageToggle) reviewLanguageToggle.textContent = 'தமிழ்'; // Update button if it exists
+             }
+
+             // Display Summary (language neutral)
              const { score, correct, incorrect, skipped, timeString } = reviewData.summary;
              reviewSummary.innerHTML = `
                   <span>Score: ${score}</span>
@@ -1652,100 +1832,172 @@
                   <span>Total Time: ${timeString}</span>
              `;
 
-             reviewTitle.textContent = reviewData.testTitle || "Test Review";
+             reviewTitle.textContent = reviewData.testTitle || "Test Review"; // Set title
 
-             // Display Individual Questions
-             reviewData.questions.forEach((qReview, index) => {
-                 const { question, correctAnswer, userAnswer, status } = qReview;
+             // Get language for display ('en' or 'ta')
+             const lang = currentReviewLanguage;
+
+             // Display Individual Questions using bilingual data
+             reviewData.questions.forEach((qReviewSummary, index) => { // qReviewSummary has English texts + status
+                 const originalQData = reviewData.originalMCQs[index]; // Get the full bilingual data
+
+                 if (!originalQData) {
+                     console.warn(`Original MCQ data missing for review item ${index}`);
+                     // Fallback: Display basic info from qReviewSummary if original is missing
+                     const reviewItem = document.createElement('div');
+                     reviewItem.classList.add('review-item', `status-${qReviewSummary.status || 'unknown'}`);
+                     reviewItem.innerHTML = `
+                        <div class="review-item-qnum">Question ${index + 1}</div>
+                        <div class="review-item-question">${qReviewSummary.question || '(Question missing)'}</div>
+                        <div class="review-item-details">
+                            <span>Your Answer: ${qReviewSummary.userAnswer || 'N/A'}</span><br>
+                            <span class="correct-answer">Correct Answer: ${qReviewSummary.correctAnswer || 'N/A'}</span>
+                            <div class="review-item-explanation">Explanation: ${qReviewSummary.explanation || 'N/A'}</div>
+                        </div>`;
+                     reviewContent.appendChild(reviewItem);
+                     return; // Skip to next item
+                 }
+
+                 // *** Get bilingual text from originalQData, fallback to English ***
+                 const questionText = originalQData.question?.[lang] || originalQData.question?.en || '(Question text missing)';
+
+                 const options = originalQData.options || [];
+                 const correctAnswerLetter = originalQData.answer?.trim().toUpperCase();
+                 const correctAnswerIndex = correctAnswerLetter ? correctAnswerLetter.charCodeAt(0) - 'A'.charCodeAt(0) : -1;
+                 // Get correct answer text in the selected language
+                 const correctAnswerText = (correctAnswerIndex >= 0 && correctAnswerIndex < options.length)
+                                            ? (options[correctAnswerIndex]?.[lang] || options[correctAnswerIndex]?.en) : "N/A";
+
+                 // Determine user answer text in the selected language
+                 let userAnswerText = qReviewSummary.userAnswer; // Start with the text stored in summary (might be "Skipped" or English option)
+                 const status = qReviewSummary.status;
+                 if (status !== 'skipped' && status !== 'invalid') {
+                      // If user answered, try to find the corresponding option index from the English text
+                      const userAnswerEn = qReviewSummary.userAnswer;
+                      const userAnswerIndex = options.findIndex(opt => opt.en === userAnswerEn);
+                      if (userAnswerIndex !== -1) {
+                           // Found the option, get the text in the selected language
+                           userAnswerText = options[userAnswerIndex]?.[lang] || options[userAnswerIndex]?.en;
+                      } else {
+                          // Couldn't match English text (maybe data mismatch?), fallback to stored English
+                          userAnswerText = userAnswerEn || '(Answer text missing)';
+                      }
+                 } else if (status === 'skipped') {
+                     // Explicitly set skipped text for different languages if desired
+                     userAnswerText = (lang === 'ta') ? "தவிர்க்கப்பட்டது" : "Skipped";
+                 } else { // Invalid
+                     userAnswerText = (lang === 'ta') ? "தவறான தேர்வு" : "Invalid Selection";
+                 }
+
+
+                 // Get explanation in the selected language
+                 const explanationText = originalQData.explanation?.[lang] || originalQData.explanation?.en || "No explanation provided.";
+
+                 // --- Create Review Item Element ---
                  let itemStatusClass = `status-${status}`;
                  let answerDetailClass = `user-answer-${status}`;
 
                  const reviewItem = document.createElement('div');
                  reviewItem.classList.add('review-item', itemStatusClass);
-                 reviewItem.dataset.status = status;
+                 reviewItem.dataset.status = status; // For filtering
 
-                 let detailsHtml = `<span class="${answerDetailClass}">Your Answer: ${userAnswer}</span>`;
-                 if (status !== 'correct') {
-                     detailsHtml += `<br><span class="correct-answer">Correct Answer: ${correctAnswer}</span>`;
+                 // Build details HTML
+                 let detailsHtml = `<span class="${answerDetailClass}">Your Answer: ${userAnswerText}</span>`;
+                 if (status !== 'correct') { // Show correct answer if user was wrong or skipped
+                     detailsHtml += `<br><span class="correct-answer">Correct Answer: ${correctAnswerText}</span>`;
                  }
+                 // Add Explanation
+                 detailsHtml += `<div class="review-item-explanation">${(lang === 'ta' ? 'விளக்கம்' : 'Explanation')}: ${explanationText}</div>`;
 
+                 // Set innerHTML for the review item
                  reviewItem.innerHTML = `
                      <div class="review-item-qnum">Question ${index + 1}</div>
-                     <div class="review-item-question">${question || '(Question text missing)'}</div>
+                     <div class="review-item-question">${questionText}</div>
                      <div class="review-item-details">${detailsHtml}</div>
                  `;
                  reviewContent.appendChild(reviewItem);
              });
 
-             // Configure Save Button visibility based on context
-             if (reviewData.savedAt) { // Loaded from saved reviews
+             // Configure Save Button
+             if (reviewData.savedAt) { // Loaded from saved reviews (already saved)
                  saveReviewBtn.textContent = "Review Saved";
                  saveReviewBtn.disabled = true;
                  saveReviewBtn.style.display = 'inline-block';
              } else if (reviewResultsCache && !cameFromAllTestsList) { // Fresh review from test just taken
                  saveReviewBtn.textContent = "Save Review";
-                 saveReviewBtn.disabled = false;
+                 saveReviewBtn.disabled = !currentUser; // Enable only if logged in
                  saveReviewBtn.style.display = 'inline-block';
              } else { // Hide if no cache or came from all tests list (already saved)
                   saveReviewBtn.style.display = 'none';
              }
 
-             reviewFilters.style.display = 'block'; // Show filters now
+             reviewFilters.style.display = 'block'; // Show filters
 
+             // Re-render MathJax for review content
               try {
                   if (typeof MathJax !== "undefined" && MathJax.typesetPromise) {
                        MathJax.typesetPromise([reviewContent]).catch(err => console.error('MathJax typeset error on review:', err));
                   }
               } catch (e) { console.error("MathJax call failed:", e); }
 
+             // Apply default filter ('all')
              filterReviewItems('all');
+             // Ensure 'All' button is marked active
              reviewFilters.querySelectorAll('button').forEach(btn => {
                  btn.classList.toggle('active-filter', btn.dataset.filter === 'all');
              });
-        }
+        } // End of displayReview
 
-        function handleReviewFilterClick(event) {
+        function handleReviewFilterClick(event) { /* ... (same as before) ... */
             const button = event.target.closest('button[data-filter]');
             if (button) {
                 filterReviewItems(button.dataset.filter);
             }
         }
-
-        function filterReviewItems(filter) {
+        function filterReviewItems(filter) { /* ... (same as before) ... */
+            // Highlight active filter button
             reviewFilters.querySelectorAll('button').forEach(btn => {
                 btn.classList.toggle('active-filter', btn.dataset.filter === filter);
             });
+            // Show/hide review items based on filter and status
             reviewContent.querySelectorAll('.review-item').forEach(item => {
                 const show = (filter === 'all') || item.dataset.status === filter;
-                item.classList.toggle('hidden-by-filter', !show);
+                item.classList.toggle('hidden-by-filter', !show); // Add/remove class to hide
             });
         }
-
-        function exitReview() {
+        function exitReview() { /* ... (same as before) ... */
             reviewResultsCache = null; // Clear current review cache
 
-            // Go back to chat view (sidebar will still show All Tests if user was there)
+            // Go back to chat view
             switchView('chat');
 
-            // Reset review specific UI
+            // Reset review specific UI elements (optional, but good practice)
             reviewSummary.innerHTML = '';
             reviewContent.innerHTML = '';
             reviewTitle.textContent = 'Test Review';
+            if (reviewLanguageToggle) reviewLanguageToggle.textContent = 'தமிழ்'; // Reset toggle text
+            currentReviewLanguage = 'en'; // Reset language state
         }
-
-        async function saveTestReviewToCloud() {
-            if (!currentUser) { alert("Please log in to save the review."); return; }
+        async function saveTestReviewToCloud() { /* ... (same as before - uses reviewResultsCache) ... */
+            if (!currentUser) { alert("Please log in to save the review. / மதிப்பாய்வைச் சேமிக்க உள்நுழையவும்."); return; }
             // Use reviewResultsCache which holds the data from the just-completed test
             if (!reviewResultsCache || reviewResultsCache.savedAt) {
-                 alert("No new review data available to save or it has already been saved.");
+                 alert("No new review data available to save or it has already been saved. / சேமிக்க புதிய ஆய்வுத் தரவு இல்லை அல்லது அது ஏற்கனவே சேமிக்கப்பட்டுள்ளது.");
                  return;
              }
+             // Check if originalMCQs exist (crucial for bilingual review later)
+             if (!reviewResultsCache.originalMCQs || reviewResultsCache.originalMCQs.length === 0) {
+                 if (!confirm("Warning: Original question data (including translations) seems missing. Review might not display correctly later. Save anyway?")) {
+                      return;
+                 }
+             }
+
 
             // Prepare data, ensure necessary fields are included
             const reviewDataToSave = {
-                ...reviewResultsCache, // Includes questions, summary, testTitle, originalMCQs, etc.
+                ...reviewResultsCache, // Includes questions (summary), summary, testTitle, originalMCQs, etc.
                 userId: currentUser.uid,
-                savedAt: firebase.firestore.FieldValue.serverTimestamp(),
+                savedAt: firebase.firestore.FieldValue.serverTimestamp(), // Add server timestamp on save
             };
 
             saveReviewBtn.disabled = true;
@@ -1754,23 +2006,21 @@
             try {
                 const newReviewRef = await db.collection('testReviews').add(reviewDataToSave);
                 console.log("Review saved to Firestore with ID:", newReviewRef.id);
-                alert("Test review saved successfully!");
-                saveReviewBtn.textContent = "Review Saved"; // Keep disabled
+                alert("Test review saved successfully! / சோதனை ஆய்வு வெற்றிகரமாக சேமிக்கப்பட்டது!");
+                saveReviewBtn.textContent = "Review Saved"; // Keep disabled after successful save
                 // Mark cache as saved locally to prevent accidental resave attempts
-                reviewResultsCache.savedAt = new Date();
+                if (reviewResultsCache) reviewResultsCache.savedAt = new Date(); // Mark as saved
 
             } catch (error) {
                 console.error("Error saving review to Firestore:", error);
-                alert("Failed to save the review. Please check your connection and try again.");
+                alert("Failed to save the review. Please check your connection and try again. / மதிப்பாய்வைச் சேமிக்கத் தவறிவிட்டது. உங்கள் இணைப்பைச் சரிபார்த்து மீண்டும் முயற்சிக்கவும்.");
                 saveReviewBtn.disabled = false; // Re-enable on failure
                 saveReviewBtn.textContent = "Save Review";
             }
         }
 
-
         // --- All Tests List Functions ---
-
-        function loadAndListenForTests(userId) {
+        function loadAndListenForTests(userId) { /* ... (same as before) ... */
             if (testListListener) { testListListener(); testListListener = null; }
 
             const testsRef = db.collection('testReviews')
@@ -1785,18 +2035,19 @@
                 });
                 console.log("Received saved tests snapshot:", allSavedTestsData.length, "tests");
                 renderAllTestsList(allSavedTestsData); // Update UI
-                filterTestsInSidebar(); // Apply existing search filter
+                filterTestsInSidebar(); // Apply existing search filter if any
 
             }, error => {
                 console.error("Error listening for saved tests:", error);
                 // Show error in the list area itself
                 allTestsListContainer.innerHTML = `<div style="padding:10px;color:var(--error-text);font-size:0.9em;">Error loading tests. Check console (F12) & Firestore index/rules.</div>`;
-                allSavedTestsData = [];
+                allSavedTestsData = []; // Clear cache on error
             });
         }
 
+        // MODIFIED renderAllTestsList (Adds Edit/Delete buttons)
         function renderAllTestsList(tests) {
-            allTestsListContainer.innerHTML = '';
+            allTestsListContainer.innerHTML = ''; // Clear previous list
             if (!currentUser) {
                 allTestsListContainer.innerHTML = '<div style="padding:10px;color:var(--text-secondary);font-size:0.9em;">Login to see saved tests.</div>';
                 return;
@@ -1807,33 +2058,70 @@
                 tests.forEach(testData => {
                     const itemElement = document.createElement('div');
                     itemElement.classList.add('test-list-item');
-                    itemElement.dataset.reviewId = testData.id;
+                    itemElement.dataset.reviewId = testData.id; // Store Firestore ID
 
                     const title = testData.testTitle || '(Untitled Test)';
+                    // Format date safely
                     const date = testData.savedAt?.toDate ? testData.savedAt.toDate().toLocaleString() : 'Unknown date';
                     const score = testData.summary?.score || 'N/A';
-                    // Check for valid reattempt data more thoroughly
-                    const hasReattemptData = testData.originalMCQs && Array.isArray(testData.originalMCQs) && testData.originalMCQs.length > 0 && testData.originalMCQs.every(q => q && q.question && q.options && q.answer);
 
+                    // Check if reattempt is possible (requires valid originalMCQs)
+                    const hasReattemptData = testData.originalMCQs && Array.isArray(testData.originalMCQs) && testData.originalMCQs.length > 0 &&
+                                             // Basic check for structure needed for bilingual display
+                                             testData.originalMCQs.every(q => q && q.question && q.options && q.answer && q.explanation);
+
+                    // --- Info Div (Title, Details, Edit/Delete Controls) ---
                     const infoDiv = document.createElement('div');
-                    infoDiv.classList.add('test-item-info');
-                    infoDiv.innerHTML = `
-                        <span class="test-item-title" title="${title}">${title}</span>
-                        <span class="test-item-details">Saved: ${date} | Score: ${score}</span>
-                    `;
+                    infoDiv.classList.add('test-item-info'); // Enables relative positioning for controls
 
+                    // Title Span
+                    const titleSpan = document.createElement('span');
+                    titleSpan.classList.add('test-item-title');
+                    titleSpan.textContent = title;
+                    titleSpan.title = title; // Tooltip for long titles
+
+                    // Details Span
+                    const detailsSpan = document.createElement('span');
+                    detailsSpan.classList.add('test-item-details');
+                    detailsSpan.textContent = `Saved: ${date} | Score: ${score}`;
+
+                    // Controls Div (Edit/Delete)
+                    const controlsDiv = document.createElement('div');
+                    controlsDiv.classList.add('test-item-controls');
+
+                    const editBtn = document.createElement('button');
+                    editBtn.innerHTML = EDIT_TEST_ICON; // '✏️'
+                    editBtn.title = "Edit test title";
+                    editBtn.dataset.action = "edit-title"; // Action for click handler
+                    controlsDiv.appendChild(editBtn);
+
+                    const deleteBtn = document.createElement('button');
+                    deleteBtn.innerHTML = DELETE_TEST_ICON; // '🗑️'
+                    deleteBtn.title = "Delete this saved test";
+                    deleteBtn.dataset.action = "delete-test"; // Action for click handler
+                    controlsDiv.appendChild(deleteBtn);
+
+                    // Add title, details, and controls to infoDiv
+                    infoDiv.appendChild(titleSpan);
+                    infoDiv.appendChild(detailsSpan);
+                    infoDiv.appendChild(controlsDiv);
+
+                    // --- Actions Div (View Details, Reattempt) ---
                     const actionsDiv = document.createElement('div');
                     actionsDiv.classList.add('test-item-actions');
 
+                    // View Details Button
                     const viewBtn = document.createElement('button');
                     viewBtn.textContent = "View Details";
-                    viewBtn.dataset.action = "view";
+                    viewBtn.dataset.action = "view"; // Action for click handler
                     actionsDiv.appendChild(viewBtn);
 
+                    // Reattempt Select Dropdown
                     const reattemptSelect = document.createElement('select');
                     reattemptSelect.dataset.action = "reattempt";
                     reattemptSelect.disabled = !hasReattemptData;
                     reattemptSelect.title = hasReattemptData ? "Reattempt options" : "Reattempt not available (Missing original question data)";
+                    // Options for reattempt modes
                     reattemptSelect.innerHTML = `
                         <option value="" selected>${hasReattemptData ? 'Reattempt...' : 'Reattempt N/A'}</option>
                         <option value="mistaked" ${!hasReattemptData ? 'disabled' : ''}>Mistaked Only</option>
@@ -1841,26 +2129,28 @@
                         <option value="both" ${!hasReattemptData ? 'disabled' : ''}>Mistaked & Skipped</option>
                         <option value="full" ${!hasReattemptData ? 'disabled' : ''}>Full Test</option>
                     `;
+                    // Add event listener directly to the select element
                     reattemptSelect.addEventListener('change', (event) => {
                         const selectedMode = event.target.value;
-                        if (selectedMode) {
+                        if (selectedMode) { // If a mode other than the placeholder is selected
                              const reviewId = event.target.closest('.test-list-item')?.dataset.reviewId;
                              if (reviewId) {
-                                 startReattempt(reviewId, selectedMode);
+                                 startReattempt(reviewId, selectedMode); // Trigger reattempt
                              }
-                             event.target.value = ""; // Reset select
+                             event.target.value = ""; // Reset select to placeholder after action
                         }
                     });
                     actionsDiv.appendChild(reattemptSelect);
 
+                    // Append info and actions divs to the main item element
                     itemElement.appendChild(infoDiv);
                     itemElement.appendChild(actionsDiv);
-                    allTestsListContainer.appendChild(itemElement);
+                    allTestsListContainer.appendChild(itemElement); // Add item to the list
                 });
             }
         }
 
-        function filterTestsInSidebar() {
+        function filterTestsInSidebar() { /* ... (same as before) ... */
             const searchTerm = testSearchInput.value.toLowerCase().trim();
             const items = allTestsListContainer.querySelectorAll('.test-list-item');
             let visibleCount = 0;
@@ -1872,13 +2162,14 @@
              }
 
             items.forEach(item => {
+                // Check title and details for search term
                 const titleElement = item.querySelector('.test-item-title');
                 const detailsElement = item.querySelector('.test-item-details');
                 const titleText = titleElement ? titleElement.textContent.toLowerCase() : '';
                 const detailsText = detailsElement ? detailsElement.textContent.toLowerCase() : '';
 
                 const isMatch = titleText.includes(searchTerm) || detailsText.includes(searchTerm);
-                item.classList.toggle('hidden-by-search', !isMatch);
+                item.classList.toggle('hidden-by-search', !isMatch); // Hide if no match
                 if (isMatch) {
                     visibleCount++;
                 }
@@ -1888,84 +2179,263 @@
              if (visibleCount === 0 && searchTerm !== '' && items.length > 0) {
                  const msgDiv = document.createElement('div');
                  msgDiv.textContent = "No tests match your search.";
-                 // Use class for styling defined in CSS
-                 msgDiv.classList.add('no-search-results');
+                 msgDiv.classList.add('no-search-results'); // Use class for styling
                  allTestsListContainer.appendChild(msgDiv);
              }
         }
 
-
+        // MODIFIED handleAllTestsListClick (Handles view, edit-title, delete-test)
         async function handleAllTestsListClick(event) {
-            const viewButton = event.target.closest('button[data-action="view"]');
+            // Find the closest button with a data-action attribute
+            const button = event.target.closest('button[data-action]');
+            if (!button) return; // Exit if click wasn't on an action button
 
-            if (viewButton) {
-                const listItem = viewButton.closest('.test-list-item');
-                const reviewId = listItem?.dataset.reviewId;
+            const action = button.dataset.action;
+            const listItem = button.closest('.test-list-item'); // Find the parent list item
+            const reviewId = listItem?.dataset.reviewId; // Get the Firestore ID
 
-                if (reviewId) {
+            if (!reviewId) {
+                console.warn("Action button clicked, but couldn't find review ID.");
+                return;
+            }
+
+            // Handle different actions based on button's data-action
+            switch (action) {
+                case "view":
                     console.log("View Details clicked for review:", reviewId);
-                    // Find data from the cache populated by the listener
+                    // Find data from the local cache populated by the listener
                     const reviewData = allSavedTestsData.find(test => test.id === reviewId);
-
                     if (reviewData) {
-                        reviewResultsCache = reviewData; // Use the specific review's data
+                        reviewResultsCache = reviewData; // Cache for display
                         switchView('review', true); // Switch view, indicate came from tests list
                         displayReview(reviewData); // Display this specific review
                     } else {
                         console.error("Could not find review data in cache for ID:", reviewId);
                         alert("Error: Could not load review details.");
                     }
-                }
+                    break;
+
+                case "edit-title":
+                    console.log("Edit Title clicked for review:", reviewId);
+                    enterTestTitleEditMode(listItem, reviewId); // Switch item to edit mode
+                    break;
+
+                case "delete-test":
+                    console.log("Delete Test clicked for review:", reviewId);
+                    const testTitleSpan = listItem.querySelector('.test-item-title');
+                    const testTitle = testTitleSpan?.textContent || 'this test'; // Get title for confirm message
+                    // Ask for confirmation before deleting
+                    if (confirm(`Are you sure you want to permanently delete the saved test "${testTitle}"? This cannot be undone. / சேமிக்கப்பட்ட சோதனை "${testTitle}" ஐ நிரந்தரமாக நீக்க உறுதியாக இருக்கிறீர்களா? இது செயல்தவிர்க்க முடியாதது.`)) {
+                        deleteSavedTest(reviewId, listItem); // Proceed with deletion
+                    }
+                    break;
+
+                // Note: Reattempt logic is handled by its own 'change' listener on the select element
             }
         }
 
-        async function startReattempt(reviewId, mode) {
-            console.log(`Starting reattempt for review: ${reviewId}, mode: ${mode}`);
+        // --- NEW Function: Enter Edit Mode for Test Title ---
+        function enterTestTitleEditMode(listItem, reviewId) {
+            const infoDiv = listItem.querySelector('.test-item-info');
+            const titleSpan = infoDiv.querySelector('.test-item-title');
+            const detailsSpan = infoDiv.querySelector('.test-item-details');
+            const controlsDiv = infoDiv.querySelector('.test-item-controls'); // Edit/Delete icons
+            const currentTitle = titleSpan.textContent;
 
-            const reviewData = allSavedTestsData.find(test => test.id === reviewId);
+            // Hide original title, details, and controls
+            titleSpan.style.display = 'none';
+            detailsSpan.style.display = 'none'; // Hide details during edit
+            if(controlsDiv) controlsDiv.style.display = 'none';
 
-            if (!reviewData) {
-                alert("Error: Could not find the data for this test review.");
-                return;
+            // Check if edit container already exists to prevent duplicates
+            if (infoDiv.querySelector('.test-item-edit-mode')) return;
+
+            // Create container for input and save/cancel buttons
+            const editContainer = document.createElement('div');
+            editContainer.classList.add('test-item-edit-mode');
+
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.value = currentTitle;
+            input.maxLength = 100; // Limit title length
+            // Add keydown listener to save on Enter, cancel on Escape
+            input.addEventListener('keydown', (e) => {
+                 if (e.key === 'Enter') {
+                     saveTestTitle(listItem, reviewId, input.value);
+                 } else if (e.key === 'Escape') {
+                     exitTestTitleEditMode(listItem, currentTitle);
+                 }
+            });
+
+            const saveBtn = document.createElement('button');
+            saveBtn.textContent = 'Save';
+            saveBtn.onclick = () => saveTestTitle(listItem, reviewId, input.value);
+
+            const cancelBtn = document.createElement('button');
+            cancelBtn.textContent = 'Cancel';
+            cancelBtn.onclick = () => exitTestTitleEditMode(listItem, currentTitle); // Pass original title to restore on cancel
+
+            editContainer.appendChild(input);
+            editContainer.appendChild(saveBtn);
+            editContainer.appendChild(cancelBtn);
+
+            // Insert the edit container into the infoDiv
+            infoDiv.appendChild(editContainer);
+            input.focus(); // Focus the input field
+            input.select(); // Select current text
+        }
+
+        // --- NEW Function: Exit Edit Mode ---
+        function exitTestTitleEditMode(listItem, originalTitle = null) {
+            const infoDiv = listItem.querySelector('.test-item-info');
+            const titleSpan = infoDiv.querySelector('.test-item-title');
+            const detailsSpan = infoDiv.querySelector('.test-item-details');
+            const controlsDiv = infoDiv.querySelector('.test-item-controls');
+            const editContainer = infoDiv.querySelector('.test-item-edit-mode');
+
+            if (editContainer) {
+                editContainer.remove(); // Remove input and buttons
             }
 
-            // Check again for valid reattempt data
-             const originalMCQs = reviewData.originalMCQs;
-             const hasReattemptData = originalMCQs && Array.isArray(originalMCQs) && originalMCQs.length > 0 && originalMCQs.every(q => q && q.question && q.options && q.answer);
+            // Restore original title if provided (used on cancel)
+            if (originalTitle !== null && titleSpan) {
+                 titleSpan.textContent = originalTitle;
+                 titleSpan.title = originalTitle; // Update tooltip too
+            }
 
-            if (!hasReattemptData) {
-                 alert("Error: Cannot reattempt this test because the original question data is missing or invalid (likely saved before this feature was added or data format issue).");
+            // Show original title, details, and controls again
+            if(titleSpan) titleSpan.style.display = '';
+            if(detailsSpan) detailsSpan.style.display = '';
+            if(controlsDiv) controlsDiv.style.display = ''; // Use display flex if needed based on CSS
+        }
+
+        // --- NEW Function: Save Edited Test Title ---
+        async function saveTestTitle(listItem, reviewId, newTitle) {
+            const trimmedTitle = newTitle.trim();
+            if (!trimmedTitle) {
+                alert("Test title cannot be empty. / சோதனைத் தலைப்பு காலியாக இருக்க முடியாது.");
+                return;
+            }
+            if (trimmedTitle.length > 100) {
+                 alert("Test title is too long (max 100 characters). / சோதனைத் தலைப்பு மிக நீளமாக உள்ளது (அதிகபட்சம் 100 எழுத்துகள்).");
                  return;
             }
 
-            const reviewQuestions = reviewData.questions || []; // Status is needed from here
+            const testDocRef = db.collection('testReviews').doc(reviewId);
+            try {
+                // Update only the testTitle field in Firestore
+                await testDocRef.update({ testTitle: trimmedTitle });
+                console.log("Test title updated successfully in Firestore:", reviewId, trimmedTitle);
+
+                // Update UI immediately in the title span
+                const titleSpan = listItem.querySelector('.test-item-title');
+                if (titleSpan) {
+                    titleSpan.textContent = trimmedTitle;
+                    titleSpan.title = trimmedTitle; // Update tooltip
+                }
+
+                // Update local cache (allSavedTestsData) for consistency
+                const testIndex = allSavedTestsData.findIndex(test => test.id === reviewId);
+                if (testIndex > -1) {
+                    allSavedTestsData[testIndex].testTitle = trimmedTitle;
+                }
+
+                exitTestTitleEditMode(listItem); // Exit edit mode on success
+
+            } catch (error) {
+                console.error("Error updating test title in Firestore:", error);
+                alert("Failed to update the test title. Please try again. / சோதனைத் தலைப்பைப் புதுப்பிக்கத் தவறிவிட்டது. மீண்டும் முயற்சிக்கவும்.");
+                // Optionally, exit edit mode even on error to avoid getting stuck
+                // exitTestTitleEditMode(listItem, listItem.querySelector('.test-item-edit-mode input')?.value || null);
+            }
+        }
+
+        // --- NEW Function: Delete Saved Test ---
+        async function deleteSavedTest(reviewId, listItemElement) {
+             if (!currentUser || !reviewId) return;
+
+             // Visually indicate deletion process (optional)
+             listItemElement.style.opacity = '0.5';
+             listItemElement.style.pointerEvents = 'none'; // Disable clicks during delete
+
+             const testDocRef = db.collection('testReviews').doc(reviewId);
+             try {
+                 await testDocRef.delete(); // Delete the document from Firestore
+                 console.log("Saved test deleted successfully from Firestore:", reviewId);
+                 // The list will auto-update via the Firestore listener (renderAllTestsList)
+                 // No need to manually remove listItemElement if listener works reliably.
+                 // If immediate removal is desired (though may cause flicker with listener):
+                 // listItemElement.remove();
+
+                 // Update local cache immediately for responsiveness
+                 allSavedTestsData = allSavedTestsData.filter(test => test.id !== reviewId);
+                 // Optionally re-apply filter if search is active
+                 // filterTestsInSidebar();
+
+                 alert("Saved test deleted. / சேமித்த சோதனை நீக்கப்பட்டது.");
+
+
+             } catch (error) {
+                 console.error("Error deleting saved test from Firestore:", error);
+                 alert("Failed to delete the saved test. Please try again. / சேமித்த சோதனையை நீக்கத் தவறிவிட்டது. மீண்டும் முயற்சிக்கவும்.");
+                 // Restore appearance on error
+                 listItemElement.style.opacity = '1';
+                 listItemElement.style.pointerEvents = 'auto';
+             }
+        }
+
+        // MODIFIED startReattempt (Handles bilingual implicitly)
+        async function startReattempt(reviewId, mode) {
+            console.log(`Starting reattempt for review: ${reviewId}, mode: ${mode}`);
+
+            // Find the full review data (including originalMCQs) from cache
+            const reviewData = allSavedTestsData.find(test => test.id === reviewId);
+
+            if (!reviewData) {
+                alert("Error: Could not find the data for this test review. / பிழை: இந்த சோதனை ஆய்வுக்கான தரவைக் கண்டுபிடிக்க முடியவில்லை.");
+                return;
+            }
+
+            // Check again for valid originalMCQs data (crucial for reattempt)
+            const originalMCQs = reviewData.originalMCQs;
+            const hasValidReattemptData = originalMCQs && Array.isArray(originalMCQs) && originalMCQs.length > 0 &&
+                                       originalMCQs.every(q => q && q.question && q.options && q.answer && q.explanation); // Check essential fields
+
+            if (!hasValidReattemptData) {
+                 alert("Error: Cannot reattempt this test because the original question data is missing or invalid (likely saved before this feature or has structure issues). / பிழை: அசல் கேள்வித் தரவு காணவில்லை அல்லது தவறானது என்பதால் இந்தச் சோதனையை மீண்டும் செய்ய முடியாது.");
+                 return;
+            }
+
+            // Use the review summary data (qReview.status) to filter originalMCQs
+            const reviewQuestionsSummary = reviewData.questions || [];
             let questionsToReattempt = [];
 
             switch (mode) {
                 case 'mistaked':
-                    questionsToReattempt = originalMCQs.filter((mcq, index) => reviewQuestions[index]?.status === 'incorrect');
+                    questionsToReattempt = originalMCQs.filter((mcq, index) => reviewQuestionsSummary[index]?.status === 'incorrect');
                     break;
                 case 'skipped':
-                    questionsToReattempt = originalMCQs.filter((mcq, index) => reviewQuestions[index]?.status === 'skipped');
+                    questionsToReattempt = originalMCQs.filter((mcq, index) => reviewQuestionsSummary[index]?.status === 'skipped');
                     break;
                 case 'both':
-                    questionsToReattempt = originalMCQs.filter((mcq, index) => reviewQuestions[index]?.status === 'incorrect' || reviewQuestions[index]?.status === 'skipped');
+                    questionsToReattempt = originalMCQs.filter((mcq, index) => reviewQuestionsSummary[index]?.status === 'incorrect' || reviewQuestionsSummary[index]?.status === 'skipped');
                     break;
                 case 'full':
                 default:
-                    questionsToReattempt = [...originalMCQs];
+                    questionsToReattempt = [...originalMCQs]; // Use a copy
                     break;
             }
 
             if (questionsToReattempt.length === 0) {
-                alert(`No questions found for the selected reattempt mode ('${mode}').`);
+                alert(`No questions found for the selected reattempt mode ('${mode}'). / தேர்ந்தெடுக்கப்பட்ட மறுமுயற்சி முறைக்கு ('${mode}') கேள்விகள் எதுவும் இல்லை.`);
                 return;
             }
 
+            // Create a title for the reattempt session
             const reattemptTitle = `${reviewData.testTitle || 'Test'} (Reattempt: ${mode})`;
 
-            // Start the test with filtered questions
-            // switchView will be called inside startMockTest
+            // Start the test with the filtered questions
+            // startMockTest handles switching view and setting up the test environment
             startMockTest(questionsToReattempt, reattemptTitle);
         }
 
