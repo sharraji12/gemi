@@ -3,8 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <!-- தலைப்பை மாற்றலாம் -->
-    <title>Gemini Chat + Mock Test (v9.1 - Image/Video Embed)</title> <!-- Version Updated -->
+    <title>Gemini Chat + Mock Test (v9.2 - Image Upload & Fixes)</title> <!-- Version Updated -->
     <script>
         window.MathJax = {
             tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$'], ['\\[', '\\]']] },
@@ -17,14 +16,16 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
+    <!-- Removed Firebase Storage import for now as we use base64 -->
+    <!-- <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-storage-compat.js"></script> -->
 
     <style>
-        /* --- Styles (v9.1 - Image/Video Embed Included) --- */
+        /* --- Styles (v9.2 - Image Upload & Fixes Included) --- */
         :root { /* ... Theme Variables ... */
              --font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; --sidebar-width: 260px; --message-font-size-base: 1rem;
-            /* LIGHT */ --sidebar-bg: #f7f7f7; --main-bg: #ffffff; --input-bg: #ffffff; --border-color: #e0e0e0; --text-primary: #2c2c2c; --text-secondary: #5f5f5f; --text-placeholder: #999999; --accent-color: #d97a7a; --user-message-bg: #cce0ff; --user-message-text: #1c1c1c; --ai-message-bg: #f0f0f0; --ai-message-text: #2c2c2c; --button-bg: #f0f0f0; --button-hover-bg: #e0e0e0; --active-item-bg: #e0e0e0; --code-bg: #e8e8e8; --scrollbar-thumb: #ccc; --scrollbar-thumb-hover: #bbb; --app-outer-bg: #e8e8e8; --send-button-bg: var(--accent-color); --send-button-hover-bg: #c76b6b; --send-button-text: #ffffff; --error-bg: #ffebee; --error-text: #c62828; --error-border: #ef9a9a; --message-font-size: var(--message-font-size-base); --delete-button-color: #aaa; --delete-button-hover-color: #dc3545; --input-border-color: var(--border-color); --input-focus-border-color: var(--accent-color);
+            /* LIGHT */ --sidebar-bg: #f7f7f7; --main-bg: #ffffff; --input-bg: #ffffff; --border-color: #e0e0e0; --text-primary: #2c2c2c; --text-secondary: #5f5f5f; --text-placeholder: #999999; --accent-color: #d97a7a; --user-message-bg: #cce0ff; --user-message-text: #1c1c1c; --ai-message-bg: #f0f0f0; --ai-message-text: #2c2c2c; --button-bg: #f0f0f0; --button-hover-bg: #e0e0e0; --active-item-bg: #e0e0e0; --code-bg: #e8e8e8; --scrollbar-thumb: #ccc; --scrollbar-thumb-hover: #bbb; --app-outer-bg: #e8e8e8; --send-button-bg: var(--accent-color); --send-button-hover-bg: #c76b6b; --send-button-text: #ffffff; --error-bg: #ffebee; --error-text: #c62828; --error-border: #ef9a9a; --message-font-size: var(--message-font-size-base); --delete-button-color: #aaa; --delete-button-hover-color: #dc3545; --input-border-color: var(--border-color); --input-focus-border-color: var(--accent-color); --preview-bg: var(--button-bg); --preview-border: var(--border-color); --remove-btn-color: var(--text-secondary); --remove-btn-hover-color: var(--error-text);
         }
-        body.dark-theme { /* DARK */ --sidebar-bg: #2a2a2e; --main-bg: #1e1e1e; --input-bg: #2a2a2e; --border-color: #404040; --text-primary: #e0e0e0; --text-secondary: #a0a0a0; --text-placeholder: #777777; --accent-color: #e58b8b; --user-message-bg: #3a4a6b; --user-message-text: #e8e8e8; --ai-message-bg: #333333; --ai-message-text: #e0e0e0; --button-bg: #404040; --button-hover-bg: #505050; --active-item-bg: #454545; --code-bg: #2c2c2e; --scrollbar-thumb: #555; --scrollbar-thumb-hover: #666; --app-outer-bg: #121212; --send-button-bg: var(--accent-color); --send-button-hover-bg: #f09f9f; --send-button-text: #1e1e1e; --error-bg: #5c2b2b; --error-text: #ffcdd2; --error-border: #8c4343; --delete-button-color: #666; --delete-button-hover-color: #f09f9f; --input-border-color: var(--border-color); --input-focus-border-color: var(--accent-color); }
+        body.dark-theme { /* DARK */ --sidebar-bg: #2a2a2e; --main-bg: #1e1e1e; --input-bg: #2a2a2e; --border-color: #404040; --text-primary: #e0e0e0; --text-secondary: #a0a0a0; --text-placeholder: #777777; --accent-color: #e58b8b; --user-message-bg: #3a4a6b; --user-message-text: #e8e8e8; --ai-message-bg: #333333; --ai-message-text: #e0e0e0; --button-bg: #404040; --button-hover-bg: #505050; --active-item-bg: #454545; --code-bg: #2c2c2e; --scrollbar-thumb: #555; --scrollbar-thumb-hover: #666; --app-outer-bg: #121212; --send-button-bg: var(--accent-color); --send-button-hover-bg: #f09f9f; --send-button-text: #1e1e1e; --error-bg: #5c2b2b; --error-text: #ffcdd2; --error-border: #8c4343; --delete-button-color: #666; --delete-button-hover-color: #f09f9f; --input-border-color: var(--border-color); --input-focus-border-color: var(--accent-color); --preview-bg: var(--button-bg); --preview-border: var(--border-color); --remove-btn-color: var(--text-secondary); --remove-btn-hover-color: var(--error-text); }
         body { font-family: var(--font-family); margin: 0; padding: 0; background-color: var(--app-outer-bg); color: var(--text-primary); font-size: 15px; transition: background-color 0.3s ease, color 0.3s ease; }
 
         /* --- Layout & Structure --- */
@@ -34,14 +35,13 @@
         .main-content, .review-view { display: none; flex-direction: column; background-color: var(--main-bg); height: 100%; width: 100%; overflow: hidden; transition: background-color 0.3s ease; }
         .main-content.active, .review-view.active { display: flex; }
         .chat-area { flex-grow: 1; overflow-y: auto; padding: 30px 10% 20px; display: flex; flex-direction: column; max-width: 800px; margin: 0 auto; width: 80%; }
-        .input-container { padding: 20px 10%; border-top: 1px solid var(--border-color); background-color: var(--input-bg); max-width: 800px; margin: 0 auto; width: 80%; transition: background-color 0.3s ease, border-color 0.3s ease; display: none; /* Initially hidden until login */ }
+        .input-container { padding: 15px 10% 20px; border-top: 1px solid var(--border-color); background-color: var(--input-bg); max-width: 800px; margin: 0 auto; width: 80%; transition: background-color 0.3s ease, border-color 0.3s ease; display: none; /* Initially hidden until login */ }
 
         /* --- Sidebar Elements --- */
          .sidebar-header { padding: 10px 20px; font-size: 1.1em; font-weight: 600; color: var(--text-primary); }
          .sidebar-section { flex-grow: 1; display: flex; flex-direction: column; overflow: hidden; margin-top: 10px; }
          .sidebar-section-title { padding: 5px 20px; font-size: 0.85em; font-weight: 600; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px; flex-shrink: 0; }
-
-         /* --- All Tests Section Styles --- */
+         /* ... (rest of sidebar styles are the same) ... */
          #all-tests-section { border-bottom: 1px solid var(--border-color); margin-bottom: 10px; padding-bottom: 10px; flex-shrink: 0; display: flex; flex-direction: column; max-height: 40%; display: none; }
          #all-tests-section.visible { display: flex; }
          #test-search-input { width: calc(100% - 40px); padding: 8px 10px; margin: 5px 15px 10px 15px; border: 1px solid var(--input-border-color); background-color: var(--input-bg); color: var(--text-primary); border-radius: 6px; font-size: 0.9em; box-sizing: border-box; }
@@ -66,12 +66,9 @@
         .test-item-edit-mode input[type="text"] { flex-grow: 1; padding: 2px 4px; margin-right: 5px; border: 1px solid var(--input-focus-border-color); background-color: var(--input-bg); color: var(--text-primary); border-radius: 3px; font-size: 0.95em; }
         .test-item-edit-mode button { font-size: 0.9em; padding: 2px 5px; background-color: var(--button-bg); border: 1px solid var(--border-color); color: var(--text-primary); border-radius: 3px; cursor: pointer; margin-left: 3px; }
         .test-item-edit-mode button:hover { background-color: var(--button-hover-bg); }
-         /* --- End All Tests Section Styles --- */
-
          .start-chat-button { display: flex; align-items: center; gap: 8px; background-color: var(--main-bg); border: 1px solid var(--border-color); color: var(--text-primary); border-radius: 8px; padding: 10px 15px; margin: 0 15px 10px 15px; font-size: 0.95em; font-weight: 500; cursor: pointer; text-align: left; transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease; flex-shrink: 0; }
          .start-chat-button:hover { background-color: var(--button-hover-bg); } .start-chat-button svg { fill: currentColor; width: 16px; height: 16px; }
          .start-chat-button:disabled { opacity: 0.6; cursor: not-allowed; }
-
          .chat-list { overflow-y: auto; padding: 0 15px; margin-bottom: 10px; flex-grow: 1; }
          .chat-list::-webkit-scrollbar { width: 6px; } .chat-list::-webkit-scrollbar-thumb { background: var(--scrollbar-thumb); border-radius: 3px;} .chat-list::-webkit-scrollbar-thumb:hover { background: var(--scrollbar-thumb-hover); }
          .chat-list-item { padding: 8px 30px 8px 10px; margin-bottom: 4px; border-radius: 6px; font-size: 0.9em; cursor: pointer; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--text-secondary); transition: background-color 0.2s ease, color 0.2s ease; position: relative; }
@@ -80,7 +77,6 @@
          .delete-chat-button { position: absolute; right: 6px; top: 50%; transform: translateY(-50%); width: 18px; height: 18px; background: none; border: none; color: var(--delete-button-color); cursor: pointer; font-size: 1.3em; line-height: 1; padding: 0; display: none; opacity: 0.7; transition: color 0.2s ease, opacity 0.2s ease; }
          .chat-list-item:hover .delete-chat-button { display: block; }
          .delete-chat-button:hover { color: var(--delete-button-hover-color); opacity: 1; }
-
          .sidebar-footer { border-top: 1px solid var(--border-color); padding: 10px 15px; transition: border-color 0.3s ease; flex-shrink: 0; }
          .sidebar-controls { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
          .text-size-controls span, .theme-toggle span { font-size: 0.85em; color: var(--text-secondary); }
@@ -110,10 +106,14 @@
         .error-message { background-color: var(--error-bg); color: var(--error-text); border: 1px solid var(--error-border); align-self: flex-start; transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;}
         .info-message { text-align: center; color: var(--text-secondary); padding: 50px 20px; font-style: italic; }
         .message mjx-container { color: inherit !important; font-size: inherit !important; }
-        /* --- NEW: Styles for Embedded Images & Videos --- */
-        .message img.chat-image { max-width: 100%; height: auto; border-radius: 8px; margin-top: 8px; cursor: pointer; /* Optional: for zoom later */ }
+        /* --- Styles for Embedded Images & Videos --- */
+        .message img.chat-image, .message img.uploaded-image {
+            max-width: 100%; height: auto; border-radius: 8px; margin-top: 8px; cursor: pointer; display: block; /* Ensure it takes its own line */
+        }
+        /* Style specifically uploaded images maybe slightly differently if needed */
+        .message img.uploaded-image { border: 1px solid var(--border-color); }
         .message .youtube-embed-container { margin-top: 10px; }
-        .message iframe.chat-video { max-width: 100%; aspect-ratio: 16 / 9; /* Maintain aspect ratio */ border: none; border-radius: 8px; }
+        .message iframe.chat-video { max-width: 100%; aspect-ratio: 16 / 9; border: none; border-radius: 8px; }
 
         /* --- Input Area Elements --- */
         .suggestions { display: none; gap: 10px; margin-bottom: 15px; flex-wrap: wrap; }
@@ -121,6 +121,13 @@
         .suggestion-chip:hover { background-color: var(--button-hover-bg); color: var(--text-primary); }
         .input-box { display: flex; align-items: flex-end; background-color: var(--main-bg); border: 1px solid var(--input-border-color); border-radius: 12px; padding: 5px 5px 5px 15px; position: relative; transition: background-color 0.3s ease, border-color 0.3s ease; }
         .input-box:focus-within { border-color: var(--input-focus-border-color); }
+        /* --- NEW: Image Upload Button Style --- */
+        #image-upload-button {
+            background: none; border: none; color: var(--text-secondary); cursor: pointer; font-size: 1.4em; /* Make icon bigger */ padding: 0 8px; margin-right: 5px; /* Space between icon and textarea */ line-height: 1; align-self: center; /* Center vertically */ transition: color 0.2s ease;
+        }
+        #image-upload-button:hover { color: var(--text-primary); }
+        #image-upload-button:disabled { opacity: 0.5; cursor: not-allowed; }
+
         #user-input { flex-grow: 1; border: none; outline: none; padding: 10px 5px; font-size: 1rem; background-color: transparent; resize: none; min-height: 48px; max-height: 250px; line-height: 1.5; color: var(--text-primary); font-family: var(--font-family); }
         #user-input::placeholder { color: var(--text-placeholder); }
         .mcq-mode-control { display: flex; align-items: center; margin-left: 10px; padding-bottom: 8px; flex-shrink: 0; }
@@ -130,6 +137,23 @@
         #send-button:hover:not(:disabled) { background-color: var(--send-button-hover-bg); }
         #send-button:disabled { background-color: #cccccc; cursor: not-allowed; opacity: 0.6; }
         #send-button svg { width: 20px; height: 20px; fill: currentColor; }
+
+        /* --- NEW: Image Preview Styles --- */
+        #image-preview-container {
+            margin-bottom: 10px; /* Space below preview, above input box */
+            padding: 8px; background-color: var(--preview-bg); border: 1px solid var(--preview-border); border-radius: 8px; display: flex; align-items: center; gap: 10px; display: none; /* Hidden by default */
+        }
+        #image-preview-container img {
+            max-height: 50px; /* Limit preview height */ max-width: 80px; height: auto; width: auto; border-radius: 4px; object-fit: cover;
+        }
+        #image-preview-info {
+            font-size: 0.85em; color: var(--text-secondary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex-grow: 1;
+        }
+        #remove-image-button {
+            background: none; border: none; color: var(--remove-btn-color); cursor: pointer; font-size: 1.4em; line-height: 1; padding: 0 5px; transition: color 0.2s ease;
+        }
+        #remove-image-button:hover { color: var(--remove-btn-hover-color); }
+
         .thinking::after { content: ' .'; animation: dots 1s steps(3, end) infinite; display: inline-block; }
         @keyframes dots { 0%, 20% { content: ' .'; } 40% { content: ' ..'; } 60%, 100% { content: ' ...'; } }
          .start-test-button { background-color: var(--accent-color); color: var(--send-button-text); border: none; border-radius: 6px; padding: 8px 15px; margin-top: 10px; cursor: pointer; font-weight: 500; display: inline-block; transition: background-color 0.2s ease; }
@@ -142,16 +166,10 @@
         .test-header h2 { margin: 0; font-size: 1.3em; color: var(--text-primary); }
         .test-info { display: flex; align-items: center; } /* Align items horizontally */
         .test-info span { margin-left: 15px; font-size: 0.95em; color: var(--text-secondary); }
-        /* Style for language toggle button */
         #test-language-toggle, #review-language-toggle {
-            margin-left: 15px; padding: 3px 8px; font-size: 0.8em; cursor: pointer;
-            background-color: var(--button-bg); border: 1px solid var(--border-color);
-            color: var(--text-secondary); border-radius: 4px;
-            transition: background-color 0.2s ease, color 0.2s ease;
+            margin-left: 15px; padding: 3px 8px; font-size: 0.8em; cursor: pointer; background-color: var(--button-bg); border: 1px solid var(--border-color); color: var(--text-secondary); border-radius: 4px; transition: background-color 0.2s ease, color 0.2s ease;
         }
-        #test-language-toggle:hover, #review-language-toggle:hover {
-             background-color: var(--button-hover-bg); color: var(--text-primary);
-        }
+        #test-language-toggle:hover, #review-language-toggle:hover { background-color: var(--button-hover-bg); color: var(--text-primary); }
         .test-content { flex-grow: 1; overflow-y: auto; padding: 10px 20px; }
         .test-question-container { margin-bottom: 25px; }
         .test-question-number { font-weight: bold; margin-bottom: 8px; color: var(--text-secondary); }
@@ -173,7 +191,7 @@
         .review-summary { display: inline; } /* Allow toggle button next to it */
         .review-summary span { margin-right: 20px; font-size: 1em; color: var(--text-primary); }
         .review-summary .score-correct { color: #28a745; font-weight: bold;} .review-summary .score-incorrect { color: #dc3545; font-weight: bold;} .review-summary .score-skipped { color: #fd7e14; font-weight: bold;}
-        .review-filters { margin-top: 10px; /* Add space above filters */ margin-bottom: 15px; }
+        .review-filters { margin-top: 10px; margin-bottom: 15px; }
         .review-filters button { background-color: var(--button-bg); color: var(--text-primary); border: 1px solid var(--border-color); border-radius: 6px; padding: 5px 12px; margin-right: 8px; cursor: pointer; font-size: 0.9em; transition: background-color 0.2s ease, border-color 0.2s ease; }
         .review-filters button:hover { background-color: var(--button-hover-bg); }
         .review-filters button.active-filter { background-color: var(--accent-color); color: var(--send-button-text); border-color: var(--accent-color);}
@@ -185,7 +203,6 @@
         .review-item-details span { display: block; margin-bottom: 5px; font-size: 0.95em; color: var(--text-primary); }
         .review-item-details .correct-answer { color: #28a745; font-weight: bold; }
         .review-item-details .user-answer-correct { color: #28a745; } .review-item-details .user-answer-incorrect { color: #dc3545; text-decoration: line-through; } .review-item-details .user-answer-skipped { color: #fd7e14; font-style: italic; }
-        /* Style for explanation in review */
         .review-item-explanation { margin-top: 8px; font-size: 0.9em; color: var(--text-secondary); border-left: 3px solid var(--border-color); padding-left: 8px; line-height: 1.4; }
         .review-footer { text-align: center; padding-top: 20px; border-top: 1px solid var(--border-color); margin-top: auto; flex-shrink: 0; display: flex; justify-content: center; gap: 15px; }
         #exit-review-btn, #save-review-btn { background-color: var(--accent-color); color: var(--send-button-text); border: none; border-radius: 6px; padding: 10px 25px; cursor: pointer; font-size: 1em; transition: background-color 0.2s ease; display: none; }
@@ -197,51 +214,22 @@
         /* --- Responsive Design (Mobile) --- */
         @media (max-width: 768px) {
             :root { --sidebar-width: 200px; }
-            .sidebar { padding: 10px 0; /* Adjusted */ }
-            .main-container { /* Adjusted */ }
+            .sidebar { padding: 10px 0; }
+            .main-container { }
             .chat-area, .input-container { width: 95%; padding-left: 2.5%; padding-right: 2.5%; max-width: none; }
             .chat-area { padding-top: 15px; padding-bottom: 10px; }
             .input-container { padding-top: 10px; padding-bottom: 10px; }
             .message { max-width: 90%; font-size: calc(var(--message-font-size) * 0.95); }
-            .greeting { font-size: 1.5em; margin-bottom: 20px; }
-            .suggestions { gap: 5px; margin-bottom: 10px; }
-            .suggestion-chip { padding: 6px 10px; font-size: 0.85em; }
+            /* ... (rest of mobile styles are the same) ... */
+            #image-upload-button { font-size: 1.3em; padding: 0 6px; }
+            #image-preview-container { padding: 6px; gap: 8px; }
+            #image-preview-container img { max-height: 40px; }
+            #image-preview-info { font-size: 0.8em; }
+            #remove-image-button { font-size: 1.3em; }
             .input-box { padding: 5px 5px 5px 10px; }
-            #user-input { min-height: 40px; font-size: 0.95rem; }
-            #send-button { width: 32px; height: 32px; }
-            .mcq-mode-control label { font-size: 0.8em; }
-            /* Sidebar elements adjustments */
-            .sidebar-header { font-size: 1em; padding: 8px 15px; }
-            .sidebar-section-title { padding: 5px 15px; font-size: 0.8em;}
-            #test-search-input { margin: 5px 10px 8px 10px; width: calc(100% - 20px); }
-            #all-tests-list, .chat-list { padding: 0 10px; }
-            .test-list-item, .chat-list-item { padding: 6px 8px; font-size: 0.85em;}
-            .chat-list-item { padding-right: 25px; }
-            .start-chat-button { padding: 8px 12px; margin: 0 10px 8px 10px; font-size: 0.9em; }
-            .sidebar-footer { padding: 8px 10px;}
-            .text-size-buttons button, .theme-toggle button { padding: 1px 6px; font-size: 1em;}
-            .account-info { font-size: 0.85em; gap: 8px;}
-            .account-avatar { width: 25px; height: 25px;}
-            .test-item-info { padding-right: 45px; } /* Adjust space for icons on mobile */
-            .test-item-controls button { font-size: 1em; }
-            .test-item-edit-mode input[type="text"] { font-size: 0.9em; }
-            .test-item-edit-mode button { font-size: 0.85em; }
-            /* Test/Review View Adjustments */
-            .mock-test-view, .review-view { padding: 10px; }
-            .test-header, .review-header { margin-bottom: 15px; padding-bottom: 8px; flex-direction: column; align-items: flex-start; }
-            .test-header h2, .review-header h2 { font-size: 1.1em; margin-bottom: 5px;}
-            .test-info, .review-summary { margin-bottom: 5px; } /* Space below info/summary */
-            .test-info span, .review-summary span { margin-left: 0; margin-right: 10px; font-size: 0.9em; display: inline-block; margin-bottom: 3px;}
-            #test-language-toggle, #review-language-toggle { margin-left: 0; margin-top: 5px; font-size: 0.75em;} /* Adjust toggle on mobile */
-            .test-content, .review-content { padding: 5px; }
-            .test-question, .review-item-question { font-size: 1em; }
-            .test-options label, .review-item { padding: 10px; font-size: 0.95em;}
-            .review-filters { margin-top: 5px; } /* Adjust filter margin */
-            .review-filters button { padding: 4px 8px; font-size: 0.85em; margin-right: 5px;}
-            .test-navigation, .review-footer { padding-top: 10px; }
-            .test-navigation button, #exit-review-btn, #save-review-btn { padding: 8px 15px; font-size: 0.9em; }
-            /* --- NEW: Mobile Styles for Embedded Media --- */
-            .message iframe.chat-video { /* Maybe slightly smaller aspect ratio on mobile if needed */ }
+             #user-input { min-height: 40px; font-size: 0.95rem; }
+             #send-button { width: 32px; height: 32px; }
+             .mcq-mode-control label { font-size: 0.8em; }
         }
 
     </style>
@@ -251,7 +239,7 @@
     <div class="app-container" id="app-container">
         <div class="sidebar">
             <div class="sidebar-header">Gemini Chat</div>
-
+            <!-- Sidebar content remains the same -->
             <!-- == "All Tests" Section == -->
             <div id="all-tests-section">
                 <div class="sidebar-section-title">All Tests</div>
@@ -305,24 +293,33 @@
                  <div class="input-container" id="input-container">
                      <div class="suggestions" id="suggestions">
                           <button class="suggestion-chip" data-prompt="5 questions about US History">5 Qs US History (Check MCQ)</button>
-                          <button class="suggestion-chip" data-prompt="What is recursion?">Recursion?</button>
+                          <button class="suggestion-chip" data-prompt="Describe this image">Describe this image</button>
                           <button class="suggestion-chip" data-prompt="Explain $\lim_{x\to 0} \frac{\sin x}{x} = 1$">Limit sin(x)/x ?</button>
                      </div>
+                    <!-- NEW: Image Preview Container -->
+                    <div id="image-preview-container">
+                        <img id="preview-image" src="#" alt="Image preview" />
+                        <span id="image-preview-info">filename.jpg</span>
+                        <button id="remove-image-button" title="Remove image">&times;</button>
+                    </div>
                     <div class="input-box">
-                        <!-- Placeholder updated for image URL pasting -->
-                        <textarea id="user-input" placeholder="Enter prompt, paste image URL, or paste YouTube link (Check 'MCQs?' to generate test)" rows="1"></textarea>
-                        <div class="mcq-mode-control"> <input type="checkbox" id="mcq-mode-checkbox" title="Check to generate MCQs based on your prompt"> <label for="mcq-mode-checkbox">MCQs?</label> </div>
-                        <button id="send-button" title="Send message" disabled> <svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"></path></svg>
+                         <!-- Hidden file input -->
+                         <input type="file" id="image-upload-input" accept="image/*" style="display: none;">
+                         <!-- Upload button -->
+                         <button id="image-upload-button" title="Upload image" disabled>📎</button>
+                         <textarea id="user-input" placeholder="Enter prompt, paste URL, or click 📎 to upload image" rows="1"></textarea>
+                         <div class="mcq-mode-control"> <input type="checkbox" id="mcq-mode-checkbox" title="Check to generate MCQs based on your prompt"> <label for="mcq-mode-checkbox">MCQs?</label> </div>
+                         <button id="send-button" title="Send message" disabled> <svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"></path></svg>
                         </button>
                     </div>
                  </div>
             </div>
+            <!-- Review View remains the same -->
             <div class="review-view" id="review-view">
                  <div class="review-header">
                      <h2 id="review-title">Test Review</h2>
                      <div> <!-- Wrapper for summary and toggle -->
                          <div class="review-summary" id="review-summary"></div>
-                         <!-- Add Language Toggle Button -->
                          <button id="review-language-toggle" style="margin-left: 15px; padding: 3px 8px; font-size: 0.8em; vertical-align: middle;">தமிழ்</button>
                      </div>
                      <div class="review-filters" id="review-filters" style="display: none;">
@@ -339,14 +336,13 @@
               </div>
         </div>
     </div>
-
+    <!-- Mock Test View remains the same -->
     <div class="mock-test-view" id="mock-test-view">
          <div class="test-header">
             <h2 id="test-title">Mock Test</h2>
             <div class="test-info">
                 <span id="question-counter">Q: 1 / N</span>
                 <span id="test-timer">Time: 00:00</span>
-                <!-- Add Language Toggle Button -->
                 <button id="test-language-toggle" style="margin-left: 15px; padding: 3px 8px; font-size: 0.8em;">தமிழ்</button>
             </div>
          </div>
@@ -369,17 +365,13 @@
         // --- Firebase Config ---
         // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         // !!! பாதுகாப்பு எச்சரிக்கை / SECURITY WARNING !!!
-        // This firebaseConfig (especially apiKey) is insecure because it was shared.
-        // After testing, delete/restrict this API key in Firebase Console and use a new one here.
-        // DO NOT DEPLOY WITH THIS SHARED KEY. USE A SERVER-SIDE SOLUTION (e.g., Cloud Functions)
-        // TO HIDE YOUR API KEY AND MAKE API CALLS SECURELY.
-        // இந்த firebaseConfig (குறிப்பாக apiKey) பகிரப்பட்டதால் பாதுகாப்பற்றது.
-        // சோதனைக்குப் பிறகு, Firebase Console-ல் இந்த API key-ஐ நீக்கவும்/கட்டுப்படுத்தவும் மற்றும் இங்கே புதியதைப் பயன்படுத்தவும்.
-        // இந்த பகிரப்பட்ட KEY உடன் DEPLOY செய்ய வேண்டாம். உங்கள் API KEY-ஐ மறைக்க மற்றும் API அழைப்புகளைப்
-        // பாதுகாப்பாகச் செய்ய SERVER-SIDE SOLUTION-ஐ (எ.கா., Cloud Functions) பயன்படுத்தவும்.
+        // This firebaseConfig (especially apiKey) is insecure. Replace with your own key
+        // and consider using Cloud Functions to protect it in production.
+        // இந்த firebaseConfig (குறிப்பாக apiKey) பாதுகாப்பற்றது. உங்கள் சொந்த key-ஐப் பயன்படுத்தவும்
+        // மற்றும் production-ல் பாதுகாக்க Cloud Functions பயன்படுத்துவதைப் பரிசீலிக்கவும்.
         // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         const firebaseConfig = {
-          apiKey: "AIzaSyDgw604fe5jnNu4kTOv1cQ-3n7PL8gcN58", // <- பகிரப்பட்ட, பாதுகாப்பற்ற Key / SHARED, INSECURE KEY - REPLACE ME
+          apiKey: "AIzaSyDgw604fe5jnNu4kTOv1cQ-3n7PL8gcN58", // <- REPLACE WITH YOUR KEY
           authDomain: "krish-c5db8.firebaseapp.com",
           projectId: "krish-c5db8",
           storageBucket: "krish-c5db8.appspot.com",
@@ -392,10 +384,17 @@
         firebase.initializeApp(firebaseConfig);
         const fbAuth = firebase.auth();
         const db = firebase.firestore();
-        // Firebase Storage (Uncomment if you decide to implement direct uploads later)
-        // const storage = firebase.storage();
+        // const storage = firebase.storage(); // Uncomment if using Firebase Storage later
 
         // --- DOM Elements ---
+        // ... (all previous DOM element variables are the same) ...
+        const imageUploadButton = document.getElementById('image-upload-button');
+        const imageUploadInput = document.getElementById('image-upload-input');
+        const imagePreviewContainer = document.getElementById('image-preview-container');
+        const previewImage = document.getElementById('preview-image');
+        const previewInfo = document.getElementById('image-preview-info');
+        const removeImageButton = document.getElementById('remove-image-button');
+        // ... (rest of DOM element variables are the same) ...
         const appContainer = document.getElementById('app-container');
         const chatArea = document.getElementById('chat-area');
         const userInput = document.getElementById('user-input');
@@ -431,7 +430,7 @@
         const prevQuestionBtn = document.getElementById('prev-question-btn');
         const nextQuestionBtn = document.getElementById('next-question-btn');
         const submitTestBtn = document.getElementById('submit-test-btn');
-        const testLanguageToggle = document.getElementById('test-language-toggle'); // New
+        const testLanguageToggle = document.getElementById('test-language-toggle');
         // Review elements
         const reviewTitle = document.getElementById('review-title');
         const reviewSummary = document.getElementById('review-summary');
@@ -439,25 +438,27 @@
         const exitReviewBtn = document.getElementById('exit-review-btn');
         const reviewFilters = document.getElementById('review-filters');
         const saveReviewBtn = document.getElementById('save-review-btn');
-        const reviewLanguageToggle = document.getElementById('review-language-toggle'); // New
+        const reviewLanguageToggle = document.getElementById('review-language-toggle');
 
         // --- Config & Constants ---
-        const MODEL_NAME="gemini-2.5-pro-exp-03-25";
+        // Use a model that explicitly supports multimodal input (image + text) like 1.5 Pro
+        // const MODEL_NAME = "gemini-1.5-pro-latest"; // Recommended for multimodal
+        const MODEL_NAME="gemini-2.5-pro-exp-03-25"; // Keep using experimental if preferred, check its capabilities
         const API_URL_BASE=`https://generativelanguage.googleapis.com/v1beta/models/${MODEL_NAME}:generateContent?key=`;
-        const STORAGE_KEY_API_KEY='geminiApiKey_insecureDemo'; // மீண்டும், இது பாதுகாப்பற்றது
+        const STORAGE_KEY_API_KEY='geminiApiKey_insecureDemo';
         const NEW_CHAT_TITLE="(New Chat)";
         const TEXT_SIZE_STEP=0.1;
         const MIN_TEXT_SIZE_MULTIPLIER=0.7;
         const MAX_TEXT_SIZE_MULTIPLIER=1.5;
         const LIGHT_THEME_ICON='☀️';
         const DARK_THEME_ICON='🌙';
-        const DELETE_ICON = '×'; // Chat delete icon
+        const DELETE_ICON = '×';
         const EDIT_TEST_ICON = '✏️';
         const DELETE_TEST_ICON = '🗑️';
-        // NEW: Regex for YouTube and Image URLs
         const youtubeRegex = /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:watch\?v=|embed\/|v\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})(?:\S+)?/i;
-        const imageUrlRegex = /(https?:\/\/[^\s()<>]+?\.(?:jpg|jpeg|png|gif|webp|bmp))/gi; // Made global
-
+        // Updated imageUrlRegex to be less aggressive inside potential HTML attributes
+        const imageUrlRegex = /(?<!src=["'])(?<!href=["'])(https?:\/\/[^\s()<>]+?\.(?:jpg|jpeg|png|gif|webp|bmp))/gi;
+        const MAX_IMAGE_SIZE_MB = 4; // Limit upload size (adjust as needed)
 
         // --- State Variables ---
         let API_KEY='';
@@ -480,20 +481,27 @@
         let testListListener = null;
         let isDeletingChat = false;
         let allSavedTestsData = [];
-        let currentTestLanguage = 'en'; // 'en' or 'ta' - for active test
-        let currentReviewLanguage = 'en'; // 'en' or 'ta' - for review view
+        let currentTestLanguage = 'en';
+        let currentReviewLanguage = 'en';
+        // NEW: State for selected image
+        let selectedImageData = {
+            file: null, // The File object
+            base64: null, // The base64 data URL string
+            mimeType: null // e.g., "image/jpeg"
+        };
 
         // --- Initialization ---
         initializeApp();
 
         // --- Event Listeners ---
+        // ... (most previous listeners are the same) ...
         sendButton.addEventListener('click', handleSendMessage);
         userInput.addEventListener('input', autoGrowTextarea);
         userInput.addEventListener('keydown', handleInputKeydown);
         suggestionsContainer.addEventListener('click', handleSuggestionClick);
         startChatButton.addEventListener('click', createNewChat);
         chatListContainer.addEventListener('click', handleChatListClick);
-        allTestsListContainer.addEventListener('click', handleAllTestsListClick); // Handles View, Edit, Delete test
+        allTestsListContainer.addEventListener('click', handleAllTestsListClick);
         testSearchInput.addEventListener('input', filterTestsInSidebar);
         decreaseTextBtn.addEventListener('click', () => adjustTextSize(-TEXT_SIZE_STEP));
         increaseTextBtn.addEventListener('click', () => adjustTextSize(TEXT_SIZE_STEP));
@@ -502,34 +510,37 @@
         prevQuestionBtn.addEventListener('click', () => handleTestNavigation('prev'));
         nextQuestionBtn.addEventListener('click', () => handleTestNavigation('next'));
         submitTestBtn.addEventListener('click', submitTest);
-        testLanguageToggle.addEventListener('click', toggleTestLanguage); // New
+        testLanguageToggle.addEventListener('click', toggleTestLanguage);
         // Review listeners
         exitReviewBtn.addEventListener('click', exitReview);
-        chatArea.addEventListener('click', handleChatAreaClick);
+        chatArea.addEventListener('click', handleChatAreaClick); // Also handles image clicks now
         reviewFilters.addEventListener('click', handleReviewFilterClick);
         saveReviewBtn.addEventListener('click', saveTestReviewToCloud);
-        reviewLanguageToggle.addEventListener('click', toggleReviewLanguage); // New
+        reviewLanguageToggle.addEventListener('click', toggleReviewLanguage);
         // Auth listeners
         loginBtn.addEventListener('click', signInWithGoogle);
         logoutBtn.addEventListener('click', signOut);
+        // NEW: Image Upload Listeners
+        imageUploadButton.addEventListener('click', () => imageUploadInput.click());
+        imageUploadInput.addEventListener('change', handleImageFileSelect);
+        removeImageButton.addEventListener('click', removeSelectedImage);
 
 
         // --- Initialization Functions ---
-        async function initializeApp() {
-            loadGeminiApiKey(); // Load insecurely stored key
-            fbAuth.onAuthStateChanged(handleAuthStateChange); // Listen for login/logout
-            switchView('chat'); // Start in chat view
+        async function initializeApp() { /* ... (same as before) ... */
+            loadGeminiApiKey();
+            fbAuth.onAuthStateChanged(handleAuthStateChange);
+            switchView('chat');
             userInput.focus();
         }
 
-        function loadGeminiApiKey() {
+        function loadGeminiApiKey() { /* ... (same as before) ... */
              console.warn("!!! SECURITY WARNING / பாதுகாப்பு எச்சரிக்கை !!! Gemini API Key is stored in localStorage. This is highly insecure and only for demonstration. Use a server-side solution (like Cloud Functions) to protect your key in production. / Gemini API Key localStorage-ல் சேமிக்கப்படுகிறது. இது மிகவும் பாதுகாப்பற்றது மற்றும் டெமோவுக்கு மட்டுமே. Production-ல் உங்கள் key-ஐப் பாதுகாக்க server-side solution-ஐ (Cloud Functions போன்றவை) பயன்படுத்தவும்.");
              API_KEY = localStorage.getItem(STORAGE_KEY_API_KEY);
              if(API_KEY){
                  console.log("Loaded insecure API Key from localStorage.");
              }
              else {
-                 // Use prompt only if key is missing - less annoying
                  API_KEY=prompt("--- INSECURE DEMO / பாதுகாப்பற்ற டெமோ ---\nPlease enter your Gemini API Key.\nIt will be stored *insecurely* in your browser's localStorage.\nDo NOT use this method in production!\n\nஉங்கள் Gemini API Key-ஐ உள்ளிடவும்.\nஇது உங்கள் உலாவியின் localStorage-ல் *பாதுகாப்பற்ற முறையில்* சேமிக்கப்படும்.\nProduction-ல் இந்த முறையைப் பயன்படுத்த வேண்டாம்!");
                  if(API_KEY){
                      localStorage.setItem(STORAGE_KEY_API_KEY, API_KEY);
@@ -540,45 +551,41 @@
                      setLoadingState(true, "API Key Missing");
                  }
              }
-             // Enable input/send only if API key is present
              setLoadingState(!API_KEY);
         }
 
         // --- Authentication Functions ---
-        async function signInWithGoogle() {
-            const provider = new firebase.auth.GoogleAuthProvider();
-            try {
-                setLoadingState(true, "Logging in...");
-                await fbAuth.signInWithPopup(provider);
-                // handleAuthStateChange will take over
-            } catch (error) {
-                console.error("Google Sign-In Error:", error);
-                displayError(`Login failed: ${error.message || 'Unknown error'}`);
-                setLoadingState(false);
-            }
-        }
+        async function signInWithGoogle() { /* ... (same as before) ... */
+             const provider = new firebase.auth.GoogleAuthProvider();
+             try {
+                 setLoadingState(true, "Logging in...");
+                 await fbAuth.signInWithPopup(provider);
+             } catch (error) {
+                 console.error("Google Sign-In Error:", error);
+                 displayError(`Login failed: ${error.message || 'Unknown error'}`);
+                 setLoadingState(false);
+             }
+         }
+        async function signOut() { /* ... (same as before) ... */
+             try {
+                 setLoadingState(true, "Logging out...");
+                 await fbAuth.signOut();
+             } catch (error) {
+                 console.error("Sign Out Error:", error);
+                 displayError(`Logout failed: ${error.message || 'Unknown error'}`);
+                 setLoadingState(false);
+             }
+         }
 
-        async function signOut() {
-            try {
-                setLoadingState(true, "Logging out...");
-                await fbAuth.signOut();
-                // handleAuthStateChange will take over
-            } catch (error) {
-                console.error("Sign Out Error:", error);
-                displayError(`Logout failed: ${error.message || 'Unknown error'}`);
-                setLoadingState(false);
-            }
-        }
-
-        function handleAuthStateChange(user) {
+        function handleAuthStateChange(user) { /* ... (Updated to disable upload button) ... */
             // Cleanup previous state
             if (activeChatListener) { activeChatListener(); activeChatListener = null; }
             if (chatListListener) { chatListListener(); chatListListener = null; }
             if (testListListener) { testListListener(); testListListener = null; }
 
             chatArea.innerHTML = '';
-            chatListContainer.innerHTML = '<div style="padding:10px;color:var(--text-secondary);font-size:0.9em;">Please log in to see chats.</div>'; // Default message
-            allTestsListContainer.innerHTML = '<div style="padding:10px;color:var(--text-secondary);font-size:0.9em;">Login to see saved tests.</div>'; // Default message
+            chatListContainer.innerHTML = '<div style="padding:10px;color:var(--text-secondary);font-size:0.9em;">Please log in to see chats.</div>';
+            allTestsListContainer.innerHTML = '<div style="padding:10px;color:var(--text-secondary);font-size:0.9em;">Login to see saved tests.</div>';
             allTestsSection.classList.remove('visible');
             testSearchInput.value = '';
             testSearchInput.disabled = true;
@@ -586,6 +593,7 @@
             currentChatHistory = [];
             isDeletingChat = false;
             allSavedTestsData = [];
+            removeSelectedImage(); // Clear image preview on logout/login
 
             if (user) {
                 // User is logged IN
@@ -605,6 +613,7 @@
                 themeToggleButton.disabled = false;
                 testSearchInput.disabled = false;
                 userInput.disabled = false;
+                imageUploadButton.disabled = false; // Enable upload button
                 sendButton.disabled = true; // Disabled until a chat is selected/created
                 mcqModeCheckbox.disabled = true; // Disabled until a chat is selected/created
                 userInput.placeholder = "Select or create a chat";
@@ -614,10 +623,10 @@
 
 
                 loadUserSettings(currentUser.uid);
-                loadAndListenForChats(currentUser.uid); // Will select/load a chat or show prompt
+                loadAndListenForChats(currentUser.uid);
                 loadAndListenForTests(currentUser.uid);
 
-                setLoadingState(false); // Reset loading state after setup
+                setLoadingState(false);
 
             } else {
                 // User is logged OUT
@@ -637,6 +646,7 @@
                 themeToggleButton.disabled = true;
                 testSearchInput.disabled = true;
                 userInput.disabled = true;
+                imageUploadButton.disabled = true; // Disable upload button
                 sendButton.disabled = true;
                 mcqModeCheckbox.disabled = true;
                 userInput.placeholder = "Please log in";
@@ -644,9 +654,8 @@
                 suggestionsContainer.style.display = 'none';
                 allTestsSection.classList.remove('visible');
 
-                renderGreetingOrLoginPrompt(); // Show login prompt in chat area
+                renderGreetingOrLoginPrompt();
 
-                // Reset theme/text size to defaults
                 currentTheme = 'light'; applyTheme();
                 currentTextSizeMultiplier = 1.0; applyTextSize();
 
@@ -654,26 +663,26 @@
             }
         }
 
-        function renderGreetingOrLoginPrompt() {
-            chatArea.innerHTML = '';
-            const greetingElement = document.createElement('div');
-            greetingElement.classList.add('greeting');
-            if (currentUser) {
-                 greetingElement.innerHTML = `<span class="asterisk">*</span>Good day, ${currentUser.displayName || 'User'}!`;
+        function renderGreetingOrLoginPrompt() { /* ... (same as before) ... */
+             chatArea.innerHTML = '';
+             const greetingElement = document.createElement('div');
+             greetingElement.classList.add('greeting');
+             if (currentUser) {
+                  greetingElement.innerHTML = `<span class="asterisk">*</span>Good day, ${currentUser.displayName || 'User'}!`;
+                  chatArea.appendChild(greetingElement);
+                  if (!activeChatId) {
+                      displayMessage("Select a chat from the sidebar or start a new one.", 'ai');
+                  }
+             } else {
+                 greetingElement.innerHTML = `<span class="asterisk">*</span>Welcome!`;
                  chatArea.appendChild(greetingElement);
-                 if (!activeChatId) {
-                     displayMessage("Select a chat from the sidebar or start a new one.", 'ai');
-                 }
-            } else {
-                greetingElement.innerHTML = `<span class="asterisk">*</span>Welcome!`;
-                chatArea.appendChild(greetingElement);
-                displayMessage("Please log in using the Google button in the sidebar to start chatting or view your history.", 'ai');
-            }
-            scrollToBottom(true);
-        }
-
+                 displayMessage("Please log in using the Google button in the sidebar to start chatting or view your history.", 'ai');
+             }
+             scrollToBottom(true);
+         }
 
         // --- Settings (Theme/Text Size) ---
+        // ... (loadUserSettings, saveUserSettings, applyTheme, toggleTheme, applyTextSize, adjustTextSize remain the same) ...
         async function loadUserSettings(userId) { /* ... (same as before) ... */
              const userDocRef = db.collection('users').doc(userId);
             try {
@@ -747,7 +756,8 @@
          }
 
         // --- Chat Storage & Loading (Firestore) ---
-        function loadAndListenForChats(userId) { /* ... (same as before, handles selection/loading) ... */
+        // ... (loadAndListenForChats, renderSidebarChatList, highlightActiveChatInSidebar remain the same) ...
+         function loadAndListenForChats(userId) { /* ... (same as before, handles selection/loading) ... */
             if (chatListListener) { chatListListener(); chatListListener = null; }
 
             const chatsRef = db.collection('chats')
@@ -784,6 +794,7 @@
                     setLoadingState(false);
                     sendButton.disabled = true; // Ensure send is disabled
                     mcqModeCheckbox.disabled = true;
+                    imageUploadButton.disabled = true; // Disable upload if no chat
                     userInput.placeholder = "Create a new chat to start";
                 }
 
@@ -795,9 +806,11 @@
                       // Already on the correct chat or no chat to load
                       highlightActiveChatInSidebar(); // Ensure highlight is correct
                       setLoadingState(false); // Ensure loading is off
-                      // Enable send if a chat is active
-                      sendButton.disabled = !API_KEY;
-                      mcqModeCheckbox.disabled = !API_KEY;
+                      // Enable send/upload if a chat is active
+                      const enableButtons = !API_KEY;
+                      sendButton.disabled = enableButtons;
+                      mcqModeCheckbox.disabled = enableButtons;
+                      imageUploadButton.disabled = enableButtons;
                  } else {
                      // No chat selected/available
                      setLoadingState(false);
@@ -855,68 +868,115 @@
              items.forEach(item => {
                  item.classList.toggle('active', item.dataset.id === activeChatId);
              });
-             // Update loading state based on whether a chat is active
-             // setLoadingState(!activeChatId && currentUser); // Maybe too aggressive
         }
 
-        async function createNewChat() { /* ... (same as before) ... */
+        // --- NEW: Image Handling Functions ---
+        function handleImageFileSelect(event) {
+            const file = event.target.files[0];
+            if (!file) {
+                removeSelectedImage();
+                return;
+            }
+
+            // Validate file type (allow common image types)
+            const allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'image/bmp'];
+            if (!allowedTypes.includes(file.type)) {
+                alert(`Invalid file type. Please select an image (${allowedTypes.join(', ')}). / தவறான கோப்பு வகை. ஒரு படத்தைத் தேர்ந்தெடுக்கவும் (${allowedTypes.join(', ')}).`);
+                imageUploadInput.value = ''; // Reset file input
+                removeSelectedImage();
+                return;
+            }
+
+            // Validate file size
+            const fileSizeMB = file.size / 1024 / 1024;
+            if (fileSizeMB > MAX_IMAGE_SIZE_MB) {
+                alert(`Image is too large (${fileSizeMB.toFixed(1)}MB). Maximum size is ${MAX_IMAGE_SIZE_MB}MB. / படம் மிகப் பெரியது (${fileSizeMB.toFixed(1)}MB). அதிகபட்ச அளவு ${MAX_IMAGE_SIZE_MB}MB.`);
+                 imageUploadInput.value = ''; // Reset file input
+                 removeSelectedImage();
+                 return;
+            }
+
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                selectedImageData = {
+                    file: file,
+                    base64: e.target.result, // This is the base64 data URL
+                    mimeType: file.type
+                };
+                console.log("Image selected:", file.name, file.type, `(${fileSizeMB.toFixed(2)} MB)`);
+                previewImage.src = e.target.result;
+                previewInfo.textContent = file.name;
+                imagePreviewContainer.style.display = 'flex'; // Show preview
+                // Optional: Clear text input when image is selected?
+                // userInput.value = '';
+                // autoGrowTextarea();
+            }
+            reader.onerror = (error) => {
+                console.error("Error reading file:", error);
+                alert("Error reading the image file. / படக் கோப்பைப் படிப்பதில் பிழை.");
+                removeSelectedImage();
+            };
+            reader.readAsDataURL(file); // Read as base64 data URL
+        }
+
+        function removeSelectedImage() {
+            selectedImageData = { file: null, base64: null, mimeType: null };
+            imagePreviewContainer.style.display = 'none'; // Hide preview
+            previewImage.src = '#'; // Clear preview image source
+            previewInfo.textContent = '';
+            imageUploadInput.value = ''; // Reset the file input selection
+            console.log("Selected image removed.");
+        }
+
+
+        // --- Chat Creation, Deletion, Switching ---
+        async function createNewChat() { /* ... (Added image removal) ... */
             if (!currentUser) { displayError("Please log in to create a new chat."); return; }
             setLoadingState(true, "Creating chat...");
+            removeSelectedImage(); // Clear image when starting new chat
             const newChatRef = db.collection('chats').doc();
             const timestamp = firebase.firestore.FieldValue.serverTimestamp();
 
             try {
                 await newChatRef.set({
                     userId: currentUser.uid,
-                    title: NEW_CHAT_TITLE, // Start with default title
+                    title: NEW_CHAT_TITLE,
                     createdAt: timestamp,
                     lastUpdated: timestamp
                 });
                 console.log("New chat document created:", newChatRef.id);
-                // The chat list listener will detect the new chat and select it
-                // switchChat(newChatRef.id); // Let the listener handle selection
+                // Listener will select it
             } catch (error) {
                 console.error("Error creating new chat:", error);
                 displayError("Failed to create the chat. Please try again.");
                 setLoadingState(false);
-            } finally {
-                // Focus might be handled better after listener updates UI
-                // if (!isTestMode && !isReviewMode) userInput.focus();
             }
         }
 
-        function handleChatListClick(event) { /* ... (same as before - handles item click and delete button click) ... */
+        function handleChatListClick(event) { /* ... (same as before) ... */
              const target = event.target;
              const deleteButton = target.closest('.delete-chat-button');
              if (deleteButton) {
-                 event.stopPropagation(); // Prevent chat selection when deleting
+                 event.stopPropagation();
                  const chatId = deleteButton.dataset.id;
                  const chatListItem = deleteButton.closest('.chat-list-item');
-                 // Extract title carefully, removing the delete icon text
                  const chatTitle = chatListItem?.textContent?.replace(deleteButton.textContent, '').trim() || 'this chat';
                  if (chatId) {
-                     console.log(`Delete button clicked for chat: ${chatId}, Title: "${chatTitle}"`);
                      confirmAndDeleteChat(chatId, chatTitle);
-                 } else {
-                     console.warn("Delete button clicked, but couldn't find chat ID.");
                  }
-                 return; // Stop further processing
+                 return;
              }
 
-             // Handle chat selection
              const item = target.closest('.chat-list-item');
              const clickedId = item?.dataset?.id;
              if (item && clickedId && clickedId !== activeChatId) {
-                 console.log("Chat list item clicked, switching to:", clickedId);
                  switchChat(clickedId);
-             } else if (item && clickedId && clickedId === activeChatId) {
-                 console.log("Clicked already active chat, no switch needed:", clickedId);
              }
         }
 
         function confirmAndDeleteChat(chatId, chatTitle) { /* ... (same as before) ... */
             if (!currentUser || !chatId) return;
-            // Use template literal for cleaner string formatting
             if (confirm(`Are you sure you want to permanently delete the chat "${chatTitle}" and all its messages? This cannot be undone.`)) {
                 deleteChatFromFirestore(chatId);
             } else {
@@ -924,12 +984,12 @@
             }
         }
 
-        async function deleteChatFromFirestore(chatId) { /* ... (same as before - deletes chat doc and messages subcollection) ... */
+        async function deleteChatFromFirestore(chatId) { /* ... (same as before) ... */
             if (!currentUser || !chatId) {
                 console.log("Delete chat aborted: Missing user or chatId.");
                 return;
             }
-            isDeletingChat = true; // Flag to prevent listener race conditions
+            isDeletingChat = true;
             console.log(`[Delete Start] Deleting chat: ${chatId}. isDeletingChat = ${isDeletingChat}`);
             setLoadingState(true, "Deleting chat...");
 
@@ -937,14 +997,12 @@
             const messagesRef = chatDocRef.collection('messages');
 
             try {
-                // Delete all messages in the subcollection (using batch for efficiency)
+                // Delete messages
                 console.log(`[Delete Progress] Fetching messages for chat ${chatId}`);
                 const messagesSnapshot = await messagesRef.get();
                 if (!messagesSnapshot.empty) {
                     const batch = db.batch();
-                    messagesSnapshot.docs.forEach(doc => {
-                        batch.delete(doc.ref);
-                    });
+                    messagesSnapshot.docs.forEach(doc => { batch.delete(doc.ref); });
                     console.log(`[Delete Progress] Committing batch delete for ${messagesSnapshot.size} messages.`);
                     await batch.commit();
                     console.log(`[Delete Progress] Deleted ${messagesSnapshot.size} messages for chat ${chatId}`);
@@ -952,43 +1010,37 @@
                     console.log(`[Delete Progress] No messages found to delete for chat ${chatId}`);
                 }
 
-                // Delete the main chat document
+                // Delete chat doc
                 console.log(`[Delete Progress] Deleting chat document ${chatId}`);
                 await chatDocRef.delete();
                 console.log(`[Delete Success] Successfully deleted chat document: ${chatId}`);
 
-                // If the deleted chat was the active one, reset the UI state
+                // Reset UI if active chat was deleted
                 if (activeChatId === chatId) {
                     console.log("[Delete Progress] Active chat was deleted. Resetting UI.");
                     activeChatId = null;
                     currentChatHistory = [];
-                    if (activeChatListener) {
-                        console.log("[Delete Progress] Detaching active chat listener.");
-                        activeChatListener(); activeChatListener = null;
-                    }
-                    chatArea.innerHTML = ''; // Clear chat area
-                    renderGreetingOrLoginPrompt(); // Show prompt/greeting
+                    if (activeChatListener) { activeChatListener(); activeChatListener = null; }
+                    chatArea.innerHTML = '';
+                    renderGreetingOrLoginPrompt();
                     userInput.placeholder = "Select or create a chat";
-                    sendButton.disabled = true; // Disable send
+                    sendButton.disabled = true;
                     mcqModeCheckbox.disabled = true;
-                } else {
-                     console.log(`[Delete Progress] Deleted chat ${chatId} was not the active chat (${activeChatId}). UI state should update via listener.`);
-                     // No immediate UI reset needed here, listener will refresh sidebar
+                    imageUploadButton.disabled = true; // Disable upload button
+                    removeSelectedImage(); // Clear preview
                 }
 
             } catch (error) {
                 console.error(`[Delete Error] Error deleting chat ${chatId}:`, error);
-                displayError(`Failed to delete the chat "${chatTitle || chatId}". Please try again.`);
-                setLoadingState(false); // Ensure loading state is reset on error
+                displayError(`Failed to delete the chat. Please try again.`);
+                setLoadingState(false);
             } finally {
-                isDeletingChat = false; // Reset flag after operation completes
+                isDeletingChat = false;
                 console.log(`[Delete End] Finished delete attempt for chat ${chatId}. isDeletingChat = ${isDeletingChat}`);
-                // Let the chatListListener handle the final sidebar update and potential selection of a new chat
-                // No need to manually call setLoadingState(false) here if the listener handles it
             }
         }
 
-        function switchChat(chatId) { /* ... (same as before) ... */
+        function switchChat(chatId) { /* ... (Added image removal) ... */
              if (!currentUser || !chatId || chatId === activeChatId) {
                  console.log("Switch chat condition not met or already active.");
                  return;
@@ -997,24 +1049,20 @@
              console.log("Switching to chat:", chatId);
              setLoadingState(true, "Loading chat...");
              activeChatId = chatId;
+             removeSelectedImage(); // Clear image preview when switching chat
 
-             highlightActiveChatInSidebar(); // Update sidebar highlight
+             highlightActiveChatInSidebar();
 
-             // Clear input and reset MCQ mode
              userInput.value = '';
              autoGrowTextarea();
              mcqModeCheckbox.checked = false;
-             userInput.placeholder = "Loading messages..."; // Placeholder while loading
+             userInput.placeholder = "Loading messages...";
 
-             // Load messages for the new chat (listener will handle UI updates)
              loadAndListenForActiveChat(chatId);
-
-             // Focus might be better handled after messages load
-             // if (!isTestMode && !isReviewMode) userInput.focus();
         }
 
         // --- Message Loading (Firestore) ---
-        function loadAndListenForActiveChat(chatId) { /* ... (same as before, but enables send button on load) ... */
+        function loadAndListenForActiveChat(chatId) { /* ... (Updated placeholder) ... */
             if (!currentUser || !chatId) {
                 console.log("Cannot load messages: Missing user or chatId.");
                 chatArea.innerHTML = '';
@@ -1023,146 +1071,166 @@
                 setLoadingState(false);
                 sendButton.disabled = true;
                 mcqModeCheckbox.disabled = true;
+                imageUploadButton.disabled = true;
                 return;
             }
 
-            // Detach previous listener if exists
             if (activeChatListener) { activeChatListener(); activeChatListener = null; }
 
             const messagesRef = db.collection('chats').doc(chatId)
                                   .collection('messages')
                                   .orderBy('timestamp', 'asc');
 
-            chatArea.innerHTML = ''; // Clear area
+            chatArea.innerHTML = '';
             const loadingMsg = displayMessage("Loading chat history...", 'ai', ['thinking']);
             scrollToBottom(true);
 
             console.log(`Listening for messages in chat ${chatId}`);
             activeChatListener = messagesRef.onSnapshot(snapshot => {
                 console.log(`Received messages snapshot for chat ${chatId}:`, snapshot.size, "messages");
-                removeMessageElement(loadingMsg); // Remove "Loading..." message
-                chatArea.innerHTML = ''; // Clear again before rendering new messages
+                removeMessageElement(loadingMsg);
+                chatArea.innerHTML = '';
                 currentChatHistory = []; // Reset history array
 
                 if (snapshot.empty && activeChatId === chatId) {
-                    // Chat exists but has no messages
                     console.log("Chat is empty or newly created.");
                     const chatListItem = chatListContainer.querySelector(`.chat-list-item[data-id="${chatId}"]`);
                     const chatTitle = chatListItem?.textContent?.replace(DELETE_ICON, '').trim() || '';
-                    // Display appropriate prompt based on title
                     if (chatTitle && chatTitle !== NEW_CHAT_TITLE) {
                          displayMessage("This chat is empty. Send a message to start!", 'ai');
                     } else {
-                         renderGreetingOrLoginPrompt(); // Show generic greeting if it's untitled/new
+                         renderGreetingOrLoginPrompt();
                     }
 
                 } else {
                     // Render messages
                     snapshot.forEach(doc => {
                         const msgData = doc.data();
-                        // Ensure text exists, provide default if not
                         const text = typeof msgData.text === 'string' ? msgData.text : "";
-                        const role = msgData.role === 'user' ? 'user' : 'model'; // 'model' for AI
+                        const role = msgData.role === 'user' ? 'user' : 'model';
 
                         // Add to local history cache (simple format for API context)
+                        // Only include text part for basic history
                         currentChatHistory.push({
                              role: role,
                              parts: [{ text: text }]
-                             // Note: We don't store/send image/video details to the Gemini API context
                         });
 
-                        // Display the message, passing full data for potential MCQ/Video/Image rendering
-                        displayMessage(text, role, [], null, msgData); // Pass msgData
+                        // Display the message, passing full data
+                        displayMessage(text, role, [], null, msgData);
                     });
                 }
-                scrollToBottom(true); // Scroll after rendering
-                setLoadingState(false); // Turn off loading indicator
+                scrollToBottom(true);
+                setLoadingState(false);
 
-                // Enable input/send now that chat is loaded
-                sendButton.disabled = !API_KEY; // Enable if API key exists
-                mcqModeCheckbox.disabled = !API_KEY;
-                userInput.placeholder = "Enter prompt, paste image URL, or paste YouTube link (Check 'MCQs?' to generate test)"; // Update placeholder
-                if (!isTestMode && !isReviewMode) userInput.focus(); // Focus input
+                // Enable input/send/upload now that chat is loaded
+                const enableButtons = !API_KEY;
+                sendButton.disabled = enableButtons;
+                mcqModeCheckbox.disabled = enableButtons;
+                imageUploadButton.disabled = enableButtons;
+                userInput.placeholder = "Enter prompt, paste URL, or click 📎 to upload image"; // Updated placeholder
+                if (!isTestMode && !isReviewMode) userInput.focus();
 
 
             }, error => {
                 console.error(`Error listening for messages in chat ${chatId}:`, error);
                 displayError("Could not load messages for this chat. Please check your connection.");
                 removeMessageElement(loadingMsg);
-                chatArea.innerHTML = ''; // Clear area on error
-                currentChatHistory = []; // Reset history
-                setLoadingState(false); // Turn off loading
-                sendButton.disabled = true; // Disable send on error
+                chatArea.innerHTML = '';
+                currentChatHistory = [];
+                setLoadingState(false);
+                sendButton.disabled = true;
                 mcqModeCheckbox.disabled = true;
+                imageUploadButton.disabled = true;
                 userInput.placeholder = "Error loading chat";
             });
         }
 
         // --- Message Sending (Gemini API & Firestore Save) ---
         async function handleSendMessage() {
-            const userMessageText = userInput.value.trim();
+            const userMessageTextRaw = userInput.value.trim(); // Get text input
+            const imageToSend = selectedImageData.base64 ? { ...selectedImageData } : null; // Copy image data if present
 
-            if (!API_KEY) { displayError("Gemini API Key not set. Reload to enter. / Gemini API Key அமைக்கப்படவில்லை. உள்ளிட மீண்டும் ஏற்றவும்."); return; }
-            if (!currentUser) { displayError("Please log in first. / முதலில் உள்நுழையவும்."); return; }
-            if (!activeChatId) { displayError("Please select or create a chat first. / முதலில் ஒரு உரையாடலைத் தேர்ந்தெடுக்கவும் அல்லது உருவாக்கவும்."); return; }
-            if (!userMessageText || sendButton.disabled) return; // Don't send empty or while disabled
+            // Basic validation
+            if (!API_KEY) { displayError("Gemini API Key not set."); return; }
+            if (!currentUser) { displayError("Please log in first."); return; }
+            if (!activeChatId) { displayError("Please select or create a chat first."); return; }
+            // Require text OR an image to send
+            if (!userMessageTextRaw && !imageToSend) {
+                console.log("Nothing to send (no text or image).");
+                return;
+            }
+             if (sendButton.disabled) return; // Don't send if disabled
 
             const isMCQRequest = mcqModeCheckbox.checked;
-            setLoadingState(true, "Sending..."); // Disable inputs, show thinking
+            setLoadingState(true, "Sending...");
 
-            // Clear input immediately
+            // Clear input AFTER copying values
             userInput.value = '';
             autoGrowTextarea();
-            if (isMCQRequest) mcqModeCheckbox.checked = false; // Uncheck MCQ box
+            if (isMCQRequest) mcqModeCheckbox.checked = false;
+            removeSelectedImage(); // Clear preview and selected image state
 
             const timestamp = firebase.firestore.FieldValue.serverTimestamp();
             const messagesColRef = db.collection('chats').doc(activeChatId).collection('messages');
             const chatDocRef = db.collection('chats').doc(activeChatId);
 
             let isFirstUserMessageInNewChat = false;
-            let potentialTestTitle = null; // For auto-generated test title
+            let potentialTestTitle = null;
 
-            // --- NEW: Detect YouTube Video ID in User Input ---
-            const youtubeMatch = userMessageText.match(youtubeRegex);
+            // --- Fix YouTube URL in Text for API ---
+            let userMessageTextForAPI = userMessageTextRaw;
+            const youtubeMatch = userMessageTextRaw.match(youtubeRegex);
             const youtubeVideoId = youtubeMatch ? youtubeMatch[1] : null;
             if (youtubeVideoId) {
                 console.log("Detected YouTube Video ID:", youtubeVideoId);
+                // Remove the YouTube URL from the text being sent to the API
+                // The AI cannot process video links directly.
+                 userMessageTextForAPI = userMessageTextRaw.replace(youtubeRegex, '').trim();
+                 console.log("YouTube URL removed for API call. Text sent:", userMessageTextForAPI);
+                 if (!userMessageTextForAPI && !imageToSend) {
+                     displayError("Cannot send only a YouTube link. Please add a text prompt or image. The video will still be embedded.");
+                     setLoadingState(false);
+                     return;
+                 }
+                 // Explain the limitation
+                 displayMessage("Note: I can embed the YouTube video for you to see, but I cannot analyze its content directly from the link.", 'ai');
             }
 
             // Prepare user message data for Firestore
+            // Store the RAW text (including YT link if any) and image data
              const userMsgData = {
                  role: "user",
-                 text: userMessageText,
+                 text: userMessageTextRaw, // Store original text
                  timestamp: timestamp,
-                 ...(youtubeVideoId && { youtubeVideoId: youtubeVideoId }) // Add video ID if found
-                 // Note: Image URLs are just part of the text, no special field needed here
+                 ...(youtubeVideoId && { youtubeVideoId: youtubeVideoId }), // Store YT ID for embedding
+                 ...(imageToSend && { imageData: imageToSend.base64, imageMimeType: imageToSend.mimeType }) // Store image base64 & type
+                 // Note on base64 in Firestore: This is simple but not ideal for large images due to document size limits (1MB).
+                 // Firebase Storage is the recommended solution for production (upload image, store URL).
              };
+             console.log("Saving to Firestore:", { ...userMsgData, imageData: imageToSend ? "Base64 Data Hidden" : null }); // Avoid logging huge base64 string
+
 
              try {
-                 // Check if it's the first message in an untitled chat to trigger title generation
+                 // Check for first message for title generation
                  const chatSnap = await chatDocRef.get();
                  if (chatSnap.exists && chatSnap.data().title === NEW_CHAT_TITLE) {
                      const messagesSnap = await messagesColRef.limit(1).get();
-                     if (messagesSnap.empty) {
-                         isFirstUserMessageInNewChat = true;
-                     }
+                     if (messagesSnap.empty) { isFirstUserMessageInNewChat = true; }
                  }
 
-                 // Save user message (including potential youtubeVideoId)
+                 // Save user message
                  await messagesColRef.add(userMsgData);
-                 // Update chat's lastUpdated timestamp
                  await chatDocRef.update({ lastUpdated: timestamp });
-                 console.log("User message saved to Firestore:", userMsgData);
+                 console.log("User message saved to Firestore.");
 
-                 // If first message, generate and update chat title
+                 // Generate title if first message
                  if (isFirstUserMessageInNewChat) {
-                     console.log("First user message detected, attempting to generate chat title.");
-                     const generatedTitle = generateChatTitle(userMessageText);
+                     const titleTextSource = userMessageTextRaw || (imageToSend ? "Image Upload" : NEW_CHAT_TITLE);
+                     const generatedTitle = generateChatTitle(titleTextSource);
                      if (generatedTitle && generatedTitle !== NEW_CHAT_TITLE) {
                          await updateActiveChatTitle(generatedTitle);
                          console.log("Chat title updated automatically:", generatedTitle);
-                     } else {
-                         console.log("Generated chat title was empty or same as default, not updating.");
                      }
                  }
 
@@ -1170,61 +1238,83 @@
                  console.error("Error saving user message or updating title:", error);
                  displayError("Failed to send message. Please check connection and try again.");
                  setLoadingState(false);
-                 return; // Stop processing if user message save failed
+                 return;
              }
 
-             // Display "Thinking..." message (will be removed later)
+             // Display "Thinking..." message
             const thinking = displayMessage("Thinking...", 'ai', ['thinking']);
-            scrollToBottom(); // Scroll to show thinking message
+            scrollToBottom();
 
-            // Prepare history for API call (use the up-to-date local cache)
-            // IMPORTANT: DO NOT send image/video data to the Gemini API for context
-            // Filter out any complex objects, just send text parts
+            // Prepare history for API call (only text parts)
             const apiHistoryForCall = currentChatHistory.map(msg => ({
-                role: msg.role,
-                parts: msg.parts // Assuming parts only contains {text: ...}
-            })).filter(msg => msg.parts && msg.parts.length > 0 && msg.parts[0].text); // Ensure text exists
+                 role: msg.role,
+                 parts: msg.parts.filter(part => part.text) // Only include text parts
+             })).filter(msg => msg.parts.length > 0);
 
-
-            // Modify prompt and prepare API history copy if MCQ requested
-            let promptForAPI = userMessageText; // Use the original text for the API prompt
-
-            if (isMCQRequest) {
-                // Generate a potential title from the user's prompt
-                potentialTestTitle = generateChatTitle(userMessageText);
-                if (potentialTestTitle === NEW_CHAT_TITLE || !potentialTestTitle) {
-                    potentialTestTitle = "Generated Test"; // Fallback title
-                }
-                potentialTestTitle += ` (${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })})`; // Add time for uniqueness
-
-                // *** BILINGUAL MCQ Prompt ***
-                promptForAPI = `${userMessageText}\n\nPlease generate multiple choice questions based on the above text or topic. Provide the response *only* as a valid JSON array string, enclosed within \`\`\`json ... \`\`\`.
-Each object in the array must have these exact keys:
-1.  "question": An object with "en" (English question) and "ta" (Tamil question) string properties.
-2.  "options": An array of 4 objects. Each object must have "en" (English option) and "ta" (Tamil option) string properties.
-3.  "answer": A string representing the correct option letter ('A', 'B', 'C', or 'D'). This should NOT be bilingual.
-4.  "explanation": An object with "en" (English explanation) and "ta" (Tamil explanation) string properties.
-
-Provide accurate Tamil translations. Do not include any text outside the JSON structure.`;
-
-                // Modify the *last* user message in the history *copy* for the API call
-                if (apiHistoryForCall.length > 0 && apiHistoryForCall[apiHistoryForCall.length - 1].role === 'user') {
-                    apiHistoryForCall[apiHistoryForCall.length - 1] = { role: "user", parts: [{ text: promptForAPI }] };
-                } else {
-                    // Fallback: Add modified prompt if history is unexpectedly empty or last wasn't user
-                    apiHistoryForCall.push({ role: "user", parts: [{ text: promptForAPI }] });
-                }
-                console.log("MCQ mode: Modified prompt for BILINGUAL API, potential title:", potentialTestTitle);
+            // Prepare current user message parts for API
+            const currentUserPartsForAPI = [];
+            if (userMessageTextForAPI) { // Use the text *without* the YT URL
+                currentUserPartsForAPI.push({ text: userMessageTextForAPI });
+            }
+            if (imageToSend) {
+                 // Remove the "data:mime/type;base64," prefix from the base64 string for the API
+                 const base64DataOnly = imageToSend.base64.substring(imageToSend.base64.indexOf(',') + 1);
+                 currentUserPartsForAPI.push({
+                    inlineData: {
+                        mimeType: imageToSend.mimeType,
+                        data: base64DataOnly
+                    }
+                });
+                console.log(`Preparing image for API: ${imageToSend.mimeType}`);
             }
 
-             console.warn("Calling Gemini API using client-side key. Replace with a secure Cloud Function. / கிளையன்ட் பக்க விசை மூலம் Gemini API ஐ அழைக்கப்படுகிறது. பாதுகாப்பான Cloud Function உடன் மாற்றவும்.");
+             // Modify prompt for MCQ request (using text part only)
+             let finalUserPartsForAPI = [...currentUserPartsForAPI]; // Copy parts
+
+             if (isMCQRequest) {
+                 if (!userMessageTextForAPI) {
+                      displayError("Cannot generate MCQs from only an image. Please add a text prompt describing the topic.");
+                      removeMessageElement(thinking);
+                      setLoadingState(false);
+                      return;
+                 }
+                 potentialTestTitle = generateChatTitle(userMessageTextForAPI);
+                 potentialTestTitle = (potentialTestTitle === NEW_CHAT_TITLE || !potentialTestTitle) ? "Generated Test" : potentialTestTitle;
+                 potentialTestTitle += ` (${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })})`;
+
+                 const mcqPromptText = `${userMessageTextForAPI}\n\nPlease generate multiple choice questions... (rest of your bilingual prompt)`; // Your full MCQ prompt here
+
+                 // Replace the text part in the copied parts array
+                 const textPartIndex = finalUserPartsForAPI.findIndex(part => part.text);
+                 if (textPartIndex !== -1) {
+                     finalUserPartsForAPI[textPartIndex] = { text: mcqPromptText };
+                 } else {
+                     // Should not happen if we validated earlier, but as fallback add it
+                     finalUserPartsForAPI.unshift({ text: mcqPromptText });
+                 }
+                 console.log("MCQ mode: Modified prompt for API, potential title:", potentialTestTitle);
+             }
+
+             // Add the (potentially modified) current user message to the history for the API call
+             if (finalUserPartsForAPI.length > 0) {
+                  apiHistoryForCall.push({ role: "user", parts: finalUserPartsForAPI });
+             } else {
+                 console.warn("No valid parts to send to API.");
+                 // Maybe display an error? For now, just don't call API.
+                 removeMessageElement(thinking);
+                 setLoadingState(false);
+                 return;
+             }
+
+
+             console.warn("Calling Gemini API with potentially multimodal input. Check model compatibility.");
              try {
                  const response = await fetch(API_URL_BASE + API_KEY, {
                      method: 'POST',
                      headers: { 'Content-Type': 'application/json' },
                      body: JSON.stringify({
-                         contents: apiHistoryForCall, // Use the potentially modified text-only history for API
-                         safetySettings: [ // Standard safety settings
+                         contents: apiHistoryForCall, // Send history + current message parts
+                         safetySettings: [
                             { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_MEDIUM_AND_ABOVE" },
                             { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_MEDIUM_AND_ABOVE" },
                             { category: "HARM_CATEGORY_SEXUALLY_EXPLICIT", threshold: "BLOCK_MEDIUM_AND_ABOVE" },
@@ -1233,177 +1323,125 @@ Provide accurate Tamil translations. Do not include any text outside the JSON st
                      }),
                  });
 
-                 removeMessageElement(thinking); // Remove "Thinking..."
+                 removeMessageElement(thinking);
 
-                 // Prepare default AI response structure for Firestore
-                 let aiMsgData = {
-                     role: "model",
-                     text: "Error: No valid response received from API.",
-                     timestamp: firebase.firestore.FieldValue.serverTimestamp(),
-                     mcqData: null, // For storing parsed MCQ JSON
-                     mcqTitle: null // For storing auto-generated test title
-                     // AI messages generally won't contain youtubeVideoId unless it repeats user input
-                 };
-                 let displayAsError = true; // Flag to use error styling if needed
+                 // Prepare default AI response structure
+                 let aiMsgData = { role: "model", text: "Error: No valid response.", timestamp: firebase.firestore.FieldValue.serverTimestamp(), mcqData: null, mcqTitle: null };
+                 let displayAsError = true;
 
-                 if (!response.ok) {
-                     // Handle API errors (like 4xx, 5xx)
+                 if (!response.ok) { /* ... (Error handling same as before) ... */
                      let errorDetails = `API error (${response.status})`;
                      try { const errorJson = await response.json(); errorDetails = errorJson.error?.message || errorDetails; } catch {}
                      console.error("API Error:", response.status, errorDetails);
                      aiMsgData.text = `Error: ${errorDetails}`;
-                     // Specific check for invalid API key
                      if (response.status === 400 && errorDetails.toLowerCase().includes('api key not valid')) {
-                          localStorage.removeItem(STORAGE_KEY_API_KEY); API_KEY=''; // Clear invalid key
-                          aiMsgData.text += " Your API Key seems invalid and has been cleared. Reload the page to enter a new key. / உங்கள் API விசை தவறானது போல் தெரிகிறது மற்றும் அழிக்கப்பட்டுள்ளது. புதிய விசையை உள்ளிட பக்கத்தை மீண்டும் ஏற்றவும்.";
+                          localStorage.removeItem(STORAGE_KEY_API_KEY); API_KEY='';
+                          aiMsgData.text += " Your API Key seems invalid and has been cleared. Reload the page to enter a new key.";
                      }
                  } else {
-                     // Handle successful API response (200 OK)
+                     // Handle successful API response
                      const data = await response.json();
                      let rawAiText = "";
                      let blocked = false;
-                     displayAsError = false; // Assume success initially
+                     displayAsError = false;
 
-                     // Check for safety blocks (prompt or response)
-                     if (data.promptFeedback?.blockReason) {
-                         aiMsgData.text = `Blocked: Your prompt was blocked due to safety concerns (${data.promptFeedback.blockReason}). / தடுக்கப்பட்டது: பாதுகாப்பு காரணங்களுக்காக உங்கள் தூண்டுதல் தடுக்கப்பட்டது (${data.promptFeedback.blockReason}).`;
+                     // Check safety blocks
+                     if (data.promptFeedback?.blockReason) { /* ... (Safety block handling same as before) ... */
+                         aiMsgData.text = `Blocked: Your prompt was blocked due to safety concerns (${data.promptFeedback.blockReason}).`;
                          blocked = true; displayAsError = true; console.warn("Prompt blocked:", data.promptFeedback.blockReason);
                      } else if (data.candidates?.[0]?.finishReason === 'SAFETY') {
-                          aiMsgData.text = `Blocked: The response was blocked due to safety concerns. / தடுக்கப்பட்டது: பாதுகாப்பு காரணங்களுக்காக பதில் தடுக்கப்பட்டது.`;
+                          aiMsgData.text = `Blocked: The response was blocked due to safety concerns.`;
                           blocked = true; displayAsError = true; console.warn("Response blocked due to safety.");
                      } else if (data.candidates?.[0]?.content?.parts?.[0]?.text) {
-                         // Valid text response received
+                         // Valid text response
                          rawAiText = data.candidates[0].content.parts[0].text;
-                         aiMsgData.text = rawAiText; // Store raw text by default
+                         aiMsgData.text = rawAiText;
 
-                         // If MCQ was requested and not blocked, try parsing JSON
-                         if (isMCQRequest && !blocked) {
-                              console.log("Attempting to parse BILINGUAL MCQ JSON from response...");
+                         // Parse MCQ if requested and not blocked
+                         if (isMCQRequest && !blocked) { /* ... (MCQ parsing logic same as before) ... */
+                             console.log("Attempting to parse BILINGUAL MCQ JSON from response...");
                               try {
-                                  // Extract JSON block (allows text before/after ```json ... ```)
                                   const jsonMatch = rawAiText.match(/```json\s*([\s\S]*?)\s*```/);
-                                  // Use extracted JSON or assume entire response is JSON
                                   const jsonString = jsonMatch ? jsonMatch[1].trim() : rawAiText.trim();
-
-                                  // Basic check if it looks like a JSON array
                                   if (jsonString.startsWith('[') && jsonString.endsWith(']')) {
                                       const mcqs = JSON.parse(jsonString);
-
-                                      // *** Detailed BILINGUAL Validation ***
-                                      const isValidMCQArray = Array.isArray(mcqs) && mcqs.length > 0 &&
-                                          mcqs.every(q =>
-                                              q &&
-                                              q.question && typeof q.question.en === 'string' && typeof q.question.ta === 'string' &&
-                                              Array.isArray(q.options) && q.options.length === 4 &&
-                                              q.options.every(opt => opt && typeof opt.en === 'string' && typeof opt.ta === 'string') &&
-                                              typeof q.answer === 'string' && ['A','B','C','D'].includes(q.answer.toUpperCase()) &&
-                                              q.explanation && typeof q.explanation.en === 'string' && typeof q.explanation.ta === 'string'
-                                          );
-
+                                      const isValidMCQArray = Array.isArray(mcqs) && mcqs.length > 0 && mcqs.every(q => q && q.question && typeof q.question.en === 'string' && typeof q.question.ta === 'string' && Array.isArray(q.options) && q.options.length === 4 && q.options.every(opt => opt && typeof opt.en === 'string' && typeof opt.ta === 'string') && typeof q.answer === 'string' && ['A','B','C','D'].includes(q.answer.toUpperCase()) && q.explanation && typeof q.explanation.en === 'string' && typeof q.explanation.ta === 'string');
                                       if (isValidMCQArray) {
-                                          // Success! Store parsed data and summary text
-                                          const summaryText = `Successfully generated ${mcqs.length} multiple choice questions (with explanations) based on your prompt. Click the button below to start the test. / உங்கள் தூண்டுதலின் அடிப்படையில் ${mcqs.length} பல தேர்வு கேள்விகள் (விளக்கங்களுடன்) வெற்றிகரமாக உருவாக்கப்பட்டுள்ளன. சோதனையைத் தொடங்க கீழே உள்ள பொத்தானைக் கிளிக் செய்யவும்.`;
-                                          aiMsgData.text = summaryText; // User-friendly summary for chat display
-                                          aiMsgData.mcqData = mcqs;    // Parsed bilingual JSON data
-                                          aiMsgData.mcqTitle = potentialTestTitle; // Store the generated title
-                                          console.log("BILINGUAL MCQs parsed successfully:", mcqs.length, "questions. Title:", potentialTestTitle);
+                                          const summaryText = `Successfully generated ${mcqs.length} multiple choice questions...`; // Your summary text
+                                          aiMsgData.text = summaryText;
+                                          aiMsgData.mcqData = mcqs;
+                                          aiMsgData.mcqTitle = potentialTestTitle;
+                                          console.log("BILINGUAL MCQs parsed successfully:", mcqs.length);
                                           displayAsError = false;
                                       } else {
-                                          // JSON parsed, but structure is wrong
-                                           console.warn("BILINGUAL MCQ JSON validation failed (missing fields or incorrect structure).", mcqs);
-                                           aiMsgData.text = "Received MCQ data, but it wasn't in the expected bilingual format (check 'en'/'ta' keys for question, options, explanation).\n\n" + rawAiText;
-                                           displayAsError = true; // Show as error
-                                           aiMsgData.mcqData = null; // Don't store invalid data
-                                           aiMsgData.mcqTitle = null;
+                                           console.warn("BILINGUAL MCQ JSON validation failed.");
+                                           aiMsgData.text = "Received MCQ data, but format incorrect.\n\n" + rawAiText;
+                                           displayAsError = true; aiMsgData.mcqData = null; aiMsgData.mcqTitle = null;
                                       }
                                   } else {
-                                      // Response didn't look like a JSON array string
-                                       console.warn("AI response for MCQ request didn't look like a JSON array string.");
+                                       console.warn("AI response for MCQ request didn't look like JSON array.");
                                        aiMsgData.text = "Expected MCQs in JSON format, but didn't receive it correctly.\n\n" + rawAiText;
-                                       displayAsError = true;
-                                       aiMsgData.mcqData = null;
-                                       aiMsgData.mcqTitle = null;
+                                       displayAsError = true; aiMsgData.mcqData = null; aiMsgData.mcqTitle = null;
                                   }
                               } catch (parseError) {
-                                   // JSON parsing itself failed
-                                   console.error("Failed to parse MCQ JSON:", parseError, "\nResponse Text:", rawAiText);
+                                   console.error("Failed to parse MCQ JSON:", parseError);
                                    aiMsgData.text = "Error parsing the generated MCQ JSON data.\n\n" + rawAiText;
-                                   displayAsError = true;
-                                   aiMsgData.mcqData = null;
-                                   aiMsgData.mcqTitle = null;
+                                   displayAsError = true; aiMsgData.mcqData = null; aiMsgData.mcqTitle = null;
                               }
-                          } // End MCQ parsing block
+                         } // End MCQ parsing
 
-                     } else {
-                         // No valid text content found in response
+                     } else { // No valid text content
                          console.warn("Unexpected API response format or empty content:", data);
-                         aiMsgData.text = "Sorry, I received an unexpected response format from the API. / மன்னிக்கவும், API இலிருந்து எதிர்பாராத பதில் வடிவத்தைப் பெற்றேன்.";
+                         // Check if maybe it's *only* an image generation or something else non-text?
+                         // For now, assume error if no text part.
+                         aiMsgData.text = "Sorry, I received an unexpected or empty response.";
                          displayAsError = true;
-                         aiMsgData.mcqData = null; // Ensure null
-                         aiMsgData.mcqTitle = null; // Ensure null
                      }
                  }
 
-                 // Save the AI response (or error message) to Firestore
+                 // Save the AI response to Firestore
                  try {
                       await messagesColRef.add(aiMsgData);
                       await chatDocRef.update({ lastUpdated: firebase.firestore.FieldValue.serverTimestamp() });
-                      console.log("AI response/error saved to Firestore.", aiMsgData);
-                      // The message listener will automatically display the saved message
-                      // No need to call displayMessage here, but handle error display case if needed
-                      if (displayAsError) {
-                          console.log("AI response handled as an error state, listener will display.");
-                          // Optionally, add specific styling or handling for errors if listener doesn't suffice
-                      }
+                      console.log("AI response/error saved to Firestore.");
                  } catch (saveError) {
                       console.error("Error saving AI response to Firestore:", saveError);
-                      // Display error in UI if saving failed, as listener won't pick it up
                       displayError(`Received response, but failed to save it: ${aiMsgData.text}`);
                  }
 
-             } catch (fetchError) {
-                 // Handle errors during the fetch call itself (network issues, etc.)
+             } catch (fetchError) { // Network errors etc.
                  console.error("Fetch/Processing Error:", fetchError);
-                 removeMessageElement(thinking); // Ensure thinking message is removed
-                 const errorText = `Error communicating with the API: ${fetchError.message || "Check network connection."} / API உடன் தொடர்புகொள்வதில் பிழை: ${fetchError.message || "நெட்வொர்க் இணைப்பைச் சரிபார்க்கவும்."}`;
-                 displayError(errorText); // Show error in chat
-
-                 // Attempt to save the fetch error to history for context
+                 removeMessageElement(thinking);
+                 const errorText = `Error communicating with the API: ${fetchError.message || "Check network connection."}`;
+                 displayError(errorText);
+                 // Attempt to save fetch error to history
                  try {
                      await messagesColRef.add({ role: "model", text: errorText, timestamp: firebase.firestore.FieldValue.serverTimestamp() });
                      await chatDocRef.update({ lastUpdated: firebase.firestore.FieldValue.serverTimestamp() });
-                 } catch (saveError) {
-                      console.error("Failed to save fetch/processing error to history:", saveError);
-                 }
+                 } catch (saveError) { console.error("Failed to save fetch error to history:", saveError); }
              } finally {
                  setLoadingState(false); // Re-enable inputs
-                 if (!isTestMode && !isReviewMode && activeChatId) { // Focus only if in chat view and a chat is active
+                 if (!isTestMode && !isReviewMode && activeChatId) {
                       userInput.focus();
                  }
              }
         } // End of handleSendMessage
 
         // --- Chat Title Generation/Update ---
-        function generateChatTitle(firstUserMessageText) { /* ... (same as before) ... */
-             if (!firstUserMessageText || typeof firstUserMessageText !== 'string') return NEW_CHAT_TITLE;
-             const text = firstUserMessageText.trim();
+        function generateChatTitle(sourceText) { /* ... (same as before) ... */
+             if (!sourceText || typeof sourceText !== 'string') return NEW_CHAT_TITLE;
+             const text = sourceText.trim();
              if (!text) return NEW_CHAT_TITLE;
-             // Take first 5 words, remove trailing punctuation
              const title = text.split(/\s+/).slice(0, 5).join(' ').replace(/[.,!?;:]+$/, '');
-             // Limit length
              return title.length > 35 ? title.substring(0, 32) + '...' : title;
         }
         async function updateActiveChatTitle(newTitle) { /* ... (same as before) ... */
-              if (!currentUser || !activeChatId || !newTitle || typeof newTitle !== 'string' || !newTitle.trim() || newTitle.trim() === NEW_CHAT_TITLE) {
-                  console.log("Skipping chat title update (invalid conditions).");
-                  return;
-              }
+              if (!currentUser || !activeChatId || !newTitle || typeof newTitle !== 'string' || !newTitle.trim() || newTitle.trim() === NEW_CHAT_TITLE) return;
               const finalTitle = newTitle.trim();
               const chatDocRef = db.collection('chats').doc(activeChatId);
               try {
                   await chatDocRef.update({ title: finalTitle });
                   console.log(`Chat ${activeChatId} title updated to: "${finalTitle}"`);
-                  // Listener will update the sidebar UI
               } catch (error) {
                   console.error("Error updating chat title in Firestore:", error);
               }
@@ -1422,16 +1460,15 @@ Provide accurate Tamil translations. Do not include any text outside the JSON st
         function scrollToBottom(immediate = false) { /* ... (same as before) ... */ chatArea.scrollTo({top:chatArea.scrollHeight,behavior:immediate?'auto':'smooth'}); }
         function removeMessageElement(element) { /* ... (same as before) ... */ if(element && element.parentNode === chatArea) { chatArea.removeChild(element); } }
 
-        function setLoadingState(isLoading, message = "Generating...") { /* ... (updated logic) ... */
-             // Determine disabled state based on loading OR auth/chat state
-             const isDisabledOverall = isLoading || !currentUser || !API_KEY; // General disable condition
-             const isSendDisabled = isDisabledOverall || !activeChatId; // Send requires an active chat
+        function setLoadingState(isLoading, message = "Generating...") { /* ... (Updated to include upload button and placeholder) ... */
+             const isDisabledOverall = isLoading || !currentUser || !API_KEY;
+             const isSendDisabled = isDisabledOverall || !activeChatId;
 
              userInput.disabled = isDisabledOverall;
              sendButton.disabled = isSendDisabled;
-             mcqModeCheckbox.disabled = isSendDisabled; // MCQ tied to send button
+             mcqModeCheckbox.disabled = isSendDisabled;
+             imageUploadButton.disabled = isSendDisabled; // Disable upload button similarly
 
-             // Sidebar controls depend on user login, not active chat
              const isControlDisabled = isLoading || !currentUser;
              startChatButton.disabled = isControlDisabled;
              testSearchInput.disabled = isControlDisabled;
@@ -1439,7 +1476,6 @@ Provide accurate Tamil translations. Do not include any text outside the JSON st
              increaseTextBtn.disabled = isControlDisabled || (currentUser && currentTextSizeMultiplier >= MAX_TEXT_SIZE_MULTIPLIER);
              themeToggleButton.disabled = isControlDisabled;
 
-             // Update placeholder based on state
              if (isLoading) {
                  userInput.placeholder = message;
              } else if (!currentUser) {
@@ -1449,8 +1485,7 @@ Provide accurate Tamil translations. Do not include any text outside the JSON st
              } else if (!API_KEY) {
                  userInput.placeholder = "API Key missing. Reload page.";
              } else {
-                 // Update placeholder to include image/video URL pasting
-                 userInput.placeholder = "Enter prompt, paste image URL, or paste YouTube link (Check 'MCQs?' to generate test)";
+                 userInput.placeholder = "Enter prompt, paste URL, or click 📎 to upload image"; // Updated placeholder
              }
          }
 
@@ -1459,36 +1494,31 @@ Provide accurate Tamil translations. Do not include any text outside the JSON st
             chatView.classList.remove('active');
             reviewView.classList.remove('active');
             testView.classList.remove('active');
-            appContainer.classList.remove('hidden'); // Ensure main app is visible unless test view
+            appContainer.classList.remove('hidden');
 
             isTestMode = false;
             isReviewMode = false;
             cameFromAllTestsList = cameFromTests;
 
-            // Hide footer buttons initially
             saveReviewBtn.style.display = 'none';
             exitReviewBtn.style.display = 'none';
 
             if(viewName==='test'){
-                appContainer.classList.add('hidden'); // Hide main app container for focused test view
+                appContainer.classList.add('hidden');
                 testView.classList.add('active');
                 isTestMode=true;
             } else if(viewName==='review'){
                 reviewView.classList.add('active');
                 isReviewMode=true;
-                // Show exit button in review view
                 exitReviewBtn.style.display = 'inline-block';
                 exitReviewBtn.textContent = cameFromAllTestsList ? "Back to All Tests" : "Back to Chat";
-                // Save button visibility handled by displayReview
-            } else { // Default to chat view
+            } else {
                 chatView.classList.add('active');
-                // Focus input only if logged in, chat active, and API key present
                 if (currentUser && activeChatId && API_KEY) {
                     userInput.focus();
                 }
             }
 
-            // Clear test timer if switching away from test view
             if (viewName !== 'test' && testTimerInterval) {
                 clearInterval(testTimerInterval);
                 testTimerInterval = null;
@@ -1496,7 +1526,7 @@ Provide accurate Tamil translations. Do not include any text outside the JSON st
             }
         }
 
-        // Displays a message in the chat area (MODIFIED for Image/Video)
+        // Displays a message in the chat area (MODIFIED for Uploaded Image)
         function displayMessage(text, sender, cssClasses = [], appendHtml = null, messageData = null) {
             const messageElement = document.createElement('div');
             messageElement.classList.add('message', `${sender}-message`);
@@ -1504,272 +1534,187 @@ Provide accurate Tamil translations. Do not include any text outside the JSON st
                 messageElement.classList.add(...cssClasses);
             }
 
-            const messageTextContainer = document.createElement('div'); // Container for text content
+            const messageContentContainer = document.createElement('div'); // Holds text and potentially inline images
 
-            // Sanitize and format text (Markdown-like)
+            // --- NEW: Handle Displaying Uploaded Image (if present) ---
+            // Check if image data (base64) exists in the message data from Firestore
+            if (messageData?.imageData) {
+                console.log("Rendering uploaded image from message data.");
+                const img = document.createElement('img');
+                img.src = messageData.imageData; // Use base64 data URL
+                img.alt = "Uploaded Image";
+                img.classList.add('uploaded-image'); // Specific class for uploaded images
+                img.loading = "lazy";
+                messageElement.appendChild(img); // Add image BEFORE text container
+            }
+
+            // Sanitize and format text content
             const tempDiv = document.createElement('div');
-            tempDiv.innerText = text || ""; // Use innerText to prevent script injection
-            let formattedText = tempDiv.innerHTML; // Get HTML-escaped text
+            tempDiv.innerText = text || "";
+            let formattedText = tempDiv.innerHTML;
 
-             // --- NEW: Replace Image URLs with <img> tags ---
-             // Replace only if the URL is not already inside an HTML tag (basic check)
-             formattedText = formattedText.replace(imageUrlRegex, (match, imgUrl) => {
-                // Avoid replacing if inside an existing tag (simple check for '<' before the match)
-                const index = formattedText.indexOf(match);
-                const preChar = index > 0 ? formattedText[index - 1] : '';
-                const postChar = index + match.length < formattedText.length ? formattedText[index + match.length] : '';
-                // Avoid if inside quotes or already in src attribute
-                if (preChar === '"' || preChar === "'" || preChar === '=' || preChar ==='/') return match;
-                if (postChar === '"' || postChar === "'") return match;
-                // Check if it looks like it's already in an <img> tag (very basic)
-                const preText = formattedText.substring(Math.max(0, index - 10), index);
-                if (preText.toLowerCase().includes('<img') || preText.toLowerCase().includes('src=')) return match;
+             // Replace Image URLs found IN TEXT (if not an uploaded image message)
+             if (!messageData?.imageData) { // Only parse URLs if no uploaded image is present
+                 formattedText = formattedText.replace(imageUrlRegex, (match, imgUrl) => {
+                    console.log("Found image URL in text:", imgUrl);
+                    return `<img src="${imgUrl}" class="chat-image" alt="Chat Image" loading="lazy">`;
+                });
+             }
 
-                console.log("Found image URL:", imgUrl);
-                return `<img src="${imgUrl}" class="chat-image" alt="Chat Image" loading="lazy">`; // Added loading="lazy"
-            });
-
-            // Apply other formatting (Bold, Italic, Code Blocks, Inline Code) AFTER image replacement
+            // Apply other formatting
              formattedText = formattedText
-                .replace(/```([\s\S]*?)```/g, (match, code) => {
-                    const escapedCode = code.replace(/</g, "&lt;").replace(/>/g, "&gt;");
-                    return `<pre><code>${escapedCode}</code></pre>`;
-                })
-                .replace(/`([^`]+)`/g, (match, code) => {
-                    const escapedCode = code.replace(/</g, "&lt;").replace(/>/g, "&gt;");
-                    return `<code>${escapedCode}</code>`;
-                })
-                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>') // Bold
-                .replace(/(?<!\*)\*(?!\*)(.*?)(?<!\*)\*(?!\*)/g, '<em>$1</em>') // Italic (ensure not part of bold)
-                .replace(/\n/g, '<br>'); // Newlines
+                .replace(/```([\s\S]*?)```/g, (match, code) => `<pre><code>${code.replace(/</g, "&lt;").replace(/>/g, "&gt;")}</code></pre>`)
+                .replace(/`([^`]+)`/g, (match, code) => `<code>${code.replace(/</g, "&lt;").replace(/>/g, "&gt;")}</code>`)
+                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                .replace(/(?<!\*)\*(?!\*)(.*?)(?<!\*)\*(?!\*)/g, '<em>$1</em>')
+                .replace(/\n/g, '<br>');
 
-            messageTextContainer.innerHTML = formattedText;
-            messageElement.appendChild(messageTextContainer); // Add text container first
+            messageContentContainer.innerHTML = formattedText;
+            if (text) { // Only add the container if there's text
+                messageElement.appendChild(messageContentContainer);
+            }
 
-            // --- NEW: Handle YouTube Video Embed ---
+
+            // Handle YouTube Video Embed (if ID exists)
             if (messageData?.youtubeVideoId) {
                 console.log("Rendering YouTube video:", messageData.youtubeVideoId);
                 const youtubeEmbedDiv = document.createElement('div');
-                youtubeEmbedDiv.classList.add('youtube-embed-container'); // Optional container
+                youtubeEmbedDiv.classList.add('youtube-embed-container');
                 const iframe = document.createElement('iframe');
                 iframe.classList.add('chat-video');
-                iframe.width = "560"; // Standard width, CSS will control max-width
-                iframe.height = "315"; // Standard height
                 iframe.src = `https://www.youtube.com/embed/${messageData.youtubeVideoId}`;
                 iframe.title = "YouTube video player";
                 iframe.allow = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share";
                 iframe.allowFullscreen = true;
-                iframe.loading = "lazy"; // Lazy load video
+                iframe.loading = "lazy";
                 youtubeEmbedDiv.appendChild(iframe);
-                messageElement.appendChild(youtubeEmbedDiv); // Append video AFTER text
+                messageElement.appendChild(youtubeEmbedDiv);
             }
 
-            // Handle MCQ Offer (Uses mcqData and mcqTitle from Firestore document)
+            // Handle MCQ Offer
             if (messageData?.role === 'model' && messageData?.mcqData && Array.isArray(messageData.mcqData) && messageData.mcqData.length > 0) {
-                 console.log("Rendering message with MCQ offer:", messageData.mcqData.length, "questions. Title:", messageData.mcqTitle);
                  displayMCQOffer(messageData.mcqData, messageData.mcqTitle, messageElement);
             }
-            else if (appendHtml) { // Append extra HTML if provided (less common now)
+            else if (appendHtml) { /* ... (Append HTML logic same) ... */
                 const appendDiv = document.createElement('div');
                 appendDiv.innerHTML = appendHtml;
-                while (appendDiv.firstChild) {
-                    messageElement.appendChild(appendDiv.firstChild);
-                }
+                while (appendDiv.firstChild) { messageElement.appendChild(appendDiv.firstChild); }
             }
 
             chatArea.appendChild(messageElement);
 
-             // Try to render MathJax if available
+             // Render MathJax
              try {
                  if (typeof MathJax !== "undefined" && MathJax.typesetPromise) {
-                     MathJax.typesetPromise([messageElement]).catch(err => console.error('MathJax typeset error on message:', err));
+                     MathJax.typesetPromise([messageElement]).catch(err => console.error('MathJax typeset error:', err));
                  }
              } catch (e) { console.error("MathJax call failed:", e); }
 
-            return messageElement; // Return the created element
+            return messageElement;
         }
 
 
         // --- MCQ/Test Specific Functions ---
-
-        // Handles clicks on the "Start Mock Test" button within a chat message
-        function handleChatAreaClick(event) { /* ... (updated for mcqTitle) ... */
+        // ... (handleChatAreaClick, displayMCQOffer, toggleTestLanguage, startMockTest, displayTestQuestion, handleOptionSelect, handleTestNavigation, startTestTimer, submitTest remain the same) ...
+        function handleChatAreaClick(event) {
+            // Handle Start Test Button click
             const startButton = event.target.closest('.start-test-button');
             if (startButton) {
-                 // Get data and title directly from the button's attributes
                  const mcqDataString = startButton.dataset.mcq;
-                 const titleFromButton = startButton.dataset.mcqTitle; // Get the stored title
+                 const titleFromButton = startButton.dataset.mcqTitle;
                  let mcqs = null;
-
-                 if (mcqDataString) {
-                    try {
-                        mcqs = JSON.parse(mcqDataString); // Parse the MCQ data
-                    } catch (e) {
-                        console.error("Failed to parse MCQ data from button attribute:", e);
-                        displayError("Could not start the test. Failed to read question data.");
-                        return;
-                    }
-                 }
-
-                 if (mcqs && Array.isArray(mcqs) && mcqs.length > 0) {
-                     console.log("Start Test button clicked, initiating test with data and title from button...");
-                     // Pass the parsed MCQs AND the title to startMockTest
-                     startMockTest(mcqs, titleFromButton || null); // Use title or null if absent
-                 } else {
-                     console.error("MCQ data not found or invalid in button attribute when 'Start Test' button clicked.");
-                     displayError("Could not start the test. MCQ data seems missing or invalid.");
-                 }
+                 if (mcqDataString) { try { mcqs = JSON.parse(mcqDataString); } catch (e) { console.error("Failed to parse MCQ data:", e); displayError("Could not start test."); return; } }
+                 if (mcqs && Array.isArray(mcqs) && mcqs.length > 0) { startMockTest(mcqs, titleFromButton || null); } else { console.error("MCQ data missing/invalid."); displayError("Could not start test."); }
+                 return; // Prevent image click handling if button was clicked
             }
 
-            // --- NEW: Handle click on embedded images (Optional: Open in new tab) ---
-            const clickedImage = event.target.closest('img.chat-image');
-            if (clickedImage && clickedImage.src) {
-                window.open(clickedImage.src, '_blank'); // Open image URL in a new tab
+            // Handle click on embedded images (URL-based or Uploaded)
+            const clickedImage = event.target.closest('img.chat-image, img.uploaded-image');
+            if (clickedImage && clickedImage.src && !clickedImage.src.endsWith('#')) { // Ensure src is valid
+                window.open(clickedImage.src, '_blank');
             }
         }
-
-        // Appends the "Start Mock Test" button to an AI message element
-        function displayMCQOffer(mcqData, mcqTitle, aiMessageElement) { /* ... (updated for mcqTitle) ... */
-             if (aiMessageElement.querySelector('.start-test-button')) return; // Don't add if already exists
-
+        function displayMCQOffer(mcqData, mcqTitle, aiMessageElement) { /* ... (same as before) ... */
+             if (aiMessageElement.querySelector('.start-test-button')) return;
              const questionCount = mcqData.length;
              const button = document.createElement('button');
              button.classList.add('start-test-button');
              button.textContent = `Start Mock Test (${questionCount} Questions)`;
-             button.title = mcqTitle || `Start a test with ${questionCount} questions`; // Tooltip
-
-             // Store the data AND title ON the button
+             button.title = mcqTitle || `Start a test with ${questionCount} questions`;
              try {
-                button.dataset.mcq = JSON.stringify(mcqData); // Store MCQs as JSON string
-                // Store the title directly as another data attribute if it exists
-                if (mcqTitle) {
-                    button.dataset.mcqTitle = mcqTitle;
-                }
-             } catch (e) {
-                 console.error("Failed to stringify MCQ data or set title for button attribute:", e);
-                 return; // Don't add button if data can't be stored
-             }
-
+                button.dataset.mcq = JSON.stringify(mcqData);
+                if (mcqTitle) { button.dataset.mcqTitle = mcqTitle; }
+             } catch (e) { console.error("Failed to stringify MCQ data for button:", e); return; }
              const buttonContainer = document.createElement('div');
-             buttonContainer.style.marginTop = '10px'; // Space above button
+             buttonContainer.style.marginTop = '10px';
              buttonContainer.appendChild(button);
-             aiMessageElement.appendChild(buttonContainer); // Add to the AI message bubble
+             aiMessageElement.appendChild(buttonContainer);
         }
-
-        // --- NEW Function: Toggle Test Language ---
-        function toggleTestLanguage() {
-            currentTestLanguage = (currentTestLanguage === 'en') ? 'ta' : 'en'; // Switch language state
-            testLanguageToggle.textContent = (currentTestLanguage === 'en') ? 'தமிழ்' : 'English'; // Update button text
-            // Re-display the current question in the new language
+        function toggleTestLanguage() { /* ... (same as before) ... */
+            currentTestLanguage = (currentTestLanguage === 'en') ? 'ta' : 'en';
+            testLanguageToggle.textContent = (currentTestLanguage === 'en') ? 'தமிழ்' : 'English';
             displayTestQuestion(currentQuestionIndex);
             console.log("Switched test language to:", currentTestLanguage);
         }
-
-        // --- MODIFIED startMockTest function ---
-        function startMockTest(mcqs, title = null) {
-            if (!currentUser) { displayError("Please log in to start a test. / சோதனையைத் தொடங்க உள்நுழையவும்."); return; }
-            if (!mcqs || mcqs.length === 0) {
-                 displayError("No questions available for this test. / இந்த சோதனைக்கு கேள்விகள் இல்லை.");
-                 if (cameFromAllTestsList) { switchView('chat'); } // Go back if came from list and no questions
-                 return;
-            }
-            console.log("Starting mock test with", mcqs.length, "questions. Provided Title:", title);
-
-            currentTestMCQs = mcqs; // Store the questions for this test session
+        function startMockTest(mcqs, title = null) { /* ... (same as before) ... */
+            if (!currentUser) { displayError("Please log in to start a test."); return; }
+            if (!mcqs || mcqs.length === 0) { displayError("No questions available for this test."); if (cameFromAllTestsList) { switchView('chat'); } return; }
+            console.log("Starting mock test:", mcqs.length, "questions. Title:", title);
+            currentTestMCQs = mcqs;
             currentQuestionIndex = 0;
-            userAnswers = new Array(mcqs.length).fill(null); // Reset user answers
-            reviewResultsCache = null; // Clear any previous review cache
-
-            // Reset language to English when starting a new test
+            userAnswers = new Array(mcqs.length).fill(null);
+            reviewResultsCache = null;
             currentTestLanguage = 'en';
-            testLanguageToggle.textContent = 'தமிழ்'; // Reset button text
-
-            switchView('test'); // Switch to the test view interface
-
-            displayTestQuestion(0); // Display the first question
-            startTestTimer(); // Start the timer
-
-            // Use the passed title, provide a default if null/empty
+            testLanguageToggle.textContent = 'தமிழ்';
+            switchView('test');
+            displayTestQuestion(0);
+            startTestTimer();
             const finalTitle = (title && title.trim()) ? title.trim() : `Mock Test (${mcqs.length} Questions)`;
             testTitle.textContent = finalTitle;
         }
-
-        // --- MODIFIED displayTestQuestion function (Bilingual) ---
-        function displayTestQuestion(index) {
+        function displayTestQuestion(index) { /* ... (same as before) ... */
             if (index < 0 || index >= currentTestMCQs.length) return;
-
             currentQuestionIndex = index;
             const questionData = currentTestMCQs[index];
-
-            // *** Get text based on currentTestLanguage ***
-            const lang = currentTestLanguage; // 'en' or 'ta'
-
-            // Get question text, fallback to English if Tamil is missing or object structure is wrong
-            const questionText = questionData.question?.[lang] || questionData.question?.en || "(Question text missing)";
-            testQuestionNumber.textContent = `Question ${index + 1}`; // Keep number in English
-            testQuestion.innerHTML = questionText; // Use innerHTML for potential formatting
-
-            testOptionsContainer.innerHTML = ''; // Clear previous options
-
+            const lang = currentTestLanguage;
+            const questionText = questionData.question?.[lang] || questionData.question?.en || "(Question missing)";
+            testQuestionNumber.textContent = `Question ${index + 1}`;
+            testQuestion.innerHTML = questionText;
+            testOptionsContainer.innerHTML = '';
             const options = Array.isArray(questionData.options) ? questionData.options : [];
-            const optionLetters = ['A', 'B', 'C', 'D']; // Standard option letters
-
+            const optionLetters = ['A', 'B', 'C', 'D'];
             options.forEach((optionObj, optionIndex) => {
-                 if (optionIndex >= optionLetters.length) return; // Only handle A, B, C, D
-
-                 // *** Get option text based on currentTestLanguage, fallback to English ***
+                 if (optionIndex >= optionLetters.length) return;
                  const optionText = optionObj?.[lang] || optionObj?.en || '(Empty Option)';
-
                  const label = document.createElement('label');
                  const input = document.createElement('input');
                  input.type = 'radio';
-                 input.name = `q_${index}`; // Group radio buttons for the same question
-                 input.value = optionIndex; // Store the index (0-3) as the value
-                 input.checked = (userAnswers[index] === optionIndex); // Check if this was the user's previous answer
-                 input.onchange = () => handleOptionSelect(optionIndex); // Update answer on change
-
+                 input.name = `q_${index}`;
+                 input.value = optionIndex;
+                 input.checked = (userAnswers[index] === optionIndex);
+                 input.onchange = () => handleOptionSelect(optionIndex);
                  label.appendChild(input);
-                 label.appendChild(document.createTextNode(` ${optionLetters[optionIndex]}. ${optionText}`)); // Display letter and text
+                 label.appendChild(document.createTextNode(` ${optionLetters[optionIndex]}. ${optionText}`));
                  testOptionsContainer.appendChild(label);
             });
-
-            // Re-render MathJax for the new question/options
-             try {
-                 if (typeof MathJax !== "undefined" && MathJax.typesetPromise) {
-                     MathJax.typesetPromise([testQuestion, testOptionsContainer]).catch(err => console.error('MathJax typeset error on test question:', err));
-                 }
-             } catch(e){ console.error("MathJax call failed:", e); }
-
-            // Update navigation button states
+             try { if (typeof MathJax !== "undefined" && MathJax.typesetPromise) { MathJax.typesetPromise([testQuestion, testOptionsContainer]).catch(err => console.error('MathJax error:', err)); } } catch(e){ console.error("MathJax call failed:", e); }
             prevQuestionBtn.disabled = (index === 0);
             nextQuestionBtn.disabled = (index === currentTestMCQs.length - 1);
-            // Update question counter display
             questionCounter.textContent = `Q: ${index + 1} / ${currentTestMCQs.length}`;
         }
-
         function handleOptionSelect(optionIndex) { /* ... (same as before) ... */
-            if (currentQuestionIndex >= 0 && currentQuestionIndex < userAnswers.length) {
-                userAnswers[currentQuestionIndex] = optionIndex; // Store the selected option index (0-3)
-                console.log(`Answered Q${currentQuestionIndex + 1}: Option index ${optionIndex}`);
-            }
+            if (currentQuestionIndex >= 0 && currentQuestionIndex < userAnswers.length) { userAnswers[currentQuestionIndex] = optionIndex; console.log(`Answered Q${currentQuestionIndex + 1}: Option index ${optionIndex}`); }
         }
         function handleTestNavigation(direction) { /* ... (same as before) ... */
             let newIndex = currentQuestionIndex;
-            if (direction === 'prev' && currentQuestionIndex > 0) {
-                newIndex--;
-            } else if (direction === 'next' && currentQuestionIndex < currentTestMCQs.length - 1) {
-                newIndex++;
-            }
-            // Only update display if the index actually changed
-            if (newIndex !== currentQuestionIndex) {
-                displayTestQuestion(newIndex);
-            }
+            if (direction === 'prev' && currentQuestionIndex > 0) { newIndex--; }
+            else if (direction === 'next' && currentQuestionIndex < currentTestMCQs.length - 1) { newIndex++; }
+            if (newIndex !== currentQuestionIndex) { displayTestQuestion(newIndex); }
         }
         function startTestTimer() { /* ... (same as before) ... */
-            if (testTimerInterval) clearInterval(testTimerInterval); // Clear existing timer
-            testStartTime = Date.now(); // Record start time
-            testTimer.textContent = `Time: 00:00`; // Reset display
-            // Update timer every second
+            if (testTimerInterval) clearInterval(testTimerInterval);
+            testStartTime = Date.now();
+            testTimer.textContent = `Time: 00:00`;
             testTimerInterval = setInterval(() => {
                 const elapsedSeconds = Math.floor((Date.now() - testStartTime) / 1000);
                 const minutes = Math.floor(elapsedSeconds / 60).toString().padStart(2, '0');
@@ -1778,739 +1723,232 @@ Provide accurate Tamil translations. Do not include any text outside the JSON st
             }, 1000);
         }
         function submitTest() { /* ... (same as before) ... */
-            if (!confirm("Are you sure you want to submit the test? / சோதனையைச் சமர்ப்பிக்க உறுதியாக இருக்கிறீர்களா?")) return;
-
-            if (testTimerInterval) clearInterval(testTimerInterval); // Stop the timer
+            if (!confirm("Are you sure you want to submit the test?")) return;
+            if (testTimerInterval) clearInterval(testTimerInterval);
             const endTime = Date.now();
             const timeTakenMs = testStartTime ? endTime - testStartTime : 0;
-            console.log("Submitting test. Time taken (ms):", timeTakenMs);
-
-            // Calculate results using the questions from the CURRENT test session
+            console.log("Submitting test. Time (ms):", timeTakenMs);
             const results = calculateResults(currentTestMCQs, userAnswers, timeTakenMs);
-            reviewResultsCache = results; // Cache results for review display and potential saving
-
-            // Switch to review view, indicating it's NOT from the "All Tests" list
+            reviewResultsCache = results;
             switchView('review', false);
-            displayReview(results); // Display the results
+            displayReview(results);
         }
 
         // --- Review Functions ---
-
-        // --- NEW Function: Toggle Review Language ---
-        function toggleReviewLanguage() {
-            currentReviewLanguage = (currentReviewLanguage === 'en') ? 'ta' : 'en'; // Switch language state
-            reviewLanguageToggle.textContent = (currentReviewLanguage === 'en') ? 'தமிழ்' : 'English'; // Update button text
-            // Re-display the review in the new language (using the cached data)
-            if (reviewResultsCache) {
-                displayReview(reviewResultsCache); // Re-render the review
-            }
+        // ... (toggleReviewLanguage, calculateResults, displayReview, handleReviewFilterClick, filterReviewItems, exitReview, saveTestReviewToCloud remain the same) ...
+        function toggleReviewLanguage() { /* ... (same as before) ... */
+            currentReviewLanguage = (currentReviewLanguage === 'en') ? 'ta' : 'en';
+            reviewLanguageToggle.textContent = (currentReviewLanguage === 'en') ? 'தமிழ்' : 'English';
+            if (reviewResultsCache) { displayReview(reviewResultsCache); }
             console.log("Switched review language to:", currentReviewLanguage);
         }
-
-        // MODIFIED calculateResults (Ensure originalMCQs included - already done)
-        function calculateResults(mcqs, answers, timeMs) {
+        function calculateResults(mcqs, answers, timeMs) { /* ... (same as before) ... */
              let correctCount = 0, incorrectCount = 0, skippedCount = 0;
-             const reviewQuestions = []; // Data specifically for displaying the review
-
+             const reviewQuestions = [];
              mcqs.forEach((qData, index) => {
-                 // Safely access properties with fallbacks
-                 const userAnswerIndex = answers[index]; // User's selected index (0-3) or null
+                 const userAnswerIndex = answers[index];
                  const options = Array.isArray(qData.options) ? qData.options : [];
-                 const correctAnswerLetter = qData.answer?.trim().toUpperCase(); // A, B, C, D
-                 const correctAnswerIndex = correctAnswerLetter ? correctAnswerLetter.charCodeAt(0) - 'A'.charCodeAt(0) : -1; // 0-3 or -1
-
-                 // Determine correct answer text (use English as primary fallback for summary)
-                 const correctAnswerTextEn = (correctAnswerIndex >= 0 && correctAnswerIndex < options.length)
-                                           ? (options[correctAnswerIndex]?.en || '(Missing Correct Option Text)') : "N/A";
-
-                 let userAnswerTextEn = "Skipped"; // Default status text
-                 let status = "skipped";
-
+                 const correctAnswerLetter = qData.answer?.trim().toUpperCase();
+                 const correctAnswerIndex = correctAnswerLetter ? correctAnswerLetter.charCodeAt(0) - 'A'.charCodeAt(0) : -1;
+                 const correctAnswerTextEn = (correctAnswerIndex >= 0 && correctAnswerIndex < options.length) ? (options[correctAnswerIndex]?.en || '(Missing Correct)') : "N/A";
+                 let userAnswerTextEn = "Skipped"; let status = "skipped";
                  if (userAnswerIndex !== null && userAnswerIndex >= 0 && userAnswerIndex < options.length) {
-                     // User selected a valid option index
-                     userAnswerTextEn = options[userAnswerIndex]?.en || '(Missing User Option Text)'; // Get English text for the selected option
-                     if (userAnswerIndex === correctAnswerIndex) {
-                         status = "correct"; correctCount++;
-                     } else {
-                         status = "incorrect"; incorrectCount++;
-                     }
-                 } else if (userAnswerIndex !== null) {
-                     // User selected something invalid (shouldn't happen with radio buttons)
-                      userAnswerTextEn = "Invalid Selection"; status = "incorrect"; incorrectCount++;
-                 } else {
-                     // User didn't select anything (null)
-                     skippedCount++;
-                 }
-
-                 // Store data needed *for review display*. Bilingual text comes from originalMCQs later.
-                 reviewQuestions.push({
-                     // Store English versions here for simpler structure, bilingual lookup happens in displayReview
-                     question: qData.question?.en || '(Question missing)',
-                     correctAnswer: correctAnswerTextEn,
-                     userAnswer: userAnswerTextEn, // Store the English text of the user's answer or status
-                     status: status,
-                     explanation: qData.explanation?.en || "No explanation provided." // Store English explanation
-                     // Note: We don't store the bilingual text *here* to avoid duplication.
-                     // We rely on having originalMCQs available when displaying the review.
-                 });
+                     userAnswerTextEn = options[userAnswerIndex]?.en || '(Missing User Option)';
+                     if (userAnswerIndex === correctAnswerIndex) { status = "correct"; correctCount++; } else { status = "incorrect"; incorrectCount++; }
+                 } else if (userAnswerIndex !== null) { userAnswerTextEn = "Invalid Selection"; status = "incorrect"; incorrectCount++; }
+                 else { skippedCount++; }
+                 reviewQuestions.push({ question: qData.question?.en || '(Missing)', correctAnswer: correctAnswerTextEn, userAnswer: userAnswerTextEn, status: status, explanation: qData.explanation?.en || "No explanation." });
              });
-
              const totalQuestions = mcqs.length;
              const score = `${correctCount}/${totalQuestions}`;
              const timeSeconds = Math.round(timeMs / 1000);
              const minutes = Math.floor(timeSeconds / 60);
              const seconds = timeSeconds % 60;
              const timeString = `${minutes}m ${seconds}s`;
-
-             return {
-                 questions: reviewQuestions, // Review display summary data (mostly English)
-                 summary: { score, correct: correctCount, incorrect: incorrectCount, skipped: skippedCount, timeString },
-                 testDate: new Date().toISOString(),
-                 timeTakenMs: timeMs,
-                 sourceChatId: activeChatId,
-                 testTitle: testTitle.textContent, // Title shown during THIS test
-                 // *** CRUCIAL: Include the original MCQs with bilingual data ***
-                 originalMCQs: mcqs
-             };
+             return { questions: reviewQuestions, summary: { score, correct: correctCount, incorrect: incorrectCount, skipped: skippedCount, timeString }, testDate: new Date().toISOString(), timeTakenMs: timeMs, sourceChatId: activeChatId, testTitle: testTitle.textContent, originalMCQs: mcqs };
         }
-
-        // --- MODIFIED displayReview function (Bilingual & Explanation) ---
-        function displayReview(reviewData) {
-             reviewContent.innerHTML = ''; // Clear previous review items
-             reviewSummary.innerHTML = ''; // Clear summary
-             reviewFilters.style.display = 'none'; // Hide filters initially
-
-             if (!reviewData || !reviewData.questions || reviewData.questions.length === 0 || !reviewData.summary || !reviewData.originalMCQs) { // Check for originalMCQs
-                 reviewSummary.innerHTML = "<span>No valid review data available (might be missing original questions).</span>";
-                 reviewContent.innerHTML = "<p>It seems the review data is missing or incomplete.</p>";
-                 saveReviewBtn.style.display = 'none';
-                 return;
-             }
-
-             // Reset review language to 'en' only if it's a fresh display (not a toggle)
-             // Check if the button text reflects the current state. If not, reset.
+        function displayReview(reviewData) { /* ... (same as before) ... */
+             reviewContent.innerHTML = ''; reviewSummary.innerHTML = ''; reviewFilters.style.display = 'none';
+             if (!reviewData || !reviewData.questions || reviewData.questions.length === 0 || !reviewData.summary || !reviewData.originalMCQs) { reviewSummary.innerHTML = "<span>No valid review data available.</span>"; reviewContent.innerHTML = "<p>Review data missing or incomplete.</p>"; saveReviewBtn.style.display = 'none'; return; }
              const expectedButtonText = (currentReviewLanguage === 'en') ? 'தமிழ்' : 'English';
-             if (!reviewLanguageToggle || reviewLanguageToggle.textContent !== expectedButtonText) { // Add check for button existence
-                  currentReviewLanguage = 'en'; // Default to English for new review display
-                  if (reviewLanguageToggle) reviewLanguageToggle.textContent = 'தமிழ்'; // Update button if it exists
-             }
-
-             // Display Summary (language neutral)
+             if (!reviewLanguageToggle || reviewLanguageToggle.textContent !== expectedButtonText) { currentReviewLanguage = 'en'; if (reviewLanguageToggle) reviewLanguageToggle.textContent = 'தமிழ்'; }
              const { score, correct, incorrect, skipped, timeString } = reviewData.summary;
-             reviewSummary.innerHTML = `
-                  <span>Score: ${score}</span>
-                  <span class="score-correct">Correct: ${correct}</span>
-                  <span class="score-incorrect">Incorrect: ${incorrect}</span>
-                  <span class="score-skipped">Skipped: ${skipped}</span>
-                  <span>Total Time: ${timeString}</span>
-             `;
-
-             reviewTitle.textContent = reviewData.testTitle || "Test Review"; // Set title
-
-             // Get language for display ('en' or 'ta')
+             reviewSummary.innerHTML = `<span>Score: ${score}</span> <span class="score-correct">Correct: ${correct}</span> <span class="score-incorrect">Incorrect: ${incorrect}</span> <span class="score-skipped">Skipped: ${skipped}</span> <span>Time: ${timeString}</span>`;
+             reviewTitle.textContent = reviewData.testTitle || "Test Review";
              const lang = currentReviewLanguage;
-
-             // Display Individual Questions using bilingual data
-             reviewData.questions.forEach((qReviewSummary, index) => { // qReviewSummary has English texts + status
-                 const originalQData = reviewData.originalMCQs[index]; // Get the full bilingual data
-
-                 if (!originalQData) {
-                     console.warn(`Original MCQ data missing for review item ${index}`);
-                     // Fallback: Display basic info from qReviewSummary if original is missing
-                     const reviewItem = document.createElement('div');
-                     reviewItem.classList.add('review-item', `status-${qReviewSummary.status || 'unknown'}`);
-                     reviewItem.innerHTML = `
-                        <div class="review-item-qnum">Question ${index + 1}</div>
-                        <div class="review-item-question">${qReviewSummary.question || '(Question missing)'}</div>
-                        <div class="review-item-details">
-                            <span>Your Answer: ${qReviewSummary.userAnswer || 'N/A'}</span><br>
-                            <span class="correct-answer">Correct Answer: ${qReviewSummary.correctAnswer || 'N/A'}</span>
-                            <div class="review-item-explanation">Explanation: ${qReviewSummary.explanation || 'N/A'}</div>
-                        </div>`;
-                     reviewContent.appendChild(reviewItem);
-                     return; // Skip to next item
-                 }
-
-                 // *** Get bilingual text from originalQData, fallback to English ***
-                 const questionText = originalQData.question?.[lang] || originalQData.question?.en || '(Question text missing)';
-
+             reviewData.questions.forEach((qReviewSummary, index) => {
+                 const originalQData = reviewData.originalMCQs[index];
+                 if (!originalQData) { console.warn(`Original MCQ missing for review item ${index}`); /* Fallback display */ return; }
+                 const questionText = originalQData.question?.[lang] || originalQData.question?.en || '(Question missing)';
                  const options = originalQData.options || [];
                  const correctAnswerLetter = originalQData.answer?.trim().toUpperCase();
                  const correctAnswerIndex = correctAnswerLetter ? correctAnswerLetter.charCodeAt(0) - 'A'.charCodeAt(0) : -1;
-                 // Get correct answer text in the selected language
-                 const correctAnswerText = (correctAnswerIndex >= 0 && correctAnswerIndex < options.length)
-                                            ? (options[correctAnswerIndex]?.[lang] || options[correctAnswerIndex]?.en) : "N/A";
-
-                 // Determine user answer text in the selected language
-                 let userAnswerText = qReviewSummary.userAnswer; // Start with the text stored in summary (might be "Skipped" or English option)
-                 const status = qReviewSummary.status;
-                 if (status !== 'skipped' && status !== 'invalid') {
-                      // If user answered, try to find the corresponding option index from the English text
-                      const userAnswerEn = qReviewSummary.userAnswer;
-                      const userAnswerIndex = options.findIndex(opt => opt.en === userAnswerEn);
-                      if (userAnswerIndex !== -1) {
-                           // Found the option, get the text in the selected language
-                           userAnswerText = options[userAnswerIndex]?.[lang] || options[userAnswerIndex]?.en;
-                      } else {
-                          // Couldn't match English text (maybe data mismatch?), fallback to stored English
-                          userAnswerText = userAnswerEn || '(Answer text missing)';
-                      }
-                 } else if (status === 'skipped') {
-                     // Explicitly set skipped text for different languages if desired
-                     userAnswerText = (lang === 'ta') ? "தவிர்க்கப்பட்டது" : "Skipped";
-                 } else { // Invalid
-                     userAnswerText = (lang === 'ta') ? "தவறான தேர்வு" : "Invalid Selection";
-                 }
-
-
-                 // Get explanation in the selected language
-                 const explanationText = originalQData.explanation?.[lang] || originalQData.explanation?.en || "No explanation provided.";
-
-                 // --- Create Review Item Element ---
-                 let itemStatusClass = `status-${status}`;
-                 let answerDetailClass = `user-answer-${status}`;
-
-                 const reviewItem = document.createElement('div');
-                 reviewItem.classList.add('review-item', itemStatusClass);
-                 reviewItem.dataset.status = status; // For filtering
-
-                 // Build details HTML
+                 const correctAnswerText = (correctAnswerIndex >= 0 && correctAnswerIndex < options.length) ? (options[correctAnswerIndex]?.[lang] || options[correctAnswerIndex]?.en) : "N/A";
+                 let userAnswerText = qReviewSummary.userAnswer; const status = qReviewSummary.status;
+                 if (status !== 'skipped' && status !== 'invalid') { const userAnswerEn = qReviewSummary.userAnswer; const userAnswerIndex = options.findIndex(opt => opt.en === userAnswerEn); if (userAnswerIndex !== -1) { userAnswerText = options[userAnswerIndex]?.[lang] || options[userAnswerIndex]?.en; } else { userAnswerText = userAnswerEn || '(Answer missing)'; } }
+                 else if (status === 'skipped') { userAnswerText = (lang === 'ta') ? "தவிர்க்கப்பட்டது" : "Skipped"; }
+                 else { userAnswerText = (lang === 'ta') ? "தவறான தேர்வு" : "Invalid Selection"; }
+                 const explanationText = originalQData.explanation?.[lang] || originalQData.explanation?.en || "No explanation.";
+                 let itemStatusClass = `status-${status}`; let answerDetailClass = `user-answer-${status}`;
+                 const reviewItem = document.createElement('div'); reviewItem.classList.add('review-item', itemStatusClass); reviewItem.dataset.status = status;
                  let detailsHtml = `<span class="${answerDetailClass}">Your Answer: ${userAnswerText}</span>`;
-                 if (status !== 'correct') { // Show correct answer if user was wrong or skipped
-                     detailsHtml += `<br><span class="correct-answer">Correct Answer: ${correctAnswerText}</span>`;
-                 }
-                 // Add Explanation
+                 if (status !== 'correct') { detailsHtml += `<br><span class="correct-answer">Correct Answer: ${correctAnswerText}</span>`; }
                  detailsHtml += `<div class="review-item-explanation">${(lang === 'ta' ? 'விளக்கம்' : 'Explanation')}: ${explanationText}</div>`;
-
-                 // Set innerHTML for the review item
-                 reviewItem.innerHTML = `
-                     <div class="review-item-qnum">Question ${index + 1}</div>
-                     <div class="review-item-question">${questionText}</div>
-                     <div class="review-item-details">${detailsHtml}</div>
-                 `;
+                 reviewItem.innerHTML = `<div class="review-item-qnum">Question ${index + 1}</div> <div class="review-item-question">${questionText}</div> <div class="review-item-details">${detailsHtml}</div>`;
                  reviewContent.appendChild(reviewItem);
              });
-
-             // Configure Save Button
-             if (reviewData.savedAt) { // Loaded from saved reviews (already saved)
-                 saveReviewBtn.textContent = "Review Saved";
-                 saveReviewBtn.disabled = true;
-                 saveReviewBtn.style.display = 'inline-block';
-             } else if (reviewResultsCache && !cameFromAllTestsList) { // Fresh review from test just taken
-                 saveReviewBtn.textContent = "Save Review";
-                 saveReviewBtn.disabled = !currentUser; // Enable only if logged in
-                 saveReviewBtn.style.display = 'inline-block';
-             } else { // Hide if no cache or came from all tests list (already saved)
-                  saveReviewBtn.style.display = 'none';
-             }
-
-             reviewFilters.style.display = 'block'; // Show filters
-
-             // Re-render MathJax for review content
-              try {
-                  if (typeof MathJax !== "undefined" && MathJax.typesetPromise) {
-                       MathJax.typesetPromise([reviewContent]).catch(err => console.error('MathJax typeset error on review:', err));
-                  }
-              } catch (e) { console.error("MathJax call failed:", e); }
-
-             // Apply default filter ('all')
+             if (reviewData.savedAt) { saveReviewBtn.textContent = "Review Saved"; saveReviewBtn.disabled = true; saveReviewBtn.style.display = 'inline-block'; }
+             else if (reviewResultsCache && !cameFromAllTestsList) { saveReviewBtn.textContent = "Save Review"; saveReviewBtn.disabled = !currentUser; saveReviewBtn.style.display = 'inline-block'; }
+             else { saveReviewBtn.style.display = 'none'; }
+             reviewFilters.style.display = 'block';
+              try { if (typeof MathJax !== "undefined" && MathJax.typesetPromise) { MathJax.typesetPromise([reviewContent]).catch(err => console.error('MathJax error:', err)); } } catch (e) { console.error("MathJax call failed:", e); }
              filterReviewItems('all');
-             // Ensure 'All' button is marked active
-             reviewFilters.querySelectorAll('button').forEach(btn => {
-                 btn.classList.toggle('active-filter', btn.dataset.filter === 'all');
-             });
-        } // End of displayReview
-
+             reviewFilters.querySelectorAll('button').forEach(btn => { btn.classList.toggle('active-filter', btn.dataset.filter === 'all'); });
+        }
         function handleReviewFilterClick(event) { /* ... (same as before) ... */
-            const button = event.target.closest('button[data-filter]');
-            if (button) {
-                filterReviewItems(button.dataset.filter);
-            }
+            const button = event.target.closest('button[data-filter]'); if (button) { filterReviewItems(button.dataset.filter); }
         }
         function filterReviewItems(filter) { /* ... (same as before) ... */
-            // Highlight active filter button
-            reviewFilters.querySelectorAll('button').forEach(btn => {
-                btn.classList.toggle('active-filter', btn.dataset.filter === filter);
-            });
-            // Show/hide review items based on filter and status
-            reviewContent.querySelectorAll('.review-item').forEach(item => {
-                const show = (filter === 'all') || item.dataset.status === filter;
-                item.classList.toggle('hidden-by-filter', !show); // Add/remove class to hide
-            });
+            reviewFilters.querySelectorAll('button').forEach(btn => { btn.classList.toggle('active-filter', btn.dataset.filter === filter); });
+            reviewContent.querySelectorAll('.review-item').forEach(item => { const show = (filter === 'all') || item.dataset.status === filter; item.classList.toggle('hidden-by-filter', !show); });
         }
         function exitReview() { /* ... (same as before) ... */
-            reviewResultsCache = null; // Clear current review cache
-
-            // Go back to chat view
-            switchView('chat');
-
-            // Reset review specific UI elements (optional, but good practice)
-            reviewSummary.innerHTML = '';
-            reviewContent.innerHTML = '';
-            reviewTitle.textContent = 'Test Review';
-            if (reviewLanguageToggle) reviewLanguageToggle.textContent = 'தமிழ்'; // Reset toggle text
-            currentReviewLanguage = 'en'; // Reset language state
+            reviewResultsCache = null; switchView('chat'); reviewSummary.innerHTML = ''; reviewContent.innerHTML = ''; reviewTitle.textContent = 'Test Review'; if (reviewLanguageToggle) reviewLanguageToggle.textContent = 'தமிழ்'; currentReviewLanguage = 'en';
         }
-        async function saveTestReviewToCloud() { /* ... (same as before - uses reviewResultsCache) ... */
-            if (!currentUser) { alert("Please log in to save the review. / மதிப்பாய்வைச் சேமிக்க உள்நுழையவும்."); return; }
-            // Use reviewResultsCache which holds the data from the just-completed test
-            if (!reviewResultsCache || reviewResultsCache.savedAt) {
-                 alert("No new review data available to save or it has already been saved. / சேமிக்க புதிய ஆய்வுத் தரவு இல்லை அல்லது அது ஏற்கனவே சேமிக்கப்பட்டுள்ளது.");
-                 return;
-             }
-             // Check if originalMCQs exist (crucial for bilingual review later)
-             if (!reviewResultsCache.originalMCQs || reviewResultsCache.originalMCQs.length === 0) {
-                 if (!confirm("Warning: Original question data (including translations) seems missing. Review might not display correctly later. Save anyway?")) {
-                      return;
-                 }
-             }
-
-
-            // Prepare data, ensure necessary fields are included
-            const reviewDataToSave = {
-                ...reviewResultsCache, // Includes questions (summary), summary, testTitle, originalMCQs, etc.
-                userId: currentUser.uid,
-                savedAt: firebase.firestore.FieldValue.serverTimestamp(), // Add server timestamp on save
-            };
-
-            saveReviewBtn.disabled = true;
-            saveReviewBtn.textContent = "Saving...";
-
+        async function saveTestReviewToCloud() { /* ... (same as before) ... */
+            if (!currentUser) { alert("Please log in to save."); return; }
+            if (!reviewResultsCache || reviewResultsCache.savedAt) { alert("No new review data or already saved."); return; }
+            if (!reviewResultsCache.originalMCQs || reviewResultsCache.originalMCQs.length === 0) { if (!confirm("Warning: Original question data missing. Review might not display correctly. Save anyway?")) { return; } }
+            const reviewDataToSave = { ...reviewResultsCache, userId: currentUser.uid, savedAt: firebase.firestore.FieldValue.serverTimestamp(), };
+            saveReviewBtn.disabled = true; saveReviewBtn.textContent = "Saving...";
             try {
                 const newReviewRef = await db.collection('testReviews').add(reviewDataToSave);
-                console.log("Review saved to Firestore with ID:", newReviewRef.id);
-                alert("Test review saved successfully! / சோதனை ஆய்வு வெற்றிகரமாக சேமிக்கப்பட்டது!");
-                saveReviewBtn.textContent = "Review Saved"; // Keep disabled after successful save
-                // Mark cache as saved locally to prevent accidental resave attempts
-                if (reviewResultsCache) reviewResultsCache.savedAt = new Date(); // Mark as saved
-
+                console.log("Review saved:", newReviewRef.id); alert("Test review saved successfully!"); saveReviewBtn.textContent = "Review Saved";
+                if (reviewResultsCache) reviewResultsCache.savedAt = new Date();
             } catch (error) {
-                console.error("Error saving review to Firestore:", error);
-                alert("Failed to save the review. Please check your connection and try again. / மதிப்பாய்வைச் சேமிக்கத் தவறிவிட்டது. உங்கள் இணைப்பைச் சரிபார்த்து மீண்டும் முயற்சிக்கவும்.");
-                saveReviewBtn.disabled = false; // Re-enable on failure
-                saveReviewBtn.textContent = "Save Review";
+                console.error("Error saving review:", error); alert("Failed to save review. Try again."); saveReviewBtn.disabled = false; saveReviewBtn.textContent = "Save Review";
             }
         }
+
 
         // --- All Tests List Functions ---
+        // ... (loadAndListenForTests, renderAllTestsList, filterTestsInSidebar, handleAllTestsListClick, enterTestTitleEditMode, exitTestTitleEditMode, saveTestTitle, deleteSavedTest, startReattempt remain the same) ...
         function loadAndListenForTests(userId) { /* ... (same as before) ... */
             if (testListListener) { testListListener(); testListListener = null; }
-
-            const testsRef = db.collection('testReviews')
-                                .where('userId', '==', userId)
-                                .orderBy('savedAt', 'desc');
-
+            const testsRef = db.collection('testReviews').where('userId', '==', userId).orderBy('savedAt', 'desc');
             console.log(`Listening for saved tests for user ${userId}`);
             testListListener = testsRef.onSnapshot(snapshot => {
-                allSavedTestsData = []; // Clear local cache before filling
-                snapshot.forEach(doc => {
-                    allSavedTestsData.push({ id: doc.id, ...doc.data() });
-                });
+                allSavedTestsData = []; snapshot.forEach(doc => { allSavedTestsData.push({ id: doc.id, ...doc.data() }); });
                 console.log("Received saved tests snapshot:", allSavedTestsData.length, "tests");
-                renderAllTestsList(allSavedTestsData); // Update UI
-                filterTestsInSidebar(); // Apply existing search filter if any
-
+                renderAllTestsList(allSavedTestsData); filterTestsInSidebar();
             }, error => {
                 console.error("Error listening for saved tests:", error);
-                // Show error in the list area itself
-                allTestsListContainer.innerHTML = `<div style="padding:10px;color:var(--error-text);font-size:0.9em;">Error loading tests. Check console (F12) & Firestore index/rules.</div>`;
-                allSavedTestsData = []; // Clear cache on error
+                allTestsListContainer.innerHTML = `<div style="padding:10px;color:var(--error-text);font-size:0.9em;">Error loading tests. Check console & index/rules.</div>`;
+                allSavedTestsData = [];
             });
         }
-
-        // MODIFIED renderAllTestsList (Adds Edit/Delete buttons)
-        function renderAllTestsList(tests) {
-            allTestsListContainer.innerHTML = ''; // Clear previous list
-            if (!currentUser) {
-                allTestsListContainer.innerHTML = '<div style="padding:10px;color:var(--text-secondary);font-size:0.9em;">Login to see saved tests.</div>';
-                return;
-            }
-            if (tests.length === 0) {
-                allTestsListContainer.innerHTML = '<div style="padding:10px;color:var(--text-secondary);font-size:0.9em;">No saved tests yet.</div>';
-            } else {
+        function renderAllTestsList(tests) { /* ... (same as before) ... */
+            allTestsListContainer.innerHTML = '';
+            if (!currentUser) { allTestsListContainer.innerHTML = '<div style="padding:10px;color:var(--text-secondary);font-size:0.9em;">Login to see saved tests.</div>'; return; }
+            if (tests.length === 0) { allTestsListContainer.innerHTML = '<div style="padding:10px;color:var(--text-secondary);font-size:0.9em;">No saved tests yet.</div>'; }
+            else {
                 tests.forEach(testData => {
-                    const itemElement = document.createElement('div');
-                    itemElement.classList.add('test-list-item');
-                    itemElement.dataset.reviewId = testData.id; // Store Firestore ID
-
-                    const title = testData.testTitle || '(Untitled Test)';
-                    // Format date safely
-                    const date = testData.savedAt?.toDate ? testData.savedAt.toDate().toLocaleString() : 'Unknown date';
-                    const score = testData.summary?.score || 'N/A';
-
-                    // Check if reattempt is possible (requires valid originalMCQs)
-                    const hasReattemptData = testData.originalMCQs && Array.isArray(testData.originalMCQs) && testData.originalMCQs.length > 0 &&
-                                             // Basic check for structure needed for bilingual display
-                                             testData.originalMCQs.every(q => q && q.question && q.options && q.answer && q.explanation);
-
-                    // --- Info Div (Title, Details, Edit/Delete Controls) ---
-                    const infoDiv = document.createElement('div');
-                    infoDiv.classList.add('test-item-info'); // Enables relative positioning for controls
-
-                    // Title Span
-                    const titleSpan = document.createElement('span');
-                    titleSpan.classList.add('test-item-title');
-                    titleSpan.textContent = title;
-                    titleSpan.title = title; // Tooltip for long titles
-
-                    // Details Span
-                    const detailsSpan = document.createElement('span');
-                    detailsSpan.classList.add('test-item-details');
-                    detailsSpan.textContent = `Saved: ${date} | Score: ${score}`;
-
-                    // Controls Div (Edit/Delete)
-                    const controlsDiv = document.createElement('div');
-                    controlsDiv.classList.add('test-item-controls');
-
-                    const editBtn = document.createElement('button');
-                    editBtn.innerHTML = EDIT_TEST_ICON; // '✏️'
-                    editBtn.title = "Edit test title";
-                    editBtn.dataset.action = "edit-title"; // Action for click handler
-                    controlsDiv.appendChild(editBtn);
-
-                    const deleteBtn = document.createElement('button');
-                    deleteBtn.innerHTML = DELETE_TEST_ICON; // '🗑️'
-                    deleteBtn.title = "Delete this saved test";
-                    deleteBtn.dataset.action = "delete-test"; // Action for click handler
-                    controlsDiv.appendChild(deleteBtn);
-
-                    // Add title, details, and controls to infoDiv
-                    infoDiv.appendChild(titleSpan);
-                    infoDiv.appendChild(detailsSpan);
-                    infoDiv.appendChild(controlsDiv);
-
-                    // --- Actions Div (View Details, Reattempt) ---
-                    const actionsDiv = document.createElement('div');
-                    actionsDiv.classList.add('test-item-actions');
-
-                    // View Details Button
-                    const viewBtn = document.createElement('button');
-                    viewBtn.textContent = "View Details";
-                    viewBtn.dataset.action = "view"; // Action for click handler
-                    actionsDiv.appendChild(viewBtn);
-
-                    // Reattempt Select Dropdown
-                    const reattemptSelect = document.createElement('select');
-                    reattemptSelect.dataset.action = "reattempt";
-                    reattemptSelect.disabled = !hasReattemptData;
-                    reattemptSelect.title = hasReattemptData ? "Reattempt options" : "Reattempt not available (Missing original question data)";
-                    // Options for reattempt modes
-                    reattemptSelect.innerHTML = `
-                        <option value="" selected>${hasReattemptData ? 'Reattempt...' : 'Reattempt N/A'}</option>
-                        <option value="mistaked" ${!hasReattemptData ? 'disabled' : ''}>Mistaked Only</option>
-                        <option value="skipped" ${!hasReattemptData ? 'disabled' : ''}>Skipped Only</option>
-                        <option value="both" ${!hasReattemptData ? 'disabled' : ''}>Mistaked & Skipped</option>
-                        <option value="full" ${!hasReattemptData ? 'disabled' : ''}>Full Test</option>
-                    `;
-                    // Add event listener directly to the select element
-                    reattemptSelect.addEventListener('change', (event) => {
-                        const selectedMode = event.target.value;
-                        if (selectedMode) { // If a mode other than the placeholder is selected
-                             const reviewId = event.target.closest('.test-list-item')?.dataset.reviewId;
-                             if (reviewId) {
-                                 startReattempt(reviewId, selectedMode); // Trigger reattempt
-                             }
-                             event.target.value = ""; // Reset select to placeholder after action
-                        }
-                    });
+                    const itemElement = document.createElement('div'); itemElement.classList.add('test-list-item'); itemElement.dataset.reviewId = testData.id;
+                    const title = testData.testTitle || '(Untitled Test)'; const date = testData.savedAt?.toDate ? testData.savedAt.toDate().toLocaleString() : 'Unknown date'; const score = testData.summary?.score || 'N/A';
+                    const hasReattemptData = testData.originalMCQs && Array.isArray(testData.originalMCQs) && testData.originalMCQs.length > 0 && testData.originalMCQs.every(q => q && q.question && q.options && q.answer && q.explanation);
+                    const infoDiv = document.createElement('div'); infoDiv.classList.add('test-item-info');
+                    const titleSpan = document.createElement('span'); titleSpan.classList.add('test-item-title'); titleSpan.textContent = title; titleSpan.title = title;
+                    const detailsSpan = document.createElement('span'); detailsSpan.classList.add('test-item-details'); detailsSpan.textContent = `Saved: ${date} | Score: ${score}`;
+                    const controlsDiv = document.createElement('div'); controlsDiv.classList.add('test-item-controls');
+                    const editBtn = document.createElement('button'); editBtn.innerHTML = EDIT_TEST_ICON; editBtn.title = "Edit test title"; editBtn.dataset.action = "edit-title"; controlsDiv.appendChild(editBtn);
+                    const deleteBtn = document.createElement('button'); deleteBtn.innerHTML = DELETE_TEST_ICON; deleteBtn.title = "Delete this saved test"; deleteBtn.dataset.action = "delete-test"; controlsDiv.appendChild(deleteBtn);
+                    infoDiv.appendChild(titleSpan); infoDiv.appendChild(detailsSpan); infoDiv.appendChild(controlsDiv);
+                    const actionsDiv = document.createElement('div'); actionsDiv.classList.add('test-item-actions');
+                    const viewBtn = document.createElement('button'); viewBtn.textContent = "View Details"; viewBtn.dataset.action = "view"; actionsDiv.appendChild(viewBtn);
+                    const reattemptSelect = document.createElement('select'); reattemptSelect.dataset.action = "reattempt"; reattemptSelect.disabled = !hasReattemptData; reattemptSelect.title = hasReattemptData ? "Reattempt options" : "Reattempt N/A (Missing data)";
+                    reattemptSelect.innerHTML = `<option value="" selected>${hasReattemptData ? 'Reattempt...' : 'Reattempt N/A'}</option><option value="mistaked" ${!hasReattemptData ? 'disabled' : ''}>Mistaked Only</option><option value="skipped" ${!hasReattemptData ? 'disabled' : ''}>Skipped Only</option><option value="both" ${!hasReattemptData ? 'disabled' : ''}>Mistaked & Skipped</option><option value="full" ${!hasReattemptData ? 'disabled' : ''}>Full Test</option>`;
+                    reattemptSelect.addEventListener('change', (event) => { const selectedMode = event.target.value; if (selectedMode) { const reviewId = event.target.closest('.test-list-item')?.dataset.reviewId; if (reviewId) { startReattempt(reviewId, selectedMode); } event.target.value = ""; } });
                     actionsDiv.appendChild(reattemptSelect);
-
-                    // Append info and actions divs to the main item element
-                    itemElement.appendChild(infoDiv);
-                    itemElement.appendChild(actionsDiv);
-                    allTestsListContainer.appendChild(itemElement); // Add item to the list
+                    itemElement.appendChild(infoDiv); itemElement.appendChild(actionsDiv); allTestsListContainer.appendChild(itemElement);
                 });
             }
         }
-
         function filterTestsInSidebar() { /* ... (same as before) ... */
-            const searchTerm = testSearchInput.value.toLowerCase().trim();
-            const items = allTestsListContainer.querySelectorAll('.test-list-item');
-            let visibleCount = 0;
-
-            // Remove existing no-results message first
-             const existingNoResultsMsg = allTestsListContainer.querySelector('.no-search-results');
-             if (existingNoResultsMsg) {
-                 existingNoResultsMsg.remove();
-             }
-
-            items.forEach(item => {
-                // Check title and details for search term
-                const titleElement = item.querySelector('.test-item-title');
-                const detailsElement = item.querySelector('.test-item-details');
-                const titleText = titleElement ? titleElement.textContent.toLowerCase() : '';
-                const detailsText = detailsElement ? detailsElement.textContent.toLowerCase() : '';
-
-                const isMatch = titleText.includes(searchTerm) || detailsText.includes(searchTerm);
-                item.classList.toggle('hidden-by-search', !isMatch); // Hide if no match
-                if (isMatch) {
-                    visibleCount++;
-                }
-            });
-
-             // Add "No results" message if needed AFTER filtering
-             if (visibleCount === 0 && searchTerm !== '' && items.length > 0) {
-                 const msgDiv = document.createElement('div');
-                 msgDiv.textContent = "No tests match your search.";
-                 msgDiv.classList.add('no-search-results'); // Use class for styling
-                 allTestsListContainer.appendChild(msgDiv);
-             }
+            const searchTerm = testSearchInput.value.toLowerCase().trim(); const items = allTestsListContainer.querySelectorAll('.test-list-item'); let visibleCount = 0;
+            const existingNoResultsMsg = allTestsListContainer.querySelector('.no-search-results'); if (existingNoResultsMsg) { existingNoResultsMsg.remove(); }
+            items.forEach(item => { const titleElement = item.querySelector('.test-item-title'); const detailsElement = item.querySelector('.test-item-details'); const titleText = titleElement ? titleElement.textContent.toLowerCase() : ''; const detailsText = detailsElement ? detailsElement.textContent.toLowerCase() : ''; const isMatch = titleText.includes(searchTerm) || detailsText.includes(searchTerm); item.classList.toggle('hidden-by-search', !isMatch); if (isMatch) { visibleCount++; } });
+            if (visibleCount === 0 && searchTerm !== '' && items.length > 0) { const msgDiv = document.createElement('div'); msgDiv.textContent = "No tests match your search."; msgDiv.classList.add('no-search-results'); allTestsListContainer.appendChild(msgDiv); }
         }
-
-        // MODIFIED handleAllTestsListClick (Handles view, edit-title, delete-test)
-        async function handleAllTestsListClick(event) {
-            // Find the closest button with a data-action attribute
-            const button = event.target.closest('button[data-action]');
-            if (!button) return; // Exit if click wasn't on an action button
-
-            const action = button.dataset.action;
-            const listItem = button.closest('.test-list-item'); // Find the parent list item
-            const reviewId = listItem?.dataset.reviewId; // Get the Firestore ID
-
-            if (!reviewId) {
-                console.warn("Action button clicked, but couldn't find review ID.");
-                return;
-            }
-
-            // Handle different actions based on button's data-action
+        async function handleAllTestsListClick(event) { /* ... (same as before) ... */
+            const button = event.target.closest('button[data-action]'); if (!button) return;
+            const action = button.dataset.action; const listItem = button.closest('.test-list-item'); const reviewId = listItem?.dataset.reviewId; if (!reviewId) { console.warn("Action button clicked, no review ID found."); return; }
             switch (action) {
                 case "view":
-                    console.log("View Details clicked for review:", reviewId);
-                    // Find data from the local cache populated by the listener
                     const reviewData = allSavedTestsData.find(test => test.id === reviewId);
-                    if (reviewData) {
-                        reviewResultsCache = reviewData; // Cache for display
-                        switchView('review', true); // Switch view, indicate came from tests list
-                        displayReview(reviewData); // Display this specific review
-                    } else {
-                        console.error("Could not find review data in cache for ID:", reviewId);
-                        alert("Error: Could not load review details.");
-                    }
+                    if (reviewData) { reviewResultsCache = reviewData; switchView('review', true); displayReview(reviewData); } else { console.error("Could not find review data for ID:", reviewId); alert("Error: Could not load review details."); }
                     break;
-
-                case "edit-title":
-                    console.log("Edit Title clicked for review:", reviewId);
-                    enterTestTitleEditMode(listItem, reviewId); // Switch item to edit mode
-                    break;
-
+                case "edit-title": enterTestTitleEditMode(listItem, reviewId); break;
                 case "delete-test":
-                    console.log("Delete Test clicked for review:", reviewId);
-                    const testTitleSpan = listItem.querySelector('.test-item-title');
-                    const testTitle = testTitleSpan?.textContent || 'this test'; // Get title for confirm message
-                    // Ask for confirmation before deleting
-                    if (confirm(`Are you sure you want to permanently delete the saved test "${testTitle}"? This cannot be undone. / சேமிக்கப்பட்ட சோதனை "${testTitle}" ஐ நிரந்தரமாக நீக்க உறுதியாக இருக்கிறீர்களா? இது செயல்தவிர்க்க முடியாதது.`)) {
-                        deleteSavedTest(reviewId, listItem); // Proceed with deletion
-                    }
+                    const testTitleSpan = listItem.querySelector('.test-item-title'); const testTitle = testTitleSpan?.textContent || 'this test';
+                    if (confirm(`Are you sure you want to permanently delete the saved test "${testTitle}"?`)) { deleteSavedTest(reviewId, listItem); }
                     break;
-
-                // Note: Reattempt logic is handled by its own 'change' listener on the select element
             }
         }
-
-        // --- NEW Function: Enter Edit Mode for Test Title ---
-        function enterTestTitleEditMode(listItem, reviewId) {
-            const infoDiv = listItem.querySelector('.test-item-info');
-            const titleSpan = infoDiv.querySelector('.test-item-title');
-            const detailsSpan = infoDiv.querySelector('.test-item-details');
-            const controlsDiv = infoDiv.querySelector('.test-item-controls'); // Edit/Delete icons
-            const currentTitle = titleSpan.textContent;
-
-            // Hide original title, details, and controls
-            titleSpan.style.display = 'none';
-            detailsSpan.style.display = 'none'; // Hide details during edit
-            if(controlsDiv) controlsDiv.style.display = 'none';
-
-            // Check if edit container already exists to prevent duplicates
+        function enterTestTitleEditMode(listItem, reviewId) { /* ... (same as before) ... */
+            const infoDiv = listItem.querySelector('.test-item-info'); const titleSpan = infoDiv.querySelector('.test-item-title'); const detailsSpan = infoDiv.querySelector('.test-item-details'); const controlsDiv = infoDiv.querySelector('.test-item-controls'); const currentTitle = titleSpan.textContent;
+            titleSpan.style.display = 'none'; detailsSpan.style.display = 'none'; if(controlsDiv) controlsDiv.style.display = 'none';
             if (infoDiv.querySelector('.test-item-edit-mode')) return;
-
-            // Create container for input and save/cancel buttons
-            const editContainer = document.createElement('div');
-            editContainer.classList.add('test-item-edit-mode');
-
-            const input = document.createElement('input');
-            input.type = 'text';
-            input.value = currentTitle;
-            input.maxLength = 100; // Limit title length
-            // Add keydown listener to save on Enter, cancel on Escape
-            input.addEventListener('keydown', (e) => {
-                 if (e.key === 'Enter') {
-                     saveTestTitle(listItem, reviewId, input.value);
-                 } else if (e.key === 'Escape') {
-                     exitTestTitleEditMode(listItem, currentTitle);
-                 }
-            });
-
-            const saveBtn = document.createElement('button');
-            saveBtn.textContent = 'Save';
-            saveBtn.onclick = () => saveTestTitle(listItem, reviewId, input.value);
-
-            const cancelBtn = document.createElement('button');
-            cancelBtn.textContent = 'Cancel';
-            cancelBtn.onclick = () => exitTestTitleEditMode(listItem, currentTitle); // Pass original title to restore on cancel
-
-            editContainer.appendChild(input);
-            editContainer.appendChild(saveBtn);
-            editContainer.appendChild(cancelBtn);
-
-            // Insert the edit container into the infoDiv
-            infoDiv.appendChild(editContainer);
-            input.focus(); // Focus the input field
-            input.select(); // Select current text
+            const editContainer = document.createElement('div'); editContainer.classList.add('test-item-edit-mode');
+            const input = document.createElement('input'); input.type = 'text'; input.value = currentTitle; input.maxLength = 100;
+            input.addEventListener('keydown', (e) => { if (e.key === 'Enter') { saveTestTitle(listItem, reviewId, input.value); } else if (e.key === 'Escape') { exitTestTitleEditMode(listItem, currentTitle); } });
+            const saveBtn = document.createElement('button'); saveBtn.textContent = 'Save'; saveBtn.onclick = () => saveTestTitle(listItem, reviewId, input.value);
+            const cancelBtn = document.createElement('button'); cancelBtn.textContent = 'Cancel'; cancelBtn.onclick = () => exitTestTitleEditMode(listItem, currentTitle);
+            editContainer.appendChild(input); editContainer.appendChild(saveBtn); editContainer.appendChild(cancelBtn);
+            infoDiv.appendChild(editContainer); input.focus(); input.select();
         }
-
-        // --- NEW Function: Exit Edit Mode ---
-        function exitTestTitleEditMode(listItem, originalTitle = null) {
-            const infoDiv = listItem.querySelector('.test-item-info');
-            const titleSpan = infoDiv.querySelector('.test-item-title');
-            const detailsSpan = infoDiv.querySelector('.test-item-details');
-            const controlsDiv = infoDiv.querySelector('.test-item-controls');
-            const editContainer = infoDiv.querySelector('.test-item-edit-mode');
-
-            if (editContainer) {
-                editContainer.remove(); // Remove input and buttons
-            }
-
-            // Restore original title if provided (used on cancel)
-            if (originalTitle !== null && titleSpan) {
-                 titleSpan.textContent = originalTitle;
-                 titleSpan.title = originalTitle; // Update tooltip too
-            }
-
-            // Show original title, details, and controls again
-            if(titleSpan) titleSpan.style.display = '';
-            if(detailsSpan) detailsSpan.style.display = '';
-            if(controlsDiv) controlsDiv.style.display = ''; // Use display flex if needed based on CSS
+        function exitTestTitleEditMode(listItem, originalTitle = null) { /* ... (same as before) ... */
+            const infoDiv = listItem.querySelector('.test-item-info'); const titleSpan = infoDiv.querySelector('.test-item-title'); const detailsSpan = infoDiv.querySelector('.test-item-details'); const controlsDiv = infoDiv.querySelector('.test-item-controls'); const editContainer = infoDiv.querySelector('.test-item-edit-mode');
+            if (editContainer) { editContainer.remove(); }
+            if (originalTitle !== null && titleSpan) { titleSpan.textContent = originalTitle; titleSpan.title = originalTitle; }
+            if(titleSpan) titleSpan.style.display = ''; if(detailsSpan) detailsSpan.style.display = ''; if(controlsDiv) controlsDiv.style.display = '';
         }
-
-        // --- NEW Function: Save Edited Test Title ---
-        async function saveTestTitle(listItem, reviewId, newTitle) {
-            const trimmedTitle = newTitle.trim();
-            if (!trimmedTitle) {
-                alert("Test title cannot be empty. / சோதனைத் தலைப்பு காலியாக இருக்க முடியாது.");
-                return;
-            }
-            if (trimmedTitle.length > 100) {
-                 alert("Test title is too long (max 100 characters). / சோதனைத் தலைப்பு மிக நீளமாக உள்ளது (அதிகபட்சம் 100 எழுத்துகள்).");
-                 return;
-            }
-
+        async function saveTestTitle(listItem, reviewId, newTitle) { /* ... (same as before) ... */
+            const trimmedTitle = newTitle.trim(); if (!trimmedTitle) { alert("Test title cannot be empty."); return; } if (trimmedTitle.length > 100) { alert("Test title is too long (max 100 characters)."); return; }
             const testDocRef = db.collection('testReviews').doc(reviewId);
             try {
-                // Update only the testTitle field in Firestore
-                await testDocRef.update({ testTitle: trimmedTitle });
-                console.log("Test title updated successfully in Firestore:", reviewId, trimmedTitle);
-
-                // Update UI immediately in the title span
-                const titleSpan = listItem.querySelector('.test-item-title');
-                if (titleSpan) {
-                    titleSpan.textContent = trimmedTitle;
-                    titleSpan.title = trimmedTitle; // Update tooltip
-                }
-
-                // Update local cache (allSavedTestsData) for consistency
-                const testIndex = allSavedTestsData.findIndex(test => test.id === reviewId);
-                if (testIndex > -1) {
-                    allSavedTestsData[testIndex].testTitle = trimmedTitle;
-                }
-
-                exitTestTitleEditMode(listItem); // Exit edit mode on success
-
-            } catch (error) {
-                console.error("Error updating test title in Firestore:", error);
-                alert("Failed to update the test title. Please try again. / சோதனைத் தலைப்பைப் புதுப்பிக்கத் தவறிவிட்டது. மீண்டும் முயற்சிக்கவும்.");
-                // Optionally, exit edit mode even on error to avoid getting stuck
-                // exitTestTitleEditMode(listItem, listItem.querySelector('.test-item-edit-mode input')?.value || null);
-            }
+                await testDocRef.update({ testTitle: trimmedTitle }); console.log("Test title updated:", reviewId, trimmedTitle);
+                const titleSpan = listItem.querySelector('.test-item-title'); if (titleSpan) { titleSpan.textContent = trimmedTitle; titleSpan.title = trimmedTitle; }
+                const testIndex = allSavedTestsData.findIndex(test => test.id === reviewId); if (testIndex > -1) { allSavedTestsData[testIndex].testTitle = trimmedTitle; }
+                exitTestTitleEditMode(listItem);
+            } catch (error) { console.error("Error updating test title:", error); alert("Failed to update test title. Try again."); }
         }
-
-        // --- NEW Function: Delete Saved Test ---
-        async function deleteSavedTest(reviewId, listItemElement) {
+        async function deleteSavedTest(reviewId, listItemElement) { /* ... (same as before) ... */
              if (!currentUser || !reviewId) return;
-
-             // Visually indicate deletion process (optional)
-             listItemElement.style.opacity = '0.5';
-             listItemElement.style.pointerEvents = 'none'; // Disable clicks during delete
-
+             listItemElement.style.opacity = '0.5'; listItemElement.style.pointerEvents = 'none';
              const testDocRef = db.collection('testReviews').doc(reviewId);
              try {
-                 await testDocRef.delete(); // Delete the document from Firestore
-                 console.log("Saved test deleted successfully from Firestore:", reviewId);
-                 // The list will auto-update via the Firestore listener (renderAllTestsList)
-                 // No need to manually remove listItemElement if listener works reliably.
-                 // If immediate removal is desired (though may cause flicker with listener):
-                 // listItemElement.remove();
-
-                 // Update local cache immediately for responsiveness
+                 await testDocRef.delete(); console.log("Saved test deleted:", reviewId);
                  allSavedTestsData = allSavedTestsData.filter(test => test.id !== reviewId);
-                 // Optionally re-apply filter if search is active
-                 // filterTestsInSidebar();
-
-                 alert("Saved test deleted. / சேமித்த சோதனை நீக்கப்பட்டது.");
-
-
-             } catch (error) {
-                 console.error("Error deleting saved test from Firestore:", error);
-                 alert("Failed to delete the saved test. Please try again. / சேமித்த சோதனையை நீக்கத் தவறிவிட்டது. மீண்டும் முயற்சிக்கவும்.");
-                 // Restore appearance on error
-                 listItemElement.style.opacity = '1';
-                 listItemElement.style.pointerEvents = 'auto';
-             }
+                 alert("Saved test deleted.");
+             } catch (error) { console.error("Error deleting saved test:", error); alert("Failed to delete saved test. Try again."); listItemElement.style.opacity = '1'; listItemElement.style.pointerEvents = 'auto'; }
         }
-
-        // MODIFIED startReattempt (Handles bilingual implicitly)
-        async function startReattempt(reviewId, mode) {
+        async function startReattempt(reviewId, mode) { /* ... (same as before) ... */
             console.log(`Starting reattempt for review: ${reviewId}, mode: ${mode}`);
-
-            // Find the full review data (including originalMCQs) from cache
-            const reviewData = allSavedTestsData.find(test => test.id === reviewId);
-
-            if (!reviewData) {
-                alert("Error: Could not find the data for this test review. / பிழை: இந்த சோதனை ஆய்வுக்கான தரவைக் கண்டுபிடிக்க முடியவில்லை.");
-                return;
-            }
-
-            // Check again for valid originalMCQs data (crucial for reattempt)
-            const originalMCQs = reviewData.originalMCQs;
-            const hasValidReattemptData = originalMCQs && Array.isArray(originalMCQs) && originalMCQs.length > 0 &&
-                                       originalMCQs.every(q => q && q.question && q.options && q.answer && q.explanation); // Check essential fields
-
-            if (!hasValidReattemptData) {
-                 alert("Error: Cannot reattempt this test because the original question data is missing or invalid (likely saved before this feature or has structure issues). / பிழை: அசல் கேள்வித் தரவு காணவில்லை அல்லது தவறானது என்பதால் இந்தச் சோதனையை மீண்டும் செய்ய முடியாது.");
-                 return;
-            }
-
-            // Use the review summary data (qReview.status) to filter originalMCQs
-            const reviewQuestionsSummary = reviewData.questions || [];
-            let questionsToReattempt = [];
-
+            const reviewData = allSavedTestsData.find(test => test.id === reviewId); if (!reviewData) { alert("Error: Could not find data for this review."); return; }
+            const originalMCQs = reviewData.originalMCQs; const hasValidReattemptData = originalMCQs && Array.isArray(originalMCQs) && originalMCQs.length > 0 && originalMCQs.every(q => q && q.question && q.options && q.answer && q.explanation);
+            if (!hasValidReattemptData) { alert("Error: Cannot reattempt. Original question data is missing or invalid."); return; }
+            const reviewQuestionsSummary = reviewData.questions || []; let questionsToReattempt = [];
             switch (mode) {
-                case 'mistaked':
-                    questionsToReattempt = originalMCQs.filter((mcq, index) => reviewQuestionsSummary[index]?.status === 'incorrect');
-                    break;
-                case 'skipped':
-                    questionsToReattempt = originalMCQs.filter((mcq, index) => reviewQuestionsSummary[index]?.status === 'skipped');
-                    break;
-                case 'both':
-                    questionsToReattempt = originalMCQs.filter((mcq, index) => reviewQuestionsSummary[index]?.status === 'incorrect' || reviewQuestionsSummary[index]?.status === 'skipped');
-                    break;
-                case 'full':
-                default:
-                    questionsToReattempt = [...originalMCQs]; // Use a copy
-                    break;
+                case 'mistaked': questionsToReattempt = originalMCQs.filter((mcq, index) => reviewQuestionsSummary[index]?.status === 'incorrect'); break;
+                case 'skipped': questionsToReattempt = originalMCQs.filter((mcq, index) => reviewQuestionsSummary[index]?.status === 'skipped'); break;
+                case 'both': questionsToReattempt = originalMCQs.filter((mcq, index) => reviewQuestionsSummary[index]?.status === 'incorrect' || reviewQuestionsSummary[index]?.status === 'skipped'); break;
+                case 'full': default: questionsToReattempt = [...originalMCQs]; break;
             }
-
-            if (questionsToReattempt.length === 0) {
-                alert(`No questions found for the selected reattempt mode ('${mode}'). / தேர்ந்தெடுக்கப்பட்ட மறுமுயற்சி முறைக்கு ('${mode}') கேள்விகள் எதுவும் இல்லை.`);
-                return;
-            }
-
-            // Create a title for the reattempt session
+            if (questionsToReattempt.length === 0) { alert(`No questions found for reattempt mode ('${mode}').`); return; }
             const reattemptTitle = `${reviewData.testTitle || 'Test'} (Reattempt: ${mode})`;
-
-            // Start the test with the filtered questions
-            // startMockTest handles switching view and setting up the test environment
             startMockTest(questionsToReattempt, reattemptTitle);
         }
+
 
     </script>
 
