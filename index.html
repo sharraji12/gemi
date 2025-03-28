@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <!-- தலைப்பை மாற்றலாம் -->
-    <title>Gemini Chat + Mock Test (v9.0 - Bilingual & Edit)</title>
+    <title>Gemini Chat + Mock Test (v9.1 - Image/Video Embed)</title> <!-- Version Updated -->
     <script>
         window.MathJax = {
             tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$'], ['\\[', '\\]']] },
@@ -19,7 +19,7 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
 
     <style>
-        /* --- Styles (v9.0 - Bilingual & Edit Included) --- */
+        /* --- Styles (v9.1 - Image/Video Embed Included) --- */
         :root { /* ... Theme Variables ... */
              --font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; --sidebar-width: 260px; --message-font-size-base: 1rem;
             /* LIGHT */ --sidebar-bg: #f7f7f7; --main-bg: #ffffff; --input-bg: #ffffff; --border-color: #e0e0e0; --text-primary: #2c2c2c; --text-secondary: #5f5f5f; --text-placeholder: #999999; --accent-color: #d97a7a; --user-message-bg: #cce0ff; --user-message-text: #1c1c1c; --ai-message-bg: #f0f0f0; --ai-message-text: #2c2c2c; --button-bg: #f0f0f0; --button-hover-bg: #e0e0e0; --active-item-bg: #e0e0e0; --code-bg: #e8e8e8; --scrollbar-thumb: #ccc; --scrollbar-thumb-hover: #bbb; --app-outer-bg: #e8e8e8; --send-button-bg: var(--accent-color); --send-button-hover-bg: #c76b6b; --send-button-text: #ffffff; --error-bg: #ffebee; --error-text: #c62828; --error-border: #ef9a9a; --message-font-size: var(--message-font-size-base); --delete-button-color: #aaa; --delete-button-hover-color: #dc3545; --input-border-color: var(--border-color); --input-focus-border-color: var(--accent-color);
@@ -110,6 +110,10 @@
         .error-message { background-color: var(--error-bg); color: var(--error-text); border: 1px solid var(--error-border); align-self: flex-start; transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;}
         .info-message { text-align: center; color: var(--text-secondary); padding: 50px 20px; font-style: italic; }
         .message mjx-container { color: inherit !important; font-size: inherit !important; }
+        /* --- NEW: Styles for Embedded Images & Videos --- */
+        .message img.chat-image { max-width: 100%; height: auto; border-radius: 8px; margin-top: 8px; cursor: pointer; /* Optional: for zoom later */ }
+        .message .youtube-embed-container { margin-top: 10px; }
+        .message iframe.chat-video { max-width: 100%; aspect-ratio: 16 / 9; /* Maintain aspect ratio */ border: none; border-radius: 8px; }
 
         /* --- Input Area Elements --- */
         .suggestions { display: none; gap: 10px; margin-bottom: 15px; flex-wrap: wrap; }
@@ -236,6 +240,8 @@
             .review-filters button { padding: 4px 8px; font-size: 0.85em; margin-right: 5px;}
             .test-navigation, .review-footer { padding-top: 10px; }
             .test-navigation button, #exit-review-btn, #save-review-btn { padding: 8px 15px; font-size: 0.9em; }
+            /* --- NEW: Mobile Styles for Embedded Media --- */
+            .message iframe.chat-video { /* Maybe slightly smaller aspect ratio on mobile if needed */ }
         }
 
     </style>
@@ -303,7 +309,8 @@
                           <button class="suggestion-chip" data-prompt="Explain $\lim_{x\to 0} \frac{\sin x}{x} = 1$">Limit sin(x)/x ?</button>
                      </div>
                     <div class="input-box">
-                        <textarea id="user-input" placeholder="Enter prompt (Check 'MCQs?' to generate test)" rows="1"></textarea>
+                        <!-- Placeholder updated for image URL pasting -->
+                        <textarea id="user-input" placeholder="Enter prompt, paste image URL, or paste YouTube link (Check 'MCQs?' to generate test)" rows="1"></textarea>
                         <div class="mcq-mode-control"> <input type="checkbox" id="mcq-mode-checkbox" title="Check to generate MCQs based on your prompt"> <label for="mcq-mode-checkbox">MCQs?</label> </div>
                         <button id="send-button" title="Send message" disabled> <svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"></path></svg>
                         </button>
@@ -385,6 +392,8 @@
         firebase.initializeApp(firebaseConfig);
         const fbAuth = firebase.auth();
         const db = firebase.firestore();
+        // Firebase Storage (Uncomment if you decide to implement direct uploads later)
+        // const storage = firebase.storage();
 
         // --- DOM Elements ---
         const appContainer = document.getElementById('app-container');
@@ -445,6 +454,10 @@
         const DELETE_ICON = '×'; // Chat delete icon
         const EDIT_TEST_ICON = '✏️';
         const DELETE_TEST_ICON = '🗑️';
+        // NEW: Regex for YouTube and Image URLs
+        const youtubeRegex = /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:watch\?v=|embed\/|v\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})(?:\S+)?/i;
+        const imageUrlRegex = /(https?:\/\/[^\s()<>]+?\.(?:jpg|jpeg|png|gif|webp|bmp))/gi; // Made global
+
 
         // --- State Variables ---
         let API_KEY='';
@@ -1055,10 +1068,11 @@
                         currentChatHistory.push({
                              role: role,
                              parts: [{ text: text }]
+                             // Note: We don't store/send image/video details to the Gemini API context
                         });
 
-                        // Display the message, passing full data for potential MCQ button rendering
-                        displayMessage(text, role, [], null, msgData);
+                        // Display the message, passing full data for potential MCQ/Video/Image rendering
+                        displayMessage(text, role, [], null, msgData); // Pass msgData
                     });
                 }
                 scrollToBottom(true); // Scroll after rendering
@@ -1067,7 +1081,7 @@
                 // Enable input/send now that chat is loaded
                 sendButton.disabled = !API_KEY; // Enable if API key exists
                 mcqModeCheckbox.disabled = !API_KEY;
-                userInput.placeholder = "Enter prompt (Check 'MCQs?' to generate test)";
+                userInput.placeholder = "Enter prompt, paste image URL, or paste YouTube link (Check 'MCQs?' to generate test)"; // Update placeholder
                 if (!isTestMode && !isReviewMode) userInput.focus(); // Focus input
 
 
@@ -1108,11 +1122,20 @@
             let isFirstUserMessageInNewChat = false;
             let potentialTestTitle = null; // For auto-generated test title
 
+            // --- NEW: Detect YouTube Video ID in User Input ---
+            const youtubeMatch = userMessageText.match(youtubeRegex);
+            const youtubeVideoId = youtubeMatch ? youtubeMatch[1] : null;
+            if (youtubeVideoId) {
+                console.log("Detected YouTube Video ID:", youtubeVideoId);
+            }
+
             // Prepare user message data for Firestore
              const userMsgData = {
                  role: "user",
                  text: userMessageText,
-                 timestamp: timestamp
+                 timestamp: timestamp,
+                 ...(youtubeVideoId && { youtubeVideoId: youtubeVideoId }) // Add video ID if found
+                 // Note: Image URLs are just part of the text, no special field needed here
              };
 
              try {
@@ -1125,11 +1148,11 @@
                      }
                  }
 
-                 // Save user message
+                 // Save user message (including potential youtubeVideoId)
                  await messagesColRef.add(userMsgData);
                  // Update chat's lastUpdated timestamp
                  await chatDocRef.update({ lastUpdated: timestamp });
-                 console.log("User message saved to Firestore.");
+                 console.log("User message saved to Firestore:", userMsgData);
 
                  // If first message, generate and update chat title
                  if (isFirstUserMessageInNewChat) {
@@ -1155,11 +1178,16 @@
             scrollToBottom(); // Scroll to show thinking message
 
             // Prepare history for API call (use the up-to-date local cache)
-            const requestHistory = [ ...currentChatHistory ]; // Listener should have added the user message
+            // IMPORTANT: DO NOT send image/video data to the Gemini API for context
+            // Filter out any complex objects, just send text parts
+            const apiHistoryForCall = currentChatHistory.map(msg => ({
+                role: msg.role,
+                parts: msg.parts // Assuming parts only contains {text: ...}
+            })).filter(msg => msg.parts && msg.parts.length > 0 && msg.parts[0].text); // Ensure text exists
+
 
             // Modify prompt and prepare API history copy if MCQ requested
-            let promptForAPI = userMessageText;
-            let apiHistoryForCall = [...requestHistory]; // Create a copy to potentially modify
+            let promptForAPI = userMessageText; // Use the original text for the API prompt
 
             if (isMCQRequest) {
                 // Generate a potential title from the user's prompt
@@ -1195,7 +1223,7 @@ Provide accurate Tamil translations. Do not include any text outside the JSON st
                      method: 'POST',
                      headers: { 'Content-Type': 'application/json' },
                      body: JSON.stringify({
-                         contents: apiHistoryForCall, // Use the potentially modified history for API
+                         contents: apiHistoryForCall, // Use the potentially modified text-only history for API
                          safetySettings: [ // Standard safety settings
                             { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_MEDIUM_AND_ABOVE" },
                             { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_MEDIUM_AND_ABOVE" },
@@ -1214,6 +1242,7 @@ Provide accurate Tamil translations. Do not include any text outside the JSON st
                      timestamp: firebase.firestore.FieldValue.serverTimestamp(),
                      mcqData: null, // For storing parsed MCQ JSON
                      mcqTitle: null // For storing auto-generated test title
+                     // AI messages generally won't contain youtubeVideoId unless it repeats user input
                  };
                  let displayAsError = true; // Flag to use error styling if needed
 
@@ -1420,7 +1449,8 @@ Provide accurate Tamil translations. Do not include any text outside the JSON st
              } else if (!API_KEY) {
                  userInput.placeholder = "API Key missing. Reload page.";
              } else {
-                 userInput.placeholder = "Enter prompt (Check 'MCQs?' to generate test)";
+                 // Update placeholder to include image/video URL pasting
+                 userInput.placeholder = "Enter prompt, paste image URL, or paste YouTube link (Check 'MCQs?' to generate test)";
              }
          }
 
@@ -1466,23 +1496,42 @@ Provide accurate Tamil translations. Do not include any text outside the JSON st
             }
         }
 
-        // Displays a message in the chat area (MODIFIED for MCQ button data)
-        function displayMessage(text, sender, cssClasses = [], appendHtml = null, messageData = null) { /* ... (updated for mcqTitle) ... */
+        // Displays a message in the chat area (MODIFIED for Image/Video)
+        function displayMessage(text, sender, cssClasses = [], appendHtml = null, messageData = null) {
             const messageElement = document.createElement('div');
             messageElement.classList.add('message', `${sender}-message`);
             if (cssClasses && cssClasses.length > 0) {
                 messageElement.classList.add(...cssClasses);
             }
 
-             // Sanitize and format text (Markdown-like)
-             const tempDiv = document.createElement('div');
-             tempDiv.innerText = text || ""; // Use innerText to prevent script injection
-             let formattedText = tempDiv.innerHTML; // Get HTML-escaped text
+            const messageTextContainer = document.createElement('div'); // Container for text content
 
-             // Apply formatting (Bold, Italic, Code Blocks, Inline Code)
+            // Sanitize and format text (Markdown-like)
+            const tempDiv = document.createElement('div');
+            tempDiv.innerText = text || ""; // Use innerText to prevent script injection
+            let formattedText = tempDiv.innerHTML; // Get HTML-escaped text
+
+             // --- NEW: Replace Image URLs with <img> tags ---
+             // Replace only if the URL is not already inside an HTML tag (basic check)
+             formattedText = formattedText.replace(imageUrlRegex, (match, imgUrl) => {
+                // Avoid replacing if inside an existing tag (simple check for '<' before the match)
+                const index = formattedText.indexOf(match);
+                const preChar = index > 0 ? formattedText[index - 1] : '';
+                const postChar = index + match.length < formattedText.length ? formattedText[index + match.length] : '';
+                // Avoid if inside quotes or already in src attribute
+                if (preChar === '"' || preChar === "'" || preChar === '=' || preChar ==='/') return match;
+                if (postChar === '"' || postChar === "'") return match;
+                // Check if it looks like it's already in an <img> tag (very basic)
+                const preText = formattedText.substring(Math.max(0, index - 10), index);
+                if (preText.toLowerCase().includes('<img') || preText.toLowerCase().includes('src=')) return match;
+
+                console.log("Found image URL:", imgUrl);
+                return `<img src="${imgUrl}" class="chat-image" alt="Chat Image" loading="lazy">`; // Added loading="lazy"
+            });
+
+            // Apply other formatting (Bold, Italic, Code Blocks, Inline Code) AFTER image replacement
              formattedText = formattedText
                 .replace(/```([\s\S]*?)```/g, (match, code) => {
-                    // Double escape for pre/code blocks
                     const escapedCode = code.replace(/</g, "&lt;").replace(/>/g, "&gt;");
                     return `<pre><code>${escapedCode}</code></pre>`;
                 })
@@ -1494,12 +1543,30 @@ Provide accurate Tamil translations. Do not include any text outside the JSON st
                 .replace(/(?<!\*)\*(?!\*)(.*?)(?<!\*)\*(?!\*)/g, '<em>$1</em>') // Italic (ensure not part of bold)
                 .replace(/\n/g, '<br>'); // Newlines
 
-            messageElement.innerHTML = formattedText;
+            messageTextContainer.innerHTML = formattedText;
+            messageElement.appendChild(messageTextContainer); // Add text container first
+
+            // --- NEW: Handle YouTube Video Embed ---
+            if (messageData?.youtubeVideoId) {
+                console.log("Rendering YouTube video:", messageData.youtubeVideoId);
+                const youtubeEmbedDiv = document.createElement('div');
+                youtubeEmbedDiv.classList.add('youtube-embed-container'); // Optional container
+                const iframe = document.createElement('iframe');
+                iframe.classList.add('chat-video');
+                iframe.width = "560"; // Standard width, CSS will control max-width
+                iframe.height = "315"; // Standard height
+                iframe.src = `https://www.youtube.com/embed/${messageData.youtubeVideoId}`;
+                iframe.title = "YouTube video player";
+                iframe.allow = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share";
+                iframe.allowFullscreen = true;
+                iframe.loading = "lazy"; // Lazy load video
+                youtubeEmbedDiv.appendChild(iframe);
+                messageElement.appendChild(youtubeEmbedDiv); // Append video AFTER text
+            }
 
             // Handle MCQ Offer (Uses mcqData and mcqTitle from Firestore document)
-            if (messageData && messageData.role === 'model' && messageData.mcqData && Array.isArray(messageData.mcqData) && messageData.mcqData.length > 0) {
+            if (messageData?.role === 'model' && messageData?.mcqData && Array.isArray(messageData.mcqData) && messageData.mcqData.length > 0) {
                  console.log("Rendering message with MCQ offer:", messageData.mcqData.length, "questions. Title:", messageData.mcqTitle);
-                 // Pass mcqData AND mcqTitle to the function
                  displayMCQOffer(messageData.mcqData, messageData.mcqTitle, messageElement);
             }
             else if (appendHtml) { // Append extra HTML if provided (less common now)
@@ -1552,6 +1619,12 @@ Provide accurate Tamil translations. Do not include any text outside the JSON st
                      console.error("MCQ data not found or invalid in button attribute when 'Start Test' button clicked.");
                      displayError("Could not start the test. MCQ data seems missing or invalid.");
                  }
+            }
+
+            // --- NEW: Handle click on embedded images (Optional: Open in new tab) ---
+            const clickedImage = event.target.closest('img.chat-image');
+            if (clickedImage && clickedImage.src) {
+                window.open(clickedImage.src, '_blank'); // Open image URL in a new tab
             }
         }
 
