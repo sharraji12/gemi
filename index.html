@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gemini Chat + Mock Test (v8.3 - All Tests Section)</title> <script> window.MathJax={tex:{inlineMath:[['$','$'],['\\(','\\)']],displayMath:[['$$','$$'],['\\[','\\]']]},svg:{fontCache:'global'},options:{skipHtmlTags:['script','noscript','style','textarea','pre','code']}}; </script>
+    <title>Gemini Chat + Mock Test (v8.4 - Full Update)</title> <script> window.MathJax={tex:{inlineMath:[['$','$'],['\\(','\\)']],displayMath:[['$$','$$'],['\\[','\\]']]},svg:{fontCache:'global'},options:{skipHtmlTags:['script','noscript','style','textarea','pre','code']}}; </script>
     <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
 
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
@@ -11,7 +11,7 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
 
     <style>
-        /* --- Styles (Minor adjustments for delete button + All Tests Section) --- */
+        /* --- Styles (v8.4 - Consistent) --- */
         :root { /* ... Theme Variables ... */
              --font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; --sidebar-width: 260px; --message-font-size-base: 1rem;
             /* LIGHT */ --sidebar-bg: #f7f7f7; --main-bg: #ffffff; --input-bg: #ffffff; --border-color: #e0e0e0; --text-primary: #2c2c2c; --text-secondary: #5f5f5f; --text-placeholder: #999999; --accent-color: #d97a7a; --user-message-bg: #cce0ff; --user-message-text: #1c1c1c; --ai-message-bg: #f0f0f0; --ai-message-text: #2c2c2c; --button-bg: #f0f0f0; --button-hover-bg: #e0e0e0; --active-item-bg: #e0e0e0; --code-bg: #e8e8e8; --scrollbar-thumb: #ccc; --scrollbar-thumb-hover: #bbb; --app-outer-bg: #e8e8e8; --send-button-bg: var(--accent-color); --send-button-hover-bg: #c76b6b; --send-button-text: #ffffff; --error-bg: #ffebee; --error-text: #c62828; --error-border: #ef9a9a; --message-font-size: var(--message-font-size-base); --delete-button-color: #aaa; --delete-button-hover-color: #dc3545; --input-border-color: var(--border-color); --input-focus-border-color: var(--accent-color);
@@ -88,6 +88,9 @@
              border: 1px solid var(--border-color);
          }
           .test-list-item.hidden-by-search { display: none; }
+          .test-list-item .no-search-results { /* Style for no results message inside list */
+             padding:10px;color:var(--text-secondary);font-size:0.9em;
+          }
          .test-item-info {
              font-size: 0.9em;
              color: var(--text-primary);
@@ -122,6 +125,10 @@
              background-color: var(--button-hover-bg);
              color: var(--text-primary);
          }
+          .test-item-actions select:disabled {
+               opacity: 0.6;
+               cursor: not-allowed;
+          }
          /* --- End All Tests Section Styles --- */
 
          .start-chat-button { display: flex; align-items: center; gap: 8px; background-color: var(--main-bg); border: 1px solid var(--border-color); color: var(--text-primary); border-radius: 8px; padding: 10px 15px; margin: 0 15px 10px 15px; /* Adjusted margins */ font-size: 0.95em; font-weight: 500; cursor: pointer; text-align: left; transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease; flex-shrink: 0; /* Prevent shrinking */ }
@@ -129,7 +136,6 @@
          .start-chat-button:disabled { opacity: 0.6; cursor: not-allowed; } /* Disabled style for logged out */
 
          .chat-list {
-             /* Removed flex-grow: 1 */
              overflow-y: auto;
              padding: 0 15px;
              margin-bottom: 10px;
@@ -145,7 +151,7 @@
          }
          .chat-list-item:hover { background-color: var(--button-hover-bg); color: var(--text-primary); }
          .chat-list-item.active { background-color: var(--active-item-bg); color: var(--text-primary); font-weight: 500; }
-         .delete-chat-button { /* UPDATED */
+         .delete-chat-button {
              position: absolute;
              right: 6px;
              top: 50%;
@@ -187,7 +193,7 @@
          #logout-btn { display: none; /* Initially hidden */ }
 
 
-        /* --- Chat Area Elements (Unchanged) --- */
+        /* --- Chat Area Elements --- */
         .greeting { font-size: 1.8em; font-weight: 600; margin-bottom: 40px; color: var(--text-primary); } .greeting .asterisk { color: var(--accent-color); font-size: 1.2em; margin-right: 5px; display: inline-block; vertical-align: middle; }
         .message { padding: 12px 18px; border-radius: 18px; max-width: 80%; word-wrap: break-word; line-height: 1.6; margin-bottom: 15px; font-size: var(--message-font-size); transition: background-color 0.3s ease, color 0.3s ease; }
         .user-message { background-color: var(--user-message-bg); color: var(--user-message-text); align-self: flex-end; border-bottom-right-radius: 5px; }
@@ -201,7 +207,7 @@
         .info-message { text-align: center; color: var(--text-secondary); padding: 50px 20px; font-style: italic; }
         .message mjx-container { color: inherit !important; font-size: inherit !important; }
 
-        /* --- Input Area Elements (Unchanged except suggestions hidden initially) --- */
+        /* --- Input Area Elements --- */
         .suggestions { display: none; gap: 10px; margin-bottom: 15px; flex-wrap: wrap; } /* Initially hidden */
         .suggestion-chip { background-color: var(--button-bg); border: 1px solid var(--border-color); color: var(--text-secondary); border-radius: 16px; padding: 8px 15px; font-size: 0.9em; cursor: pointer; transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease; }
         .suggestion-chip:hover { background-color: var(--button-hover-bg); color: var(--text-primary); }
@@ -221,7 +227,7 @@
          .start-test-button { background-color: var(--accent-color); color: var(--send-button-text); border: none; border-radius: 6px; padding: 8px 15px; margin-top: 10px; cursor: pointer; font-weight: 500; display: inline-block; transition: background-color 0.2s ease; }
          .start-test-button:hover { background-color: var(--send-button-hover-bg); }
 
-        /* --- Mock Test View Styles (Unchanged) --- */
+        /* --- Mock Test View Styles --- */
         .mock-test-view { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: var(--main-bg); z-index: 100; flex-direction: column; padding: 20px; box-sizing: border-box; transition: background-color 0.3s ease; }
         .mock-test-view.active { display: flex; }
         .test-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-bottom: 10px; border-bottom: 1px solid var(--border-color); flex-shrink: 0; }
@@ -264,6 +270,7 @@
              background-color: var(--accent-color); color: var(--send-button-text); border: none;
              border-radius: 6px; padding: 10px 25px; cursor: pointer; font-size: 1em;
              transition: background-color 0.2s ease;
+             display: none; /* Hide initially, show based on context */
         }
         #exit-review-btn:hover, #save-review-btn:hover:not(:disabled) { background-color: var(--send-button-hover-bg); }
         #save-review-btn { /* Secondary button style (optional) */
@@ -280,12 +287,11 @@
         <div class="sidebar">
             <div class="sidebar-header">Gemini Chat</div>
 
-            <!-- == New "All Tests" Section == -->
+            <!-- == "All Tests" Section == -->
             <div id="all-tests-section">
                 <div class="sidebar-section-title">All Tests</div>
                 <input type="search" id="test-search-input" placeholder="Search tests..." disabled>
                 <div class="all-tests-list" id="all-tests-list">
-                    <!-- Test list items will be loaded here -->
                      <div style="padding:10px;color:var(--text-secondary);font-size:0.9em;">Login to see saved tests.</div>
                 </div>
             </div>
@@ -349,7 +355,7 @@
                  <div class="review-header">
                      <h2 id="review-title">Test Review</h2> <!-- Added ID for title -->
                      <div class="review-summary" id="review-summary"></div>
-                     <div class="review-filters" id="review-filters">
+                     <div class="review-filters" id="review-filters" style="display: none;"> <!-- Hide initially -->
                          <button data-filter="all" class="active-filter">All</button>
                          <button data-filter="incorrect">Incorrect</button>
                          <button data-filter="skipped">Skipped</button>
@@ -358,7 +364,7 @@
                  <div class="review-content" id="review-content"></div>
                  <div class="review-footer">
                      <button id="save-review-btn">Save Review</button>
-                     <button id="exit-review-btn">Back</button> <!-- Changed text -->
+                     <button id="exit-review-btn">Back</button> <!-- Default text, updated by switchView -->
                  </div>
               </div>
         </div>
@@ -403,11 +409,9 @@
         const suggestionsContainer = document.getElementById('suggestions');
         const startChatButton = document.getElementById('start-chat');
         const chatListContainer = document.getElementById('chat-list');
-        // --> New Test List Elements
         const allTestsSection = document.getElementById('all-tests-section');
         const testSearchInput = document.getElementById('test-search-input');
         const allTestsListContainer = document.getElementById('all-tests-list');
-        // <-- End New Test List Elements
         const accountEmail = document.getElementById('account-email');
         const accountAvatar = document.getElementById('account-avatar');
         const accountPlan = document.getElementById('account-plan');
@@ -434,7 +438,7 @@
         const nextQuestionBtn = document.getElementById('next-question-btn');
         const submitTestBtn = document.getElementById('submit-test-btn');
         // Review elements
-        const reviewTitle = document.getElementById('review-title'); // Added
+        const reviewTitle = document.getElementById('review-title');
         const reviewSummary = document.getElementById('review-summary');
         const reviewContent = document.getElementById('review-content');
         const exitReviewBtn = document.getElementById('exit-review-btn');
@@ -442,40 +446,40 @@
         const saveReviewBtn = document.getElementById('save-review-btn');
 
         // --- Config & Constants ---
-        const MODEL_NAME="gemini-1.5-flash-latest"; // Or your preferred model
+        const MODEL_NAME="gemini-1.5-flash-latest";
         const API_URL_BASE=`https://generativelanguage.googleapis.com/v1beta/models/${MODEL_NAME}:generateContent?key=`;
-        const STORAGE_KEY_API_KEY='geminiApiKey_insecureDemo'; // Use a distinct key name
+        const STORAGE_KEY_API_KEY='geminiApiKey_insecureDemo';
         const NEW_CHAT_TITLE="(New Chat)";
         const TEXT_SIZE_STEP=0.1;
         const MIN_TEXT_SIZE_MULTIPLIER=0.7;
         const MAX_TEXT_SIZE_MULTIPLIER=1.5;
         const LIGHT_THEME_ICON='☀️';
         const DARK_THEME_ICON='🌙';
-        const DELETE_ICON = '×'; // Or use an SVG like trash icon
+        const DELETE_ICON = '×';
 
         // --- State Variables ---
         let API_KEY='';
         let currentUser = null;
         let activeChatId = null;
-        let currentChatHistory=[]; // Holds {role, parts: [{text}]} for API calls, populated by listener
+        let currentChatHistory=[];
         let currentTextSizeMultiplier=1.0;
         let currentTheme='light';
         let isTestMode=false;
         let isReviewMode=false;
-        let currentTestMCQs=[];
+        let currentTestMCQs=[]; // Holds questions for the CURRENT active test/reattempt
         let currentQuestionIndex=0;
         let userAnswers=[];
         let testStartTime=null;
         let testTimerInterval=null;
-        let generatedMCQData=null; // Temporarily stores parsed MCQs before starting test
-        let reviewResultsCache = null; // Stores results for display and saving
-        let cameFromAllTestsList = false; // Flag to track if review view was opened from "All Tests" list
+        // let generatedMCQData=null; // No longer needed globally
+        let reviewResultsCache = null; // Stores results for CURRENT review display or saving
+        let cameFromAllTestsList = false;
         // Firestore Listeners
-        let activeChatListener = null; // Listener for messages in the active chat
-        let chatListListener = null;   // Listener for the list of chats in the sidebar
-        let testListListener = null;   // --> Listener for the list of saved tests
-        let isDeletingChat = false;    // Flag to prevent UI shifts during delete operations
-        let allSavedTestsData = [];    // --> Cache for all saved test review data
+        let activeChatListener = null;
+        let chatListListener = null;
+        let testListListener = null;
+        let isDeletingChat = false;
+        let allSavedTestsData = []; // Cache for ALL saved test review data fetched from Firestore
 
         // --- Initialization ---
         initializeApp();
@@ -486,11 +490,10 @@
         userInput.addEventListener('keydown', handleInputKeydown);
         suggestionsContainer.addEventListener('click', handleSuggestionClick);
         startChatButton.addEventListener('click', createNewChat);
-        chatListContainer.addEventListener('click', handleChatListClick); // Handles both switching and deleting
-        // --> New Listener for All Tests List
-        allTestsListContainer.addEventListener('click', handleAllTestsListClick);
+        chatListContainer.addEventListener('click', handleChatListClick);
+        allTestsListContainer.addEventListener('click', handleAllTestsListClick); // Handles View Details btn
+        // Note: Reattempt 'select' change listener is added directly in renderAllTestsList
         testSearchInput.addEventListener('input', filterTestsInSidebar);
-        // <-- End New Listener
         decreaseTextBtn.addEventListener('click', () => adjustTextSize(-TEXT_SIZE_STEP));
         increaseTextBtn.addEventListener('click', () => adjustTextSize(TEXT_SIZE_STEP));
         themeToggleButton.addEventListener('click', toggleTheme);
@@ -500,7 +503,7 @@
         submitTestBtn.addEventListener('click', submitTest);
         // Review listeners
         exitReviewBtn.addEventListener('click', exitReview);
-        chatArea.addEventListener('click', handleChatAreaClick); // For the "Start Mock Test" button
+        chatArea.addEventListener('click', handleChatAreaClick); // For the "Start Mock Test" button in chat
         reviewFilters.addEventListener('click', handleReviewFilterClick);
         saveReviewBtn.addEventListener('click', saveTestReviewToCloud);
         // Auth listeners
@@ -510,17 +513,16 @@
 
         // --- Initialization Functions ---
         async function initializeApp() {
-            loadGeminiApiKey(); // Load or prompt for the *insecure* API key
-            fbAuth.onAuthStateChanged(handleAuthStateChange); // Listen for login/logout
-            switchView('chat'); // Start in chat view
+            loadGeminiApiKey();
+            fbAuth.onAuthStateChanged(handleAuthStateChange);
+            switchView('chat');
             userInput.focus();
         }
 
         function loadGeminiApiKey() {
              console.warn("!!! SECURITY WARNING !!! Gemini API Key is stored in localStorage. This is highly insecure and only for demonstration. Use a server-side solution (like Cloud Functions) to protect your key in production.");
-             const k=localStorage.getItem(STORAGE_KEY_API_KEY);
-             if(k){
-                 API_KEY=k;
+             API_KEY = localStorage.getItem(STORAGE_KEY_API_KEY); // Use let for potential re-assignment
+             if(API_KEY){
                  console.log("Loaded insecure API Key from localStorage.");
              }
              else {
@@ -531,11 +533,10 @@
                  }
                  else {
                      displayError("Gemini API Key is required for this demo. Reload the page to enter it.");
-                     setLoadingState(true, "API Key Missing"); // Keep UI disabled
+                     setLoadingState(true, "API Key Missing");
                  }
              }
-             // Initial state setting, will be potentially overridden by auth change
-             setLoadingState(false); // Set to non-loading initially, auth state might disable later
+             setLoadingState(false);
         }
 
         // --- Authentication Functions ---
@@ -545,11 +546,10 @@
             try {
                 setLoadingState(true, "Logging in...");
                 await fbAuth.signInWithPopup(provider);
-                // onAuthStateChanged will handle the UI updates and data loading
             } catch (error) {
                 console.error("Google Sign-In Error:", error);
                 displayError(`Login failed: ${error.message || 'Unknown error'}`);
-                setLoadingState(false); // Reset loading state on error
+                setLoadingState(false);
             }
         }
 
@@ -557,118 +557,101 @@
             try {
                 setLoadingState(true, "Logging out...");
                 await fbAuth.signOut();
-                // onAuthStateChanged will handle the UI cleanup
             } catch (error) {
                 console.error("Sign Out Error:", error);
                 displayError(`Logout failed: ${error.message || 'Unknown error'}`);
-                setLoadingState(false); // Reset loading state on error
+                setLoadingState(false);
             }
         }
 
-        // Central function to handle UI/data changes on login/logout
         function handleAuthStateChange(user) {
-            // --- Cleanup previous state ---
-            // Detach existing Firestore listeners to prevent leaks/errors
+            // Cleanup previous state
             if (activeChatListener) { activeChatListener(); activeChatListener = null; }
             if (chatListListener) { chatListListener(); chatListListener = null; }
-            if (testListListener) { testListListener(); testListListener = null; } // --> Detach test listener
+            if (testListListener) { testListListener(); testListListener = null; }
 
-            // Reset UI elements related to chat
             chatArea.innerHTML = '';
             chatListContainer.innerHTML = '';
-            allTestsListContainer.innerHTML = '<div style="padding:10px;color:var(--text-secondary);font-size:0.9em;">Login to see saved tests.</div>'; // --> Reset test list
-            allTestsSection.classList.remove('visible'); // --> Hide test section
-            testSearchInput.value = ''; // --> Clear search
-            testSearchInput.disabled = true; // --> Disable search
+            allTestsListContainer.innerHTML = '<div style="padding:10px;color:var(--text-secondary);font-size:0.9em;">Login to see saved tests.</div>';
+            allTestsSection.classList.remove('visible');
+            testSearchInput.value = '';
+            testSearchInput.disabled = true;
             activeChatId = null;
             currentChatHistory = [];
-            isDeletingChat = false; // Ensure flag is reset on logout/login
-            allSavedTestsData = []; // --> Clear cached test data
+            isDeletingChat = false;
+            allSavedTestsData = [];
 
             if (user) {
-                // --- User is logged IN ---
+                // User is logged IN
                 currentUser = user;
                 console.log("User logged in:", currentUser.uid, currentUser.displayName || currentUser.email);
 
-                // Update sidebar auth buttons & account info
                 loginBtn.style.display = 'none';
                 logoutBtn.style.display = 'inline-block';
                 accountEmail.textContent = currentUser.email || currentUser.displayName || `User`;
                 accountAvatar.textContent = (currentUser.displayName || currentUser.email || 'U')[0].toUpperCase();
-                accountPlan.textContent = "Firebase User"; // Placeholder plan
+                accountPlan.textContent = "Firebase User";
 
-                // Enable sidebar controls
                 startChatButton.disabled = false;
                 decreaseTextBtn.disabled = false;
                 increaseTextBtn.disabled = false;
                 themeToggleButton.disabled = false;
-                testSearchInput.disabled = false; // --> Enable search
+                testSearchInput.disabled = false;
 
-                // Enable input area
-                sendButton.disabled = true; // Will be enabled once a chat is active
+                sendButton.disabled = true;
                 userInput.disabled = false;
-                userInput.placeholder = "Select or create a chat"; // Initial prompt
+                userInput.placeholder = "Select or create a chat";
                 inputContainer.style.display = 'block';
                 suggestionsContainer.style.display = 'flex';
 
-                // Load user-specific data and settings
-                loadUserSettings(currentUser.uid); // Load theme, text size
-                loadAndListenForChats(currentUser.uid); // Load chat list and attach listener
-                loadAndListenForTests(currentUser.uid); // --> Load test list and attach listener
-                allTestsSection.classList.add('visible'); // --> Show test section
+                loadUserSettings(currentUser.uid);
+                loadAndListenForChats(currentUser.uid);
+                loadAndListenForTests(currentUser.uid);
+                allTestsSection.classList.add('visible');
 
-                // No immediate greeting needed here, will be shown if no chats or after loading
-                setLoadingState(false); // Ensure loading overlay is off initially
+                setLoadingState(false);
 
             } else {
-                // --- User is logged OUT ---
+                // User is logged OUT
                 currentUser = null;
                 console.log("User logged out");
 
-                // Update sidebar auth buttons & account info
                 loginBtn.style.display = 'inline-block';
                 logoutBtn.style.display = 'none';
                 accountEmail.textContent = "Not logged in";
                 accountAvatar.textContent = '?';
                 accountPlan.textContent = "";
 
-                // Disable sidebar controls
                 startChatButton.disabled = true;
                 decreaseTextBtn.disabled = true;
                 increaseTextBtn.disabled = true;
                 themeToggleButton.disabled = true;
-                testSearchInput.disabled = true; // --> Disable search
+                testSearchInput.disabled = true;
 
-                // Disable input area
                 sendButton.disabled = true;
                 userInput.disabled = true;
                 userInput.placeholder = "Please log in";
                 inputContainer.style.display = 'none';
                 suggestionsContainer.style.display = 'none';
 
-                // Show logged-out prompt in chat area and sidebar
                 renderGreetingOrLoginPrompt();
                 chatListContainer.innerHTML = '<div style="padding:10px;color:var(--text-secondary);font-size:0.9em;">Please log in to see chats.</div>';
-                allTestsListContainer.innerHTML = '<div style="padding:10px;color:var(--text-secondary);font-size:0.9em;">Login to see saved tests.</div>'; // --> Show login prompt in tests list
+                allTestsListContainer.innerHTML = '<div style="padding:10px;color:var(--text-secondary);font-size:0.9em;">Login to see saved tests.</div>';
 
-                // Reset settings to defaults (they will reload on next login)
                 currentTheme = 'light'; applyTheme();
                 currentTextSizeMultiplier = 1.0; applyTextSize();
 
-                setLoadingState(false); // Ensure loading overlay is off
+                setLoadingState(false);
             }
         }
 
-
-        // Helper to show initial greeting or login message in the chat area
         function renderGreetingOrLoginPrompt() {
-            chatArea.innerHTML = ''; // Clear previous content
+            chatArea.innerHTML = '';
             const greetingElement = document.createElement('div');
             greetingElement.classList.add('greeting');
             if (currentUser) {
                  greetingElement.innerHTML = `<span class="asterisk">*</span>Good day, ${currentUser.displayName || 'User'}!`;
                  chatArea.appendChild(greetingElement);
-                 // If logged in but no chat is active (e.g., after deleting the last one)
                  if (!activeChatId) {
                      displayMessage("Select a chat from the sidebar or start a new one.", 'ai');
                  }
@@ -677,7 +660,7 @@
                 chatArea.appendChild(greetingElement);
                 displayMessage("Please log in using the Google button in the sidebar to start chatting or view your history.", 'ai');
             }
-            scrollToBottom(true); // Scroll down immediately
+            scrollToBottom(true);
         }
 
 
@@ -696,33 +679,29 @@
                     console.log("No user settings found, using defaults and saving.");
                     currentTheme = 'light';
                     currentTextSizeMultiplier = 1.0;
-                    await saveUserSettings(); // Save defaults for next time
+                    await saveUserSettings();
                 }
             } catch (error) {
                 console.error("Error loading user settings:", error);
-                // Fallback to defaults on error
                 currentTheme = 'light';
                 currentTextSizeMultiplier = 1.0;
             }
-            // Apply loaded/default settings
             applyTheme();
             applyTextSize();
         }
 
         async function saveUserSettings() {
-            if (!currentUser) return; // Only save if logged in
+            if (!currentUser) return;
             const userDocRef = db.collection('users').doc(currentUser.uid);
             const settings = {
                 theme: currentTheme,
                 textSizeMultiplier: currentTextSizeMultiplier
             };
             try {
-                // Use set with merge:true to create or update the document
                 await userDocRef.set(settings, { merge: true });
                 console.log("User settings saved:", settings);
             } catch (error) {
                 console.error("Error saving user settings:", error);
-                // Optionally notify user of save failure
             }
         }
 
@@ -739,46 +718,42 @@
         }
 
         function toggleTheme() {
-            if (!currentUser) return; // Prevent changing theme if logged out
+            if (!currentUser) return;
             currentTheme = (currentTheme === 'light') ? 'dark' : 'light';
             applyTheme();
-            saveUserSettings(); // Persist the change
+            saveUserSettings();
         }
 
         function applyTextSize() {
             const newSize = `calc(var(--message-font-size-base) * ${currentTextSizeMultiplier})`;
             document.documentElement.style.setProperty('--message-font-size', newSize);
-            // Enable/disable buttons at limits
             decreaseTextBtn.disabled = !currentUser || currentTextSizeMultiplier <= MIN_TEXT_SIZE_MULTIPLIER;
             increaseTextBtn.disabled = !currentUser || currentTextSizeMultiplier >= MAX_TEXT_SIZE_MULTIPLIER;
             console.log("Applied text size multiplier:", currentTextSizeMultiplier);
         }
 
         function adjustTextSize(change) {
-            if (!currentUser) return; // Prevent adjustment if logged out
+            if (!currentUser) return;
             let newMultiplier = Math.max(MIN_TEXT_SIZE_MULTIPLIER, Math.min(MAX_TEXT_SIZE_MULTIPLIER, currentTextSizeMultiplier + change));
-            newMultiplier = Math.round(newMultiplier * 10) / 10; // Round to one decimal place
+            newMultiplier = Math.round(newMultiplier * 10) / 10;
             if (newMultiplier !== currentTextSizeMultiplier) {
                 currentTextSizeMultiplier = newMultiplier;
-                applyTextSize(); // Update UI and button states
-                saveUserSettings(); // Persist the change
+                applyTextSize();
+                saveUserSettings();
             }
         }
 
         // --- Chat Storage & Loading (Firestore) ---
 
-        // Loads the list of chats for the sidebar and listens for changes
         function loadAndListenForChats(userId) {
-            if (chatListListener) { chatListListener(); chatListListener = null; } // Detach previous listener
+            if (chatListListener) { chatListListener(); chatListListener = null; }
 
             const chatsRef = db.collection('chats')
                                .where('userId', '==', userId)
-                               .orderBy('lastUpdated', 'desc'); // Newest first
+                               .orderBy('lastUpdated', 'desc');
 
             console.log(`Listening for chats for user ${userId}`);
             chatListListener = chatsRef.onSnapshot(snapshot => {
-                 // If a delete operation is in progress, wait for it to finish
-                 // before processing the snapshot to avoid UI flickering.
                  if (isDeletingChat) {
                      console.log("Skipping chat list update during delete operation. isDeletingChat =", isDeletingChat);
                      return;
@@ -790,36 +765,29 @@
                     chats.push({ id: doc.id, ...doc.data() });
                 });
                 console.log("Received chat list snapshot:", chats.length, "chats");
-                renderSidebarChatList(chats); // Update the sidebar UI
+                renderSidebarChatList(chats);
 
-                // Determine which chat should be active
                 let chatToLoad = null;
                 if (activeChatId && chats.some(c => c.id === activeChatId)) {
-                    // If the currently active chat still exists, keep it active
                     chatToLoad = activeChatId;
                 } else if (chats.length > 0) {
-                    // If active chat was deleted or none was active, load the newest chat
                     chatToLoad = chats[0].id;
                     console.log("Active chat not found or was deleted, selecting newest:", chatToLoad);
                 } else {
-                    // No chats exist for the user
                     console.log("No chats found for user.");
                     activeChatId = null;
-                    if (activeChatListener) { activeChatListener(); activeChatListener = null; } // Detach message listener
-                    renderGreetingOrLoginPrompt(); // Show the initial prompt
-                    setLoadingState(false); // Ensure input isn't stuck in loading
+                    if (activeChatListener) { activeChatListener(); activeChatListener = null; }
+                    renderGreetingOrLoginPrompt();
+                    setLoadingState(false);
                 }
 
-                 // Switch to the determined chat if it's different from the current one
                  if (chatToLoad && chatToLoad !== activeChatId) {
                      console.log("Switching to chat:", chatToLoad);
-                     switchChat(chatToLoad); // Handles loading messages etc.
+                     switchChat(chatToLoad);
                  } else if (activeChatId) {
-                      // If the chat didn't switch, ensure the correct item is still highlighted
                       highlightActiveChatInSidebar();
-                      setLoadingState(false); // Ensure input state is correct if already on active chat
+                      setLoadingState(false);
                  } else {
-                     // Case where no chats exist after update, ensure loading state is off
                      setLoadingState(false);
                  }
 
@@ -827,14 +795,13 @@
                 console.error("Error listening for chats:", error);
                 displayError("Could not load your chat list. Please check your connection or try again later.");
                 chatListContainer.innerHTML = '<div style="padding:10px;color:var(--text-secondary);font-size:0.9em;">Error loading chats.</div>';
-                setLoadingState(false); // Ensure UI is usable even if list fails
+                setLoadingState(false);
             });
         }
 
-        // Renders the chat items in the sidebar
         function renderSidebarChatList(chats) {
-            chatListContainer.innerHTML = ''; // Clear previous list
-            if (!currentUser) { // Should not happen if called correctly, but safety check
+            chatListContainer.innerHTML = '';
+            if (!currentUser) {
                 chatListContainer.innerHTML = '<div style="padding:10px;color:var(--text-secondary);font-size:0.9em;">Please log in.</div>';
                 return;
             }
@@ -848,81 +815,68 @@
                     const itemElement = document.createElement('div');
                     itemElement.classList.add('chat-list-item');
 
-                    // Ensure title is a string, provide fallback
                     let title = chatData.title;
                     if (typeof title !== 'string' || !title.trim()) {
                          title = '(Untitled Chat)';
                     }
-                    title = title.trim(); // Trim whitespace
+                    title = title.trim();
 
                     itemElement.textContent = title;
                     itemElement.dataset.id = chatData.id;
-                    itemElement.title = title; // Tooltip for long names
+                    itemElement.title = title;
 
-                    // Add Delete Button
                     const deleteBtn = document.createElement('button');
                     deleteBtn.classList.add('delete-chat-button');
-                    deleteBtn.innerHTML = DELETE_ICON; // Use '×' or an SVG icon
+                    deleteBtn.innerHTML = DELETE_ICON;
                     deleteBtn.title = "Delete chat";
-                    deleteBtn.dataset.id = chatData.id; // Store ID on button for easy access in event handler
+                    deleteBtn.dataset.id = chatData.id;
                     itemElement.appendChild(deleteBtn);
 
                     chatListContainer.appendChild(itemElement);
                 });
             }
-            highlightActiveChatInSidebar(); // Ensure the active one is highlighted
+            highlightActiveChatInSidebar();
         }
 
-        // Adds/removes the 'active' class from sidebar items
         function highlightActiveChatInSidebar() {
              const items = chatListContainer.querySelectorAll('.chat-list-item');
              items.forEach(item => {
                  item.classList.toggle('active', item.dataset.id === activeChatId);
              });
-             // Also update loading state based on whether a chat is active
-             // setLoadingState handles the placeholder/button state depending on activeChatId
              setLoadingState(false);
         }
 
-        // Creates a new chat document in Firestore
         async function createNewChat() {
             if (!currentUser) { displayError("Please log in to create a new chat."); return; }
             setLoadingState(true, "Creating chat...");
-            const newChatRef = db.collection('chats').doc(); // Generate new ID
+            const newChatRef = db.collection('chats').doc();
             const timestamp = firebase.firestore.FieldValue.serverTimestamp();
 
             try {
                 await newChatRef.set({
                     userId: currentUser.uid,
-                    title: NEW_CHAT_TITLE, // Start with a default title
+                    title: NEW_CHAT_TITLE,
                     createdAt: timestamp,
                     lastUpdated: timestamp
                 });
                 console.log("New chat document created:", newChatRef.id);
-                // The chatListListener will automatically pick up the new chat
-                // and (usually) select it as the newest one, which will reset loading state.
+                // Listener handles selection and loading state reset
             } catch (error) {
                 console.error("Error creating new chat:", error);
                 displayError("Failed to create the chat. Please try again.");
-                setLoadingState(false); // Reset loading on error
+                setLoadingState(false);
             } finally {
-                // Ensure focus returns if still in chat view
                 if (!isTestMode && !isReviewMode) userInput.focus();
             }
         }
 
-        // Handles clicks within the chat list area (delegated)
         function handleChatListClick(event) {
              const target = event.target;
-
-             // Check if the delete button (or its icon) was clicked
              const deleteButton = target.closest('.delete-chat-button');
              if (deleteButton) {
-                 event.stopPropagation(); // IMPORTANT: Prevent chat switching when clicking delete
+                 event.stopPropagation();
                  const chatId = deleteButton.dataset.id;
-                 // Find the parent list item to get the title for the confirmation message
                  const chatListItem = deleteButton.closest('.chat-list-item');
-                 // Get text content, remove the delete icon text, trim whitespace
                  const chatTitle = chatListItem?.textContent?.replace(DELETE_ICON, '').trim() || 'this chat';
                  if (chatId) {
                      console.log(`Delete button clicked for chat: ${chatId}, Title: "${chatTitle}"`);
@@ -930,13 +884,12 @@
                  } else {
                      console.warn("Delete button clicked, but couldn't find chat ID.");
                  }
-                 return; // Stop further processing
+                 return;
              }
 
-             // Otherwise, check if a chat list item (but not the delete button) was clicked
              const item = target.closest('.chat-list-item');
              const clickedId = item?.dataset?.id;
-             if (item && clickedId && clickedId !== activeChatId) { // Ensure item exists before accessing dataset
+             if (item && clickedId && clickedId !== activeChatId) {
                  console.log("Chat list item clicked, switching to:", clickedId);
                  switchChat(clickedId);
              } else if (item && clickedId && clickedId === activeChatId) {
@@ -944,10 +897,8 @@
              }
         }
 
-        // Prompts user before deleting a chat
         function confirmAndDeleteChat(chatId, chatTitle) {
             if (!currentUser || !chatId) return;
-            // Use the chat title in the confirmation for better context
             if (confirm(`Are you sure you want to permanently delete the chat "${chatTitle}" and all its messages? This cannot be undone.`)) {
                 deleteChatFromFirestore(chatId);
             } else {
@@ -955,22 +906,19 @@
             }
         }
 
-        // Deletes a chat document and its messages subcollection from Firestore (UPDATED with logging)
         async function deleteChatFromFirestore(chatId) {
             if (!currentUser || !chatId) {
                 console.log("Delete chat aborted: Missing user or chatId.");
                 return;
             }
-            // --- Set flag immediately ---
             isDeletingChat = true;
             console.log(`[Delete Start] Deleting chat: ${chatId}. isDeletingChat = ${isDeletingChat}`);
-            setLoadingState(true, "Deleting chat..."); // Show loading state
+            setLoadingState(true, "Deleting chat...");
 
             const chatDocRef = db.collection('chats').doc(chatId);
             const messagesRef = chatDocRef.collection('messages');
 
             try {
-                // 1. Delete messages subcollection
                 console.log(`[Delete Progress] Fetching messages for chat ${chatId}`);
                 const messagesSnapshot = await messagesRef.get();
                 if (!messagesSnapshot.empty) {
@@ -985,12 +933,10 @@
                     console.log(`[Delete Progress] No messages found to delete for chat ${chatId}`);
                 }
 
-                // 2. Delete the chat document
                 console.log(`[Delete Progress] Deleting chat document ${chatId}`);
                 await chatDocRef.delete();
                 console.log(`[Delete Success] Successfully deleted chat document: ${chatId}`);
 
-                // 3. Handle UI update if the *active* chat was the one deleted
                 if (activeChatId === chatId) {
                     console.log("[Delete Progress] Active chat was deleted. Resetting UI.");
                     activeChatId = null;
@@ -1000,9 +946,9 @@
                         activeChatListener(); activeChatListener = null;
                     }
                     chatArea.innerHTML = '';
-                    renderGreetingOrLoginPrompt(); // Show default prompt immediately
-                    userInput.placeholder = "Select or create a chat"; // Reset placeholder
-                    sendButton.disabled = true; // Disable send button as no chat is active
+                    renderGreetingOrLoginPrompt();
+                    userInput.placeholder = "Select or create a chat";
+                    sendButton.disabled = true;
                 } else {
                      console.log(`[Delete Progress] Deleted chat ${chatId} was not the active chat (${activeChatId}). UI state should update via listener.`);
                 }
@@ -1010,74 +956,63 @@
             } catch (error) {
                 console.error(`[Delete Error] Error deleting chat ${chatId}:`, error);
                 displayError(`Failed to delete the chat "${chatId}". Please try again.`);
-                setLoadingState(false); // Reset loading state on error to allow user interaction
+                setLoadingState(false);
             } finally {
-                // --- Unset flag in finally block ---
                 isDeletingChat = false;
                 console.log(`[Delete End] Finished delete attempt for chat ${chatId}. isDeletingChat = ${isDeletingChat}`);
-                // The chatListListener, now unblocked, should handle the visual removal from the list
+                // Listener handles UI update
             }
         }
 
 
-        // Switches the active chat view and loads its messages
         function switchChat(chatId) {
-             if (!currentUser || !chatId || chatId === activeChatId) return; // No change needed
+             if (!currentUser || !chatId || chatId === activeChatId) return;
 
              console.log("Switching to chat:", chatId);
-             setLoadingState(true, "Loading chat..."); // Show loading state *before* loading starts
-             activeChatId = chatId; // Set the new active ID immediately
+             setLoadingState(true, "Loading chat...");
+             activeChatId = chatId;
 
-             // Update sidebar highlighting *after* setting activeChatId
              highlightActiveChatInSidebar();
 
-             // Clear the input state for the new chat
              userInput.value = '';
-             autoGrowTextarea(); // Reset textarea size
-             mcqModeCheckbox.checked = false; // Reset MCQ checkbox
+             autoGrowTextarea();
+             mcqModeCheckbox.checked = false;
 
-             // Load messages AFTER setting the ID and clearing input
-             loadAndListenForActiveChat(chatId); // Load messages for the new chat
+             loadAndListenForActiveChat(chatId);
 
-             // Focus input if in chat view after loading starts
              if (!isTestMode && !isReviewMode) userInput.focus();
         }
 
         // --- Message Loading (Firestore) ---
 
-        // Loads messages for the currently active chat and listens for new ones
         function loadAndListenForActiveChat(chatId) {
-            // Ensure valid state
             if (!currentUser || !chatId) {
                 console.log("Cannot load messages: Missing user or chatId.");
                 chatArea.innerHTML = '';
-                if (activeChatListener) { activeChatListener(); activeChatListener = null; } // Clean up old listener
-                renderGreetingOrLoginPrompt(); // Show appropriate prompt
-                setLoadingState(false); // Ensure input is usable if logged in
+                if (activeChatListener) { activeChatListener(); activeChatListener = null; }
+                renderGreetingOrLoginPrompt();
+                setLoadingState(false);
                 return;
             }
 
-            // Detach any existing listener for the previous chat
             if (activeChatListener) { activeChatListener(); activeChatListener = null; }
-
-            // Note: setLoadingState(true, "Loading chat...") was moved to switchChat function
 
             const messagesRef = db.collection('chats').doc(chatId)
                                   .collection('messages')
-                                  .orderBy('timestamp', 'asc'); // Oldest first
+                                  .orderBy('timestamp', 'asc');
 
-            chatArea.innerHTML = ''; // Clear chat area for new messages
-            const loadingMsg = displayMessage("Loading chat history...", 'ai', ['thinking']); // Show temporary loading message
-            scrollToBottom(true); // Scroll down immediately to show loading indicator at bottom
+            chatArea.innerHTML = '';
+            const loadingMsg = displayMessage("Loading chat history...", 'ai', ['thinking']);
+            scrollToBottom(true);
 
             console.log(`Listening for messages in chat ${chatId}`);
             activeChatListener = messagesRef.onSnapshot(snapshot => {
                 console.log(`Received messages snapshot for chat ${chatId}:`, snapshot.size, "messages");
-                removeMessageElement(loadingMsg); // Remove the temporary loading message
-                chatArea.innerHTML = '';          // Clear again before rendering (safer)
-                currentChatHistory = [];        // Reset local history cache before rebuilding
+                removeMessageElement(loadingMsg);
+                chatArea.innerHTML = '';
+                currentChatHistory = [];
 
-                if (snapshot.empty && activeChatId === chatId) { // Check activeChatId again in case of race condition
+                if (snapshot.empty && activeChatId === chatId) {
                     console.log("Chat is empty or newly created.");
                     const chatListItem = chatListContainer.querySelector(`.chat-list-item[data-id="${chatId}"]`);
                     const chatTitle = chatListItem?.textContent?.replace(DELETE_ICON, '').trim() || '';
@@ -1090,52 +1025,51 @@
                 } else {
                     snapshot.forEach(doc => {
                         const msgData = doc.data();
-                         const text = msgData.text || ""; // Ensure text exists
-                         const role = msgData.role === 'user' ? 'user' : 'model'; // Normalize role for display/API
+                         const text = msgData.text || "";
+                         const role = msgData.role === 'user' ? 'user' : 'model';
                          currentChatHistory.push({
                              role: role,
-                             parts: [{ text: text }]
+                             parts: [{ text: text }] // Assume simple text parts for history context
                          });
+                         // Pass full msgData to handle MCQ button rendering correctly
                          displayMessage(text, role, [], null, msgData);
                     });
                 }
-                scrollToBottom(true); // Scroll to the latest message immediately after rendering
-                setLoadingState(false); // Messages loaded, enable input
+                scrollToBottom(true);
+                setLoadingState(false);
 
             }, error => {
                 console.error(`Error listening for messages in chat ${chatId}:`, error);
                 displayError("Could not load messages for this chat. Please check your connection.");
-                removeMessageElement(loadingMsg); // Remove loading indicator on error
-                chatArea.innerHTML = '';        // Clear area
-                currentChatHistory = [];      // Reset history
-                setLoadingState(false);         // Ensure input is usable
+                removeMessageElement(loadingMsg);
+                chatArea.innerHTML = '';
+                currentChatHistory = [];
+                setLoadingState(false);
             });
         }
 
         // --- Message Sending (Gemini API & Firestore Save) ---
 
-        // Handles sending user message, calling API, and saving results (UPDATED for MCQ JSON hiding)
         async function handleSendMessage() {
             const userMessageText = userInput.value.trim();
 
-            // --- Pre-send Checks ---
             if (!API_KEY) { displayError("Gemini API Key not set. Reload to enter."); return; }
             if (!currentUser) { displayError("Please log in first."); return; }
             if (!activeChatId) { displayError("Please select or create a chat first."); return; }
-            if (!userMessageText || sendButton.disabled) return; // Ignore empty input or if disabled
+            if (!userMessageText || sendButton.disabled) return;
 
             const isMCQRequest = mcqModeCheckbox.checked;
-            setLoadingState(true, "Sending..."); // Disable input/button
+            setLoadingState(true, "Sending...");
 
             userInput.value = '';
             autoGrowTextarea();
-            if (isMCQRequest) mcqModeCheckbox.checked = false; // Reset checkbox after sending
+            if (isMCQRequest) mcqModeCheckbox.checked = false;
 
             const timestamp = firebase.firestore.FieldValue.serverTimestamp();
             const messagesColRef = db.collection('chats').doc(activeChatId).collection('messages');
             const chatDocRef = db.collection('chats').doc(activeChatId);
 
-            let isFirstUserMessageInNewChat = false; // Flag to check later
+            let isFirstUserMessageInNewChat = false;
 
              const userMsgData = {
                  role: "user",
@@ -1158,7 +1092,7 @@
                      console.log("First user message detected, attempting to generate title.");
                      const generatedTitle = generateChatTitle(userMessageText);
                      if (generatedTitle && generatedTitle !== NEW_CHAT_TITLE) {
-                         await updateActiveChatTitle(generatedTitle); // Update title in Firestore
+                         await updateActiveChatTitle(generatedTitle);
                          console.log("Chat title updated automatically:", generatedTitle);
                      } else {
                          console.log("Generated title was empty or same as default, not updating.");
@@ -1168,22 +1102,31 @@
              } catch(error) {
                  console.error("Error saving user message or updating title:", error);
                  displayError("Failed to send message. Please check connection and try again.");
-                 setLoadingState(false); // Re-enable input on failure
-                 return; // Stop processing if save failed
+                 setLoadingState(false);
+                 return;
              }
 
-            const thinking = displayMessage("Thinking...", 'ai', ['thinking']); // Show thinking indicator
-            scrollToBottom(); // Scroll to show thinking indicator
+            const thinking = displayMessage("Thinking...", 'ai', ['thinking']);
+            scrollToBottom();
 
             const requestHistory = [
-                 ...currentChatHistory, // History loaded by the listener
-                 { role: "user", parts: [{ text: userMessageText }] }
+                 ...currentChatHistory, // Includes the user message just added by listener
+                 // The actual API call includes the LATEST user message,
+                 // so currentChatHistory should be up-to-date from the listener
              ];
 
-             let promptForAPI = userMessageText;
+             let promptForAPI = userMessageText; // Use the original text for the last part
+             let apiHistoryForCall = [...requestHistory]; // Copy history
+
              if (isMCQRequest) {
                  promptForAPI = `${userMessageText}\n\nPlease generate multiple choice questions based on the above text or topic. Provide the response *only* as a valid JSON array string, enclosed within \`\`\`json ... \`\`\`. Each object in the array must have these exact keys: "question" (string), "options" (array of 4 strings), and "answer" (string, representing the correct option letter 'A', 'B', 'C', or 'D'). Do not include any text outside the JSON structure.`;
-                 requestHistory[requestHistory.length - 1] = { role: "user", parts: [{ text: promptForAPI }] };
+                 // Modify the LAST user message in the history copy for the API call
+                 if (apiHistoryForCall.length > 0 && apiHistoryForCall[apiHistoryForCall.length - 1].role === 'user') {
+                     apiHistoryForCall[apiHistoryForCall.length - 1] = { role: "user", parts: [{ text: promptForAPI }] };
+                 } else {
+                     // Should not happen if listener added user message, but fallback
+                     apiHistoryForCall.push({ role: "user", parts: [{ text: promptForAPI }] });
+                 }
                  console.log("MCQ mode: Modified prompt for API.");
              }
 
@@ -1193,7 +1136,7 @@
                      method: 'POST',
                      headers: { 'Content-Type': 'application/json' },
                      body: JSON.stringify({
-                         contents: requestHistory,
+                         contents: apiHistoryForCall, // Use the potentially modified history
                          safetySettings: [
                             { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_MEDIUM_AND_ABOVE" },
                             { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_MEDIUM_AND_ABOVE" },
@@ -1202,15 +1145,15 @@
                          ]
                      }),
                  });
-                 removeMessageElement(thinking); // Remove "Thinking..." message
+                 removeMessageElement(thinking);
 
                  let aiMsgData = {
-                     role: "model", // Firestore role
+                     role: "model",
                      text: "Error: No valid response received from API.",
                      timestamp: firebase.firestore.FieldValue.serverTimestamp(),
-                     mcqData: null
+                     mcqData: null // Initialize mcqData field
                  };
-                 let displayAsError = true; // Flag to control UI display style
+                 let displayAsError = true;
 
                  if (!response.ok) {
                      let errorDetails = `API error (${response.status})`;
@@ -1223,9 +1166,9 @@
                      }
                  } else {
                      const data = await response.json();
-                     let rawAiText = ""; // Store the raw response text
+                     let rawAiText = "";
                      let blocked = false;
-                     displayAsError = false; // Assume success unless changed below
+                     displayAsError = false;
 
                      if (data.promptFeedback?.blockReason) {
                          aiMsgData.text = `Blocked: Your prompt was blocked due to safety concerns (${data.promptFeedback.blockReason}).`;
@@ -1235,7 +1178,7 @@
                           blocked = true; displayAsError = true; console.warn("Response blocked due to safety.");
                      } else if (data.candidates?.[0]?.content?.parts?.[0]?.text) {
                          rawAiText = data.candidates[0].content.parts[0].text;
-                         aiMsgData.text = rawAiText; // Default text to save, might be overwritten
+                         aiMsgData.text = rawAiText; // Default text
 
                          if (isMCQRequest && !blocked) {
                               console.log("Attempting to parse MCQ JSON from response...");
@@ -1249,14 +1192,14 @@
                                           mcqs.every(q => q && typeof q.question === 'string' && Array.isArray(q.options) && q.options.length === 4 && typeof q.answer === 'string' && ['A','B','C','D'].includes(q.answer.toUpperCase())))
                                       {
                                           const summaryText = `Successfully generated ${mcqs.length} multiple choice questions based on your prompt. Click the button below to start the test.`;
-                                          aiMsgData.text = summaryText; // Save user-friendly summary text
-                                          aiMsgData.mcqData = mcqs;    // Add parsed MCQ data separately for Firestore
-                                          console.log("MCQs parsed successfully, saving summary text and mcqData to Firestore:", mcqs.length, "questions");
+                                          aiMsgData.text = summaryText; // Save user-friendly summary
+                                          aiMsgData.mcqData = mcqs;    // Save parsed data separately
+                                          console.log("MCQs parsed successfully, saving summary text and mcqData:", mcqs.length, "questions");
                                       } else {
-                                           console.warn("MCQ JSON validation failed: Structure incorrect or missing fields.", mcqs);
+                                           console.warn("MCQ JSON validation failed.", mcqs);
                                            aiMsgData.text = "Received MCQ data, but it wasn't in the expected format.\n\n" + rawAiText;
                                            displayAsError = true;
-                                           aiMsgData.mcqData = null; // Ensure no partial/bad data is saved
+                                           aiMsgData.mcqData = null;
                                       }
                                   } else {
                                        console.warn("AI response for MCQ request didn't look like a JSON array string.");
@@ -1281,7 +1224,7 @@
                  }
 
                  try {
-                      await messagesColRef.add(aiMsgData);
+                      await messagesColRef.add(aiMsgData); // Save the AI response/error
                       await chatDocRef.update({ lastUpdated: firebase.firestore.FieldValue.serverTimestamp() });
                       console.log("AI response/error saved to Firestore.", aiMsgData);
                       if (displayAsError) {
@@ -1292,7 +1235,7 @@
                       displayError(`Received response, but failed to save it: ${aiMsgData.text}`);
                  }
 
-             } catch (error) { // Catch network errors during fetch or other JS errors
+             } catch (error) {
                  console.error("Fetch/Processing Error:", error);
                  removeMessageElement(thinking);
                  const errorText = `Error communicating with the API: ${error.message || "Check network connection."}`;
@@ -1310,33 +1253,25 @@
         }
 
 
-         // Generates a short title from the first user message
          function generateChatTitle(firstUserMessageText) {
-             if (!firstUserMessageText || typeof firstUserMessageText !== 'string') {
-                 return NEW_CHAT_TITLE; // Return default if input is invalid
-             }
+             if (!firstUserMessageText || typeof firstUserMessageText !== 'string') return NEW_CHAT_TITLE;
              const text = firstUserMessageText.trim();
-             if (!text) {
-                 return NEW_CHAT_TITLE; // Return default if input is empty after trimming
-             }
+             if (!text) return NEW_CHAT_TITLE;
              const title = text.split(/\s+/).slice(0, 5).join(' ').replace(/[.,!?;:]+$/, '');
              return title.length > 35 ? title.substring(0, 32) + '...' : title;
          }
 
 
-         // Updates the title of the active chat in Firestore
          async function updateActiveChatTitle(newTitle) {
               if (!currentUser || !activeChatId || !newTitle || typeof newTitle !== 'string' || !newTitle.trim() || newTitle.trim() === NEW_CHAT_TITLE) {
-                  console.log("Skipping title update (invalid input, no change needed, or already default).");
+                  console.log("Skipping title update.");
                   return;
               }
-              const finalTitle = newTitle.trim(); // Use trimmed title
-
+              const finalTitle = newTitle.trim();
               const chatDocRef = db.collection('chats').doc(activeChatId);
               try {
                   await chatDocRef.update({ title: finalTitle });
                   console.log(`Chat ${activeChatId} title updated to: "${finalTitle}"`);
-                  // The chatListListener will handle updating the UI in the sidebar
               } catch (error) {
                   console.error("Error updating chat title in Firestore:", error);
               }
@@ -1348,18 +1283,16 @@
         function handleInputKeydown(event) { if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();handleSendMessage();} }
         function handleSuggestionClick(event) { if(event.target.classList.contains('suggestion-chip')){userInput.value=event.target.dataset.prompt||'';autoGrowTextarea();userInput.focus();} }
 
-        // Displays an error message directly in the chat area (use sparingly)
         function displayError(text) {
-            console.error("Displaying Error:", text); // Log error prominently
+            console.error("Displaying Error:", text);
             displayMessage(`Error: ${text}`, 'ai', ['error-message']);
             scrollToBottom();
         }
 
         function scrollToBottom(immediate = false) { chatArea.scrollTo({top:chatArea.scrollHeight,behavior:immediate?'auto':'smooth'}); }
-        function removeMessageElement(element) { if(element && element.parentNode === chatArea) { chatArea.removeChild(element); } } // Added null check
+        function removeMessageElement(element) { if(element && element.parentNode === chatArea) { chatArea.removeChild(element); } }
 
 
-        // Manages the loading state of input elements and placeholders
         function setLoadingState(isLoading, message = "Generating...") {
             const isInputDisabled = isLoading || !currentUser;
             const isSendDisabled = isLoading || !currentUser || !activeChatId;
@@ -1369,7 +1302,6 @@
             sendButton.disabled = isSendDisabled;
             mcqModeCheckbox.disabled = isSendDisabled;
             startChatButton.disabled = isControlsDisabled;
-            // --> Disable test search when loading/logged out
             testSearchInput.disabled = isControlsDisabled;
             decreaseTextBtn.disabled = isControlsDisabled || (currentUser && currentTextSizeMultiplier <= MIN_TEXT_SIZE_MULTIPLIER);
             increaseTextBtn.disabled = isControlsDisabled || (currentUser && currentTextSizeMultiplier >= MAX_TEXT_SIZE_MULTIPLIER);
@@ -1388,9 +1320,8 @@
             }
         }
 
-        // Switches between Chat, Test, and Review views
-        function switchView(viewName, cameFromTests = false) { // Added cameFromTests flag
-            console.log("Switching view to:", viewName);
+        function switchView(viewName, cameFromTests = false) {
+            console.log("Switching view to:", viewName, "Came from tests:", cameFromTests);
             chatView.classList.remove('active');
             reviewView.classList.remove('active');
             testView.classList.remove('active');
@@ -1398,7 +1329,11 @@
 
             isTestMode = false;
             isReviewMode = false;
-            cameFromAllTestsList = cameFromTests; // Set the flag
+            cameFromAllTestsList = cameFromTests;
+
+            // Hide footer buttons initially
+            saveReviewBtn.style.display = 'none';
+            exitReviewBtn.style.display = 'none';
 
             if(viewName==='test'){
                 appContainer.classList.add('hidden');
@@ -1407,11 +1342,13 @@
             } else if(viewName==='review'){
                 reviewView.classList.add('active');
                 isReviewMode=true;
-                // Adjust exit button text based on where we came from
+                // Show exit button in review view
+                exitReviewBtn.style.display = 'inline-block';
                 exitReviewBtn.textContent = cameFromAllTestsList ? "Back to All Tests" : "Back to Chat";
+                // Save button visibility is handled within displayReview
             } else { // Default to chat view
                 chatView.classList.add('active');
-                if (currentUser && activeChatId) { // Only focus if logged in and a chat is active
+                if (currentUser && activeChatId) {
                     userInput.focus();
                 }
             }
@@ -1423,7 +1360,7 @@
             }
         }
 
-        // Displays a message in the chat area, handles formatting, MathJax, and MCQ buttons
+        // Displays a message in the chat area (MODIFIED for button data)
         function displayMessage(text, sender, cssClasses = [], appendHtml = null, messageData = null) {
             const messageElement = document.createElement('div');
             messageElement.classList.add('message', `${sender}-message`);
@@ -1445,15 +1382,15 @@
                     return `<code>${escapedCode}</code>`;
                 })
                 .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-                .replace(/(?<!\*)\*(?!\*)(.*?)(?<!\*)\*(?!\*)/g, '<em>$1</em>') // More precise regex for single asterisks
+                .replace(/(?<!\*)\*(?!\*)(.*?)(?<!\*)\*(?!\*)/g, '<em>$1</em>')
                 .replace(/\n/g, '<br>');
 
             messageElement.innerHTML = formattedText;
 
+            // Handle MCQ Offer (Uses mcqData from Firestore document)
             if (messageData && messageData.role === 'model' && messageData.mcqData && Array.isArray(messageData.mcqData) && messageData.mcqData.length > 0) {
                  console.log("Rendering message with MCQ offer:", messageData.mcqData.length, "questions");
-                 generatedMCQData = messageData.mcqData;
-                 displayMCQOffer(messageData.mcqData.length, messageElement);
+                 displayMCQOffer(messageData.mcqData, messageElement); // Pass the actual data
             }
             else if (appendHtml) {
                 const appendDiv = document.createElement('div');
@@ -1471,71 +1408,92 @@
                  }
              } catch (e) { console.error("MathJax call failed:", e); }
 
-            return messageElement; // Return the element
+            return messageElement;
         }
 
 
         // --- MCQ/Test Specific Functions ---
 
-        // Handles clicks on the "Start Mock Test" button within a chat message
+        // Handles clicks on the "Start Mock Test" button within a chat message (MODIFIED)
         function handleChatAreaClick(event) {
-            if (event.target.classList.contains('start-test-button')) {
-                 if (generatedMCQData && Array.isArray(generatedMCQData) && generatedMCQData.length > 0) {
-                     console.log("Start Test button clicked, initiating test...");
-                     startMockTest(generatedMCQData); // Pass the stored data
-                     generatedMCQData = null; // Clear the temporary data after starting
+            const startButton = event.target.closest('.start-test-button');
+            if (startButton) {
+                 // Get data directly from the button's attribute
+                 const mcqDataString = startButton.dataset.mcq;
+                 let mcqs = null;
+
+                 if (mcqDataString) {
+                    try {
+                        mcqs = JSON.parse(mcqDataString);
+                    } catch (e) {
+                        console.error("Failed to parse MCQ data from button attribute:", e);
+                        displayError("Could not start the test. Failed to read question data.");
+                        return;
+                    }
+                 }
+
+                 if (mcqs && Array.isArray(mcqs) && mcqs.length > 0) {
+                     console.log("Start Test button clicked, initiating test with data from button...");
+                     startMockTest(mcqs); // Pass the data parsed from the button
                  } else {
-                     console.error("MCQ data not found when 'Start Test' button clicked.");
+                     console.error("MCQ data not found or invalid in button attribute when 'Start Test' button clicked.");
                      displayError("Could not start the test. MCQ data seems missing or invalid.");
                  }
             }
         }
 
-        // Appends the "Start Mock Test" button to an AI message element
-        function displayMCQOffer(questionCount, aiMessageElement) {
+        // Appends the "Start Mock Test" button to an AI message element (MODIFIED)
+        function displayMCQOffer(mcqData, aiMessageElement) {
              if (aiMessageElement.querySelector('.start-test-button')) return;
 
-             const buttonHtml = `<button class="start-test-button">Start Mock Test (${questionCount} Questions)</button>`;
+             const questionCount = mcqData.length;
+             const button = document.createElement('button');
+             button.classList.add('start-test-button');
+             button.textContent = `Start Mock Test (${questionCount} Questions)`;
+
+             // Store the data ON the button as a JSON string
+             try {
+                button.dataset.mcq = JSON.stringify(mcqData);
+             } catch (e) {
+                 console.error("Failed to stringify MCQ data for button attribute:", e);
+                 return; // Don't add button if data can't be stored
+             }
+
              const buttonContainer = document.createElement('div');
-             buttonContainer.style.marginTop = '10px'; // Add some space
-             buttonContainer.innerHTML = buttonHtml;
+             buttonContainer.style.marginTop = '10px';
+             buttonContainer.appendChild(button);
              aiMessageElement.appendChild(buttonContainer);
         }
 
-        // Initializes and starts the mock test view
-        function startMockTest(mcqs, title = null) { // Added optional title
+        function startMockTest(mcqs, title = null) {
             if (!currentUser) { displayError("Please log in to start a test."); return; }
             if (!mcqs || mcqs.length === 0) {
                  displayError("No questions available for this test.");
-                 // If started from reattempt, maybe switch back?
-                 if (cameFromAllTestsList) {
-                     switchView('chat'); // Go back to chat for now, or could show "All Tests" view again
-                 }
+                 if (cameFromAllTestsList) { switchView('chat'); }
                  return;
             }
             console.log("Starting mock test with", mcqs.length, "questions.");
 
-            currentTestMCQs = mcqs; // Store the questions for this attempt
+            currentTestMCQs = mcqs; // Use the passed questions
             currentQuestionIndex = 0;
             userAnswers = new Array(mcqs.length).fill(null);
-            reviewResultsCache = null; // Clear previous review results
+            reviewResultsCache = null; // Clear any previous review
 
-            switchView('test'); // Switch to the test view
+            switchView('test'); // Switch view AFTER setting up state
 
             displayTestQuestion(0);
             startTestTimer();
-            testTitle.textContent = title || `Mock Test (${mcqs.length} Questions)`; // Use provided title or default
+            testTitle.textContent = title || `Mock Test (${mcqs.length} Questions)`;
         }
 
-        // Displays a specific question in the test view
         function displayTestQuestion(index) {
-            if (index < 0 || index >= currentTestMCQs.length) return; // Index out of bounds
+            if (index < 0 || index >= currentTestMCQs.length) return;
 
             currentQuestionIndex = index;
             const questionData = currentTestMCQs[index];
 
             testQuestionNumber.textContent = `Question ${index + 1}`;
-            testQuestion.innerHTML = questionData.question || "(Question text missing)"; // Use innerHTML for potential formatting
+            testQuestion.innerHTML = questionData.question || "(Question text missing)";
 
             testOptionsContainer.innerHTML = '';
 
@@ -1568,15 +1526,13 @@
             questionCounter.textContent = `Q: ${index + 1} / ${currentTestMCQs.length}`;
         }
 
-        // Stores the user's selected answer for the current question
         function handleOptionSelect(optionIndex) {
             if (currentQuestionIndex >= 0 && currentQuestionIndex < userAnswers.length) {
-                userAnswers[currentQuestionIndex] = optionIndex; // Store the selected index (0-3)
+                userAnswers[currentQuestionIndex] = optionIndex;
                 console.log(`Answered Q${currentQuestionIndex + 1}: Option index ${optionIndex}`);
             }
         }
 
-        // Handles navigation between test questions
         function handleTestNavigation(direction) {
             let newIndex = currentQuestionIndex;
             if (direction === 'prev' && currentQuestionIndex > 0) {
@@ -1589,7 +1545,6 @@
             }
         }
 
-        // Starts or resets the test timer
         function startTestTimer() {
             if (testTimerInterval) clearInterval(testTimerInterval);
             testStartTime = Date.now();
@@ -1602,7 +1557,6 @@
             }, 1000);
         }
 
-        // Submits the test, calculates results, and switches to review view
         function submitTest() {
             if (!confirm("Are you sure you want to submit the test?")) return;
 
@@ -1611,31 +1565,28 @@
             const timeTakenMs = testStartTime ? endTime - testStartTime : 0;
             console.log("Submitting test. Time taken (ms):", timeTakenMs);
 
-            // Calculate results and prepare review data
+            // Calculate results using the CURRENT test's questions (currentTestMCQs)
             const results = calculateResults(currentTestMCQs, userAnswers, timeTakenMs);
-            reviewResultsCache = results; // Cache the results
+            reviewResultsCache = results; // Cache the results for potential saving
 
-            // Switch to the review view, pass false for cameFromTests
+            // Switch to review view, indicating it's NOT from the "All Tests" list
             switchView('review', false);
-            // Display the calculated review data
-            displayReview(results);
+            displayReview(results); // Display the calculated review data
         }
 
         // --- Review Functions ---
 
-        // Calculates results (used by submitTest)
         function calculateResults(mcqs, answers, timeMs) {
              let correctCount = 0, incorrectCount = 0, skippedCount = 0;
-             const reviewQuestions = [];
+             const reviewQuestions = []; // Data specifically for displaying the review
 
              mcqs.forEach((qData, index) => {
-                 const userAnswerIndex = answers[index]; // User's selected option index (0-3 or null)
+                 const userAnswerIndex = answers[index];
                  const options = Array.isArray(qData.options) ? qData.options : [];
                  const correctAnswerLetter = qData.answer?.trim().toUpperCase();
                  const correctAnswerIndex = correctAnswerLetter ? correctAnswerLetter.charCodeAt(0) - 'A'.charCodeAt(0) : -1;
                  const correctAnswerText = (correctAnswerIndex >= 0 && correctAnswerIndex < options.length)
-                                           ? options[correctAnswerIndex]
-                                           : "N/A (Invalid Correct Answer)";
+                                           ? options[correctAnswerIndex] : "N/A";
 
                  let userAnswerText = "Skipped";
                  let status = "skipped";
@@ -1654,9 +1605,7 @@
                  }
 
                  reviewQuestions.push({
-                     // Save data needed for REVIEW display
                      question: qData.question,
-                     // We don't strictly need options here if we have correct/user answer text
                      correctAnswer: correctAnswerText,
                      userAnswer: userAnswerText,
                      status: status
@@ -1671,28 +1620,25 @@
              const timeString = `${minutes}m ${seconds}s`;
 
              return {
-                 // Data to be saved or displayed in review
-                 questions: reviewQuestions, // Review-focused question data
+                 questions: reviewQuestions, // Review display data
                  summary: { score, correct: correctCount, incorrect: incorrectCount, skipped: skippedCount, timeString },
                  testDate: new Date().toISOString(),
                  timeTakenMs: timeMs,
-                 sourceChatId: activeChatId, // Store which chat generated the test
-                 testTitle: testTitle.textContent, // Title shown during test
-                 // *** IMPORTANT: Add original MCQs for reattempt ***
-                 originalMCQs: mcqs // The full original MCQ array
+                 sourceChatId: activeChatId, // Can be null if chat was deleted
+                 testTitle: testTitle.textContent, // Title shown during THIS test
+                 originalMCQs: mcqs // *** Include the actual questions used in THIS test ***
              };
         }
 
-
-        // Displays the test results and review details (takes calculated review data)
         function displayReview(reviewData) {
-             reviewContent.innerHTML = ''; // Clear previous review content
+             reviewContent.innerHTML = '';
+             reviewSummary.innerHTML = ''; // Clear summary too
+             reviewFilters.style.display = 'none'; // Hide filters initially
 
              if (!reviewData || !reviewData.questions || reviewData.questions.length === 0 || !reviewData.summary) {
                  reviewSummary.innerHTML = "<span>No valid review data available.</span>";
                  reviewContent.innerHTML = "<p>It seems the review data is missing or incomplete.</p>";
-                 saveReviewBtn.style.display = 'none'; // Hide save button if no data
-                 reviewFilters.style.display = 'none'; // Hide filters
+                 saveReviewBtn.style.display = 'none';
                  return;
              }
 
@@ -1706,15 +1652,13 @@
                   <span>Total Time: ${timeString}</span>
              `;
 
-             // Display Review Title
              reviewTitle.textContent = reviewData.testTitle || "Test Review";
 
              // Display Individual Questions
              reviewData.questions.forEach((qReview, index) => {
                  const { question, correctAnswer, userAnswer, status } = qReview;
-
-                 let itemStatusClass = `status-${status}`; // e.g., status-correct
-                 let answerDetailClass = `user-answer-${status}`; // e.g., user-answer-correct
+                 let itemStatusClass = `status-${status}`;
+                 let answerDetailClass = `user-answer-${status}`;
 
                  const reviewItem = document.createElement('div');
                  reviewItem.classList.add('review-item', itemStatusClass);
@@ -1733,37 +1677,33 @@
                  reviewContent.appendChild(reviewItem);
              });
 
-             // Configure Save Button
-             if (reviewData.savedAt) { // If it's already saved (loaded from "All Tests")
+             // Configure Save Button visibility based on context
+             if (reviewData.savedAt) { // Loaded from saved reviews
                  saveReviewBtn.textContent = "Review Saved";
                  saveReviewBtn.disabled = true;
-                 saveReviewBtn.style.display = 'inline-block'; // Ensure it's visible but disabled
-             } else if (reviewResultsCache && !cameFromAllTestsList) { // If it's a fresh review from a test
+                 saveReviewBtn.style.display = 'inline-block';
+             } else if (reviewResultsCache && !cameFromAllTestsList) { // Fresh review from test just taken
                  saveReviewBtn.textContent = "Save Review";
                  saveReviewBtn.disabled = false;
                  saveReviewBtn.style.display = 'inline-block';
-             } else { // Should not happen, but hide if neither condition met
+             } else { // Hide if no cache or came from all tests list (already saved)
                   saveReviewBtn.style.display = 'none';
              }
 
-             reviewFilters.style.display = 'block'; // Show filters
+             reviewFilters.style.display = 'block'; // Show filters now
 
-             // Typeset MathJax for the review content
               try {
                   if (typeof MathJax !== "undefined" && MathJax.typesetPromise) {
                        MathJax.typesetPromise([reviewContent]).catch(err => console.error('MathJax typeset error on review:', err));
                   }
               } catch (e) { console.error("MathJax call failed:", e); }
 
-             // Apply the default 'all' filter
              filterReviewItems('all');
-             // Ensure the 'All' button is visually selected
              reviewFilters.querySelectorAll('button').forEach(btn => {
                  btn.classList.toggle('active-filter', btn.dataset.filter === 'all');
              });
         }
 
-        // Handles clicks on the review filter buttons
         function handleReviewFilterClick(event) {
             const button = event.target.closest('button[data-filter]');
             if (button) {
@@ -1771,59 +1711,42 @@
             }
         }
 
-        // Filters the displayed review items based on status (all, incorrect, skipped)
         function filterReviewItems(filter) {
-            // Update active state of filter buttons
             reviewFilters.querySelectorAll('button').forEach(btn => {
                 btn.classList.toggle('active-filter', btn.dataset.filter === filter);
             });
-            // Show/hide review items based on their status
             reviewContent.querySelectorAll('.review-item').forEach(item => {
                 const show = (filter === 'all') || item.dataset.status === filter;
                 item.classList.toggle('hidden-by-filter', !show);
             });
         }
 
-        // Exits the review view and returns to the chat view or All Tests list
         function exitReview() {
-            reviewResultsCache = null; // Clear cached results when leaving
+            reviewResultsCache = null; // Clear current review cache
 
-            // Decide where to go back
-            if (cameFromAllTestsList) {
-                switchView('chat'); // Go back to chat, sidebar shows All Tests
-                // Optionally, could try to scroll the All Tests list to the item?
-            } else {
-                switchView('chat'); // Default back to chat
-            }
-            // Reset flag
-            cameFromAllTestsList = false;
+            // Go back to chat view (sidebar will still show All Tests if user was there)
+            switchView('chat');
 
-            // Reset review specific UI elements
+            // Reset review specific UI
             reviewSummary.innerHTML = '';
             reviewContent.innerHTML = '';
-            reviewTitle.textContent = 'Test Review'; // Reset title
+            reviewTitle.textContent = 'Test Review';
         }
 
-        // Saves the cached test review results to Firestore (MODIFIED to include originalMCQs)
         async function saveTestReviewToCloud() {
             if (!currentUser) { alert("Please log in to save the review."); return; }
-            // Use reviewResultsCache which should contain the full data including originalMCQs
+            // Use reviewResultsCache which holds the data from the just-completed test
             if (!reviewResultsCache || reviewResultsCache.savedAt) {
-                 alert("No new review data available to save or already saved.");
+                 alert("No new review data available to save or it has already been saved.");
                  return;
              }
 
+            // Prepare data, ensure necessary fields are included
             const reviewDataToSave = {
-                // Spread the contents of reviewResultsCache
-                ...reviewResultsCache,
-                userId: currentUser.uid, // Ensure userId is set
+                ...reviewResultsCache, // Includes questions, summary, testTitle, originalMCQs, etc.
+                userId: currentUser.uid,
                 savedAt: firebase.firestore.FieldValue.serverTimestamp(),
-                // testTitle is already in reviewResultsCache now
-                // originalMCQs is already in reviewResultsCache now
             };
-
-            // Clean up potentially large data we don't need *just* for the saved doc if needed
-            // For now, save everything calculated in reviewResultsCache
 
             saveReviewBtn.disabled = true;
             saveReviewBtn.textContent = "Saving...";
@@ -1832,24 +1755,23 @@
                 const newReviewRef = await db.collection('testReviews').add(reviewDataToSave);
                 console.log("Review saved to Firestore with ID:", newReviewRef.id);
                 alert("Test review saved successfully!");
-                saveReviewBtn.textContent = "Review Saved"; // Keep disabled, show saved status
-                // Update the cache to mark it as saved (prevent resaving)
-                reviewResultsCache.savedAt = new Date(); // Mark as saved locally
+                saveReviewBtn.textContent = "Review Saved"; // Keep disabled
+                // Mark cache as saved locally to prevent accidental resave attempts
+                reviewResultsCache.savedAt = new Date();
 
             } catch (error) {
                 console.error("Error saving review to Firestore:", error);
                 alert("Failed to save the review. Please check your connection and try again.");
-                saveReviewBtn.disabled = false; // Re-enable button on failure
+                saveReviewBtn.disabled = false; // Re-enable on failure
                 saveReviewBtn.textContent = "Save Review";
             }
         }
 
 
-        // --- All Tests List Functions (New) ---
+        // --- All Tests List Functions ---
 
-        // Loads saved test reviews for the sidebar
         function loadAndListenForTests(userId) {
-            if (testListListener) { testListListener(); testListListener = null; } // Detach previous
+            if (testListListener) { testListListener(); testListListener = null; }
 
             const testsRef = db.collection('testReviews')
                                 .where('userId', '==', userId)
@@ -1857,24 +1779,24 @@
 
             console.log(`Listening for saved tests for user ${userId}`);
             testListListener = testsRef.onSnapshot(snapshot => {
-                allSavedTestsData = []; // Clear local cache
+                allSavedTestsData = []; // Clear local cache before filling
                 snapshot.forEach(doc => {
                     allSavedTestsData.push({ id: doc.id, ...doc.data() });
                 });
                 console.log("Received saved tests snapshot:", allSavedTestsData.length, "tests");
-                renderAllTestsList(allSavedTestsData); // Update the sidebar UI
-                filterTestsInSidebar(); // Apply current search filter
+                renderAllTestsList(allSavedTestsData); // Update UI
+                filterTestsInSidebar(); // Apply existing search filter
 
             }, error => {
                 console.error("Error listening for saved tests:", error);
-                allTestsListContainer.innerHTML = '<div style="padding:10px;color:var(--text-secondary);font-size:0.9em;">Error loading tests.</div>';
-                allSavedTestsData = []; // Clear cache on error
+                // Show error in the list area itself
+                allTestsListContainer.innerHTML = `<div style="padding:10px;color:var(--error-text);font-size:0.9em;">Error loading tests. Check console (F12) & Firestore index/rules.</div>`;
+                allSavedTestsData = [];
             });
         }
 
-        // Renders the saved test items in the sidebar
         function renderAllTestsList(tests) {
-            allTestsListContainer.innerHTML = ''; // Clear previous list
+            allTestsListContainer.innerHTML = '';
             if (!currentUser) {
                 allTestsListContainer.innerHTML = '<div style="padding:10px;color:var(--text-secondary);font-size:0.9em;">Login to see saved tests.</div>';
                 return;
@@ -1885,14 +1807,14 @@
                 tests.forEach(testData => {
                     const itemElement = document.createElement('div');
                     itemElement.classList.add('test-list-item');
-                    itemElement.dataset.reviewId = testData.id; // Store Firestore doc ID
+                    itemElement.dataset.reviewId = testData.id;
 
                     const title = testData.testTitle || '(Untitled Test)';
                     const date = testData.savedAt?.toDate ? testData.savedAt.toDate().toLocaleString() : 'Unknown date';
                     const score = testData.summary?.score || 'N/A';
-                    const hasReattemptData = testData.originalMCQs && Array.isArray(testData.originalMCQs) && testData.originalMCQs.length > 0;
+                    // Check for valid reattempt data more thoroughly
+                    const hasReattemptData = testData.originalMCQs && Array.isArray(testData.originalMCQs) && testData.originalMCQs.length > 0 && testData.originalMCQs.every(q => q && q.question && q.options && q.answer);
 
-                    // Info Section
                     const infoDiv = document.createElement('div');
                     infoDiv.classList.add('test-item-info');
                     infoDiv.innerHTML = `
@@ -1900,7 +1822,6 @@
                         <span class="test-item-details">Saved: ${date} | Score: ${score}</span>
                     `;
 
-                    // Actions Section
                     const actionsDiv = document.createElement('div');
                     actionsDiv.classList.add('test-item-actions');
 
@@ -1909,18 +1830,17 @@
                     viewBtn.dataset.action = "view";
                     actionsDiv.appendChild(viewBtn);
 
-                    // Reattempt Dropdown/Select
                     const reattemptSelect = document.createElement('select');
                     reattemptSelect.dataset.action = "reattempt";
-                    reattemptSelect.disabled = !hasReattemptData; // Disable if no original MCQs
+                    reattemptSelect.disabled = !hasReattemptData;
+                    reattemptSelect.title = hasReattemptData ? "Reattempt options" : "Reattempt not available (Missing original question data)";
                     reattemptSelect.innerHTML = `
-                        <option value="" ${!hasReattemptData ? 'selected' : ''}>${hasReattemptData ? 'Reattempt...' : 'Reattempt N/A'}</option>
-                        <option value="mistaked">Mistaked Only</option>
-                        <option value="skipped">Skipped Only</option>
-                        <option value="both">Mistaked & Skipped</option>
-                        <option value="full">Full Test</option>
+                        <option value="" selected>${hasReattemptData ? 'Reattempt...' : 'Reattempt N/A'}</option>
+                        <option value="mistaked" ${!hasReattemptData ? 'disabled' : ''}>Mistaked Only</option>
+                        <option value="skipped" ${!hasReattemptData ? 'disabled' : ''}>Skipped Only</option>
+                        <option value="both" ${!hasReattemptData ? 'disabled' : ''}>Mistaked & Skipped</option>
+                        <option value="full" ${!hasReattemptData ? 'disabled' : ''}>Full Test</option>
                     `;
-                    // Add event listener directly to the select
                     reattemptSelect.addEventListener('change', (event) => {
                         const selectedMode = event.target.value;
                         if (selectedMode) {
@@ -1928,10 +1848,9 @@
                              if (reviewId) {
                                  startReattempt(reviewId, selectedMode);
                              }
-                             event.target.value = ""; // Reset select after triggering
+                             event.target.value = ""; // Reset select
                         }
                     });
-
                     actionsDiv.appendChild(reattemptSelect);
 
                     itemElement.appendChild(infoDiv);
@@ -1941,11 +1860,16 @@
             }
         }
 
-        // Filters the tests displayed in the sidebar based on search input
         function filterTestsInSidebar() {
             const searchTerm = testSearchInput.value.toLowerCase().trim();
             const items = allTestsListContainer.querySelectorAll('.test-list-item');
             let visibleCount = 0;
+
+            // Remove existing no-results message first
+             const existingNoResultsMsg = allTestsListContainer.querySelector('.no-search-results');
+             if (existingNoResultsMsg) {
+                 existingNoResultsMsg.remove();
+             }
 
             items.forEach(item => {
                 const titleElement = item.querySelector('.test-item-title');
@@ -1960,25 +1884,17 @@
                 }
             });
 
-             // Optionally, show a "No results" message if search yields nothing
-             const noResultsMsg = allTestsListContainer.querySelector('.no-search-results');
+             // Add "No results" message if needed AFTER filtering
              if (visibleCount === 0 && searchTerm !== '' && items.length > 0) {
-                 if (!noResultsMsg) {
-                     const msgDiv = document.createElement('div');
-                     msgDiv.textContent = "No tests match your search.";
-                     msgDiv.style.cssText = "padding:10px;color:var(--text-secondary);font-size:0.9em;";
-                     msgDiv.classList.add('no-search-results');
-                     allTestsListContainer.appendChild(msgDiv);
-                 }
-             } else {
-                 if (noResultsMsg) {
-                     noResultsMsg.remove();
-                 }
+                 const msgDiv = document.createElement('div');
+                 msgDiv.textContent = "No tests match your search.";
+                 // Use class for styling defined in CSS
+                 msgDiv.classList.add('no-search-results');
+                 allTestsListContainer.appendChild(msgDiv);
              }
         }
 
 
-        // Handles clicks within the "All Tests" list (View Details button)
         async function handleAllTestsListClick(event) {
             const viewButton = event.target.closest('button[data-action="view"]');
 
@@ -1988,30 +1904,24 @@
 
                 if (reviewId) {
                     console.log("View Details clicked for review:", reviewId);
-                    // Find the full data from our cached list
+                    // Find data from the cache populated by the listener
                     const reviewData = allSavedTestsData.find(test => test.id === reviewId);
 
                     if (reviewData) {
-                        reviewResultsCache = reviewData; // Store loaded data in cache for display
-                        switchView('review', true); // Switch to review view, set flag
-                        displayReview(reviewData); // Display the loaded review data
+                        reviewResultsCache = reviewData; // Use the specific review's data
+                        switchView('review', true); // Switch view, indicate came from tests list
+                        displayReview(reviewData); // Display this specific review
                     } else {
                         console.error("Could not find review data in cache for ID:", reviewId);
                         alert("Error: Could not load review details.");
-                        // Optionally try fetching directly from Firestore as fallback
-                        // const docRef = db.collection('testReviews').doc(reviewId);
-                        // try { const docSnap = await docRef.get(); ... } catch ...
                     }
                 }
             }
-            // Reattempt is handled by the 'change' listener on the select element itself
         }
 
-        // Starts a reattempt of a test based on saved data
         async function startReattempt(reviewId, mode) {
             console.log(`Starting reattempt for review: ${reviewId}, mode: ${mode}`);
 
-             // Find the full data from our cached list
             const reviewData = allSavedTestsData.find(test => test.id === reviewId);
 
             if (!reviewData) {
@@ -2019,14 +1929,16 @@
                 return;
             }
 
-            // Check if the crucial originalMCQs data exists
-            if (!reviewData.originalMCQs || !Array.isArray(reviewData.originalMCQs) || reviewData.originalMCQs.length === 0) {
-                 alert("Error: Cannot reattempt this test because the original question data is missing (likely saved before this feature was added).");
+            // Check again for valid reattempt data
+             const originalMCQs = reviewData.originalMCQs;
+             const hasReattemptData = originalMCQs && Array.isArray(originalMCQs) && originalMCQs.length > 0 && originalMCQs.every(q => q && q.question && q.options && q.answer);
+
+            if (!hasReattemptData) {
+                 alert("Error: Cannot reattempt this test because the original question data is missing or invalid (likely saved before this feature was added or data format issue).");
                  return;
             }
 
-            const originalMCQs = reviewData.originalMCQs;
-            const reviewQuestions = reviewData.questions || []; // Status is in here
+            const reviewQuestions = reviewData.questions || []; // Status is needed from here
             let questionsToReattempt = [];
 
             switch (mode) {
@@ -2041,7 +1953,7 @@
                     break;
                 case 'full':
                 default:
-                    questionsToReattempt = [...originalMCQs]; // Copy array
+                    questionsToReattempt = [...originalMCQs];
                     break;
             }
 
@@ -2050,14 +1962,12 @@
                 return;
             }
 
-            // Create a title for the reattempt test
             const reattemptTitle = `${reviewData.testTitle || 'Test'} (Reattempt: ${mode})`;
 
-            // Start the mock test with the filtered questions and new title
-            // cameFromAllTestsList flag is already set by switchView if we came from there
+            // Start the test with filtered questions
+            // switchView will be called inside startMockTest
             startMockTest(questionsToReattempt, reattemptTitle);
         }
-
 
     </script>
 
